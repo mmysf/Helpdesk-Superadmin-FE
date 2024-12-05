@@ -1,9 +1,7 @@
 {
   "globals": {
     "createRef": true,
-    "formatCurrency": true,
     "forwardRef": true,
-    "http": true,
     "lazy": true,
     "memo": true,
     "navigate": true,
@@ -13,8 +11,6 @@
     "useDebugValue": true,
     "useDeferredValue": true,
     "useEffect": true,
-    "useHttp": true,
-    "useHttpMutation": true,
     "useId": true,
     "useImperativeHandle": true,
     "useInsertionEffect": true,
