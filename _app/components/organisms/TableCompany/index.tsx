@@ -15,31 +15,33 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/ui/input";
 import { Plus, Search } from "lucide-react";
+import YecLogo from "@/assets/logo/yec-logo.png";
+import Image from "next/image";
+import PaginationWithoutLinks from "../PaginationWithoutLinks";
 
-const allCompanies = Array.from({ length: 30 }, (_, index) => ({
+const COMPANY = Array.from({ length: 30 }, (_, index) => ({
   name: `Company ${index + 1}`,
-  logo: `/path-to-logo/company-${index + 1}.png`,
+  logo: `@/assets/logo/yec-logo-${index + 1}.png`,
   email: `company${index + 1}@example.com`,
   totalBrand: Math.floor(Math.random() * 10) + 1,
   totalTickets: Math.floor(Math.random() * 50) + 1,
 }));
 
-const ITEMS_PER_PAGE = 6;
-
-const Company = () => {
+const CompanyTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
-  const totalPages = Math.ceil(allCompanies.length / ITEMS_PER_PAGE);
-  const currentData = allCompanies.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE,
+  const filteredData = COMPANY.filter(
+    (customer) =>
+      customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customer.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-  const goToPage = (page: number) => setCurrentPage(page);
-  const nextPage = () =>
-    currentPage < totalPages && setCurrentPage(currentPage + 1);
-  const prevPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
+  const currentData = filteredData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage,
+  );
 
   return (
     <div className="container mx-auto px-4">
@@ -75,12 +77,11 @@ const Company = () => {
             <TableRow key={company.name}>
               <TableCell>
                 <div className="flex items-center space-x-2">
-                  <img
-                    src={company.logo}
-                    alt={`${company.name} logo`}
-                    width={20}
-                    height={20}
-                    className="w-8 h-8 rounded-full"
+                  <Image
+                    src={YecLogo}
+                    alt="company logo"
+                    width={50}
+                    height={50}
                   />
                   <div>
                     <p className="text-sm font-medium">{company.name}</p>
@@ -112,36 +113,17 @@ const Company = () => {
         </TableBody>
       </Table>
 
-      <div className="flex justify-center items-center mt-4 space-x-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={prevPage}
-          disabled={currentPage === 1}
-        >
-          Previous
-        </Button>
-        {Array.from({ length: totalPages }, (_, index) => (
-          <Button
-            key={index}
-            variant={currentPage === index + 1 ? "default" : "outline"}
-            size="sm"
-            onClick={() => goToPage(index + 1)}
-          >
-            {index + 1}
-          </Button>
-        ))}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={nextPage}
-          disabled={currentPage === totalPages}
-        >
-          Next
-        </Button>
+      <div className="flex justify-center items-center mt-2">
+        <PaginationWithoutLinks
+          totalData={filteredData.length}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          perPage={10}
+          setCurrentLimit={() => {}}
+        />
       </div>
     </div>
   );
 };
 
-export default Company;
+export default CompanyTable;
