@@ -1,5 +1,5 @@
 "use client";
 
-import AdminCustomer from "@/_modules/bo-customer";
+import ManageCustomer from "@/_modules/bo-customer";
 
-export default AdminCustomer;
+export default ManageCustomer;

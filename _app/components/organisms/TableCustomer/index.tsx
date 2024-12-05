@@ -7,20 +7,22 @@ import {
   TableRow,
   TableCell,
 } from "@/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Card, CardContent } from "@/ui/card";
 import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-} from "@/ui/pagination";
-import { Plus, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Search } from "lucide-react";
+import PaginationWithoutLinks from "../PaginationWithoutLinks";
 
 const CUSTOMERS = Array.from({ length: 50 }, (_, i) => ({
-  name: `Customer Name`,
+  name: `Customer ${i + 1}`,
   email: `customer${i + 1}@example.com`,
+  company: i % 2 === 0 ? "Company A" : "Company B",
   subscription: "Basic Plan",
   lastActivity: "Sept, 25 2024",
   timeRemaining: "10d 7h 3m",
@@ -31,8 +33,10 @@ export default function CustomerTable() {
   const [searchTerm, setSearchTerm] = useState("");
   const itemsPerPage = 10;
 
-  const filteredData = CUSTOMERS.filter((customer) =>
-    customer.email.toLowerCase().includes(searchTerm.toLowerCase()),
+  const filteredData = CUSTOMERS.filter(
+    (customer) =>
+      customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customer.company.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const currentData = filteredData.slice(
@@ -71,6 +75,7 @@ export default function CustomerTable() {
               <Table>
                 <TableHeader>
                   <TableColumn>Name</TableColumn>
+                  <TableColumn>Company</TableColumn>
                   <TableColumn>Subscription</TableColumn>
                   <TableColumn>Last Activity</TableColumn>
                   <TableColumn>Time Remaining</TableColumn>
@@ -79,10 +84,9 @@ export default function CustomerTable() {
                 <TableBody>
                   {currentData.map((customer) => (
                     <TableRow key={customer.email}>
-                      {" "}
                       <TableCell>
                         <div className="flex items-center gap-3">
-                          <span className="bg-green-100 text-green-600 p-2 rounded-full">
+                          <span className="bg-green-100 text-primary p-2 rounded-full">
                             S
                           </span>
                           <div>
@@ -93,13 +97,29 @@ export default function CustomerTable() {
                           </div>
                         </div>
                       </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <span className="bg-blue-100 text-blue-600 p-2 rounded-full">
+                            {customer.company[0]}
+                          </span>
+                          <p className="font-medium">{customer.company}</p>
+                        </div>
+                      </TableCell>
                       <TableCell>{customer.subscription}</TableCell>
                       <TableCell>{customer.lastActivity}</TableCell>
                       <TableCell>{customer.timeRemaining}</TableCell>
                       <TableCell>
-                        <Button className="text-gray-600 bg-transparent hover:bg-transparent focus:bg-transparent border-none shadow-none">
-                          ...
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-6 w-6 p-0">
+                              ...
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" sideOffset={4}>
+                            <DropdownMenuItem>Edit</DropdownMenuItem>
+                            <DropdownMenuItem>Delete</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -108,47 +128,14 @@ export default function CustomerTable() {
             </div>
           </CardContent>
         </Card>
-        <div className="flex justify-between items-center mt-4">
-          <Button
-            size="sm"
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          >
-            <ChevronLeft />
-          </Button>
-          <Pagination>
-            <PaginationContent>
-              {Array.from(
-                { length: Math.ceil(filteredData.length / itemsPerPage) },
-                (_, i) => (
-                  <PaginationItem key={i}>
-                    <PaginationLink
-                      isActive={currentPage === i + 1}
-                      onClick={() => setCurrentPage(i + 1)}
-                    >
-                      {i + 1}
-                    </PaginationLink>
-                  </PaginationItem>
-                ),
-              )}
-            </PaginationContent>
-          </Pagination>
-          <Button
-            size="sm"
-            disabled={
-              currentPage === Math.ceil(filteredData.length / itemsPerPage)
-            }
-            onClick={() =>
-              setCurrentPage((prev) =>
-                Math.min(
-                  prev + 1,
-                  Math.ceil(filteredData.length / itemsPerPage),
-                ),
-              )
-            }
-          >
-            <ChevronRight />
-          </Button>
+        <div className="flex justify-center items-center mt-2">
+          <PaginationWithoutLinks
+            totalData={filteredData.length}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            perPage={10}
+            setCurrentLimit={() => {}}
+          />
         </div>
       </div>
     </div>
