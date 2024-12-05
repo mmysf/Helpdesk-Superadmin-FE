@@ -30,10 +30,10 @@ export const menuSidebar = [
   {
     name: "product",
     icon: Package,
-    link: Routes.BO_PRODUCT,
+    // link: Routes.BO_PRODUCT,
     children: [
-      { name: "duration", link: "/product/duration" },
-      { name: "subscription", link: "/product/subscription" },
+      { name: "duration", link: "/bo/product/duration" },
+      { name: "subscription", link: "/bo/product/subscription" },
     ],
   },
   {
