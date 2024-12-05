@@ -6,4 +6,5 @@ export const Routes = {
   BO_CUSTOMER: "/bo/customer",
   BO_TICKET: "/bo/ticket",
   BO_AGENT: "/bo/agent",
+  BO_COMPANY: "/bo/company",
 };

@@ -8,18 +8,9 @@ export const menuSidebar = [
     link: Routes.BO_DASHBOARD,
   },
   {
-    name: "product",
-    icon: Package,
-    link: Routes.BO_PRODUCT,
-    children: [
-      { name: "duration", link: "/product/duration" },
-      { name: "subscription", link: "/product/subscription" },
-    ],
-  },
-  {
-    name: "order",
-    icon: ShoppingBag,
-    link: Routes.BO_ORDER,
+    name: "company",
+    icon: User,
+    link: Routes.BO_COMPANY,
   },
   {
     name: "customer",
@@ -35,6 +26,20 @@ export const menuSidebar = [
     name: "agent",
     icon: User,
     link: Routes.BO_AGENT,
+  },
+  {
+    name: "product",
+    icon: Package,
+    link: Routes.BO_PRODUCT,
+    children: [
+      { name: "duration", link: "/product/duration" },
+      { name: "subscription", link: "/product/subscription" },
+    ],
+  },
+  {
+    name: "order",
+    icon: ShoppingBag,
+    link: Routes.BO_ORDER,
   },
 ];
 
