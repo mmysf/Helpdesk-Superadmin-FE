@@ -1,5 +1,5 @@
 "use client";
 
-import AdminProductDuration from "@/organisms/duration";
+import AdminProductDuration from "@/_modules/bo-product/duration";
 
 export default AdminProductDuration;

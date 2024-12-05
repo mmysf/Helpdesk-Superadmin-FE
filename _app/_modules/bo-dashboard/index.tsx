@@ -1,4 +1,7 @@
 /* eslint-disable react/no-array-index-key */
+
+"use client";
+
 import Stats from "@/organisms/stats";
 import CompanyItem from "../../components/molecules/CompanyItem";
 import PaginationWithoutLinks from "../../components/organisms/PaginationWithoutLinks";
