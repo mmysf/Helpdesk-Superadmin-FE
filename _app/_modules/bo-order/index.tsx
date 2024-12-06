@@ -1,4 +1,4 @@
-import Order from "@/organisms/order";
+import Order from "@/organisms/TableOrder";
 
 const AdminOrder = () => {
   return (
