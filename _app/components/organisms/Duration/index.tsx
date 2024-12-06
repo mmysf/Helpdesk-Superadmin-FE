@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
 import { Plus, Search } from "lucide-react";
-import { Card, CardContent } from "../ui/card";
+import { Card, CardContent } from "../../ui/card";
 import {
   Table,
   TableHeader,
@@ -10,8 +10,8 @@ import {
   TableBody,
   TableRow,
   TableCell,
-} from "../ui/table";
-import PaginationWithoutLinks from "./PaginationWithoutLinks";
+} from "../../ui/table";
+import PaginationWithoutLinks from "../PaginationWithoutLinks";
 
 const DURATIONS = Array.from({ length: 90 }, (_, i) => ({
   no: i + 1,
