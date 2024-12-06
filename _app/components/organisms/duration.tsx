@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
-import { Filter, Plus, Search } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
 import {
   Table,
@@ -44,17 +44,14 @@ export default function DurationTable() {
         </div>
         <div className="flex items-center gap-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500" />
             <Input
               placeholder="Search by Subject"
-              className="rounded-md pl-10 bordered-input"
+              className="rounded-md pr-2 bordered-input"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <Button className="bg-slate-500 text-white flex items-center gap-2 px-4 py-2 rounded-md">
-            <Filter className="w-4 h-4" /> Filter
-          </Button>
           <Button className="bg-primary text-white flex items-center gap-2 px-4 py-2 rounded-md">
             Create New Duration <Plus className="w-4 h-4" />
           </Button>

@@ -10,13 +10,8 @@ import {
 import { Card, CardContent } from "@/ui/card";
 import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-} from "@/ui/pagination";
 import { Filter, Search } from "lucide-react";
+import PaginationWithoutLinks from "../PaginationWithoutLinks";
 
 const ORDERS = Array.from({ length: 90 }, (_, i) => ({
   orderId: `OrderID${i + 1}`,
@@ -43,9 +38,9 @@ export default function OrdersTable() {
 
   const renderStatus = (status: "Paid" | "Pending" | "Unpaid") => {
     const statusColors = {
-      Paid: "bg-green-100 text-green-600",
-      Pending: "bg-gray-100 text-gray-600",
-      Unpaid: "bg-red-100 text-red-600",
+      Paid: "bg-primary text-white",
+      Pending: "bg-gray-500 text-white",
+      Unpaid: "bg-red-500 text-white",
     };
 
     return (
@@ -112,47 +107,14 @@ export default function OrdersTable() {
             </div>
           </CardContent>
         </Card>
-        <div className="flex justify-center items-center mt-4">
-          <Button
-            size="sm"
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          >
-            Prev
-          </Button>
-          <Pagination>
-            <PaginationContent className="flex items-center gap-2">
-              {Array.from(
-                { length: Math.ceil(filteredData.length / itemsPerPage) },
-                (_, i) => i + 1,
-              ).map((pageNumber) => (
-                <PaginationItem key={pageNumber}>
-                  <PaginationLink
-                    isActive={currentPage === pageNumber}
-                    onClick={() => setCurrentPage(pageNumber)}
-                  >
-                    {pageNumber}
-                  </PaginationLink>
-                </PaginationItem>
-              ))}
-            </PaginationContent>
-          </Pagination>
-          <Button
-            size="sm"
-            disabled={
-              currentPage === Math.ceil(filteredData.length / itemsPerPage)
-            }
-            onClick={() =>
-              setCurrentPage((prev) =>
-                Math.min(
-                  prev + 1,
-                  Math.ceil(filteredData.length / itemsPerPage),
-                ),
-              )
-            }
-          >
-            Next
-          </Button>
+        <div className="flex justify-center items-center mt-2">
+          <PaginationWithoutLinks
+            totalData={filteredData.length}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            perPage={10}
+            setCurrentLimit={() => {}}
+          />
         </div>
       </div>
     </div>
