@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import {
   Table,
   TableHeader,
-  TableColumn,
   TableBody,
   TableRow,
   TableCell,
+  TableHead,
 } from "@/ui/table";
 import { Card, CardContent } from "@/ui/card";
 import { Button } from "@/ui/button";
@@ -55,41 +55,43 @@ export default function OrdersTable() {
   };
 
   return (
-    <div className="p-6 bg-white min-h-screen shadow-lg rounded-sm">
-      <div className="flex flex-col gap-4">
-        <div className="flex justify-between items-center">
-          <h2 className="text-lg font-bold">
-            History of All Orders from Customer
-          </h2>
-          <div className="flex items-center gap-2">
-            <Button
-              className="bg-slate-500 text-white"
-              onClick={() => setIsFilterModalOpen(true)}
-            >
-              <Filter /> Filter
-            </Button>
-            <div className="relative">
-              <Search className="absolute left-2 top-2 text-gray-500" />
-              <Input
-                placeholder="Search by OrderID"
-                className="rounded-md pl-10"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />{" "}
+    <Card>
+      <CardContent className="p-0 shadow-lg">
+        <div className="p-6 bg-white rounded-md">
+          <div className="flex flex-col gap-4">
+            <div className="flex justify-between items-center">
+              <h2 className="text-lg font-bold">
+                History of All Orders from Customer
+              </h2>
+              <div className="flex items-center gap-2">
+                <Button
+                  onClick={() => setIsFilterModalOpen(true)}
+                  className="bg-slate-500 text-white"
+                >
+                  <Filter /> Filter
+                </Button>
+                <div className="relative">
+                  <Search className="absolute left-2 top-2 text-gray-500" />
+                  <Input
+                    placeholder="Search by OrderID"
+                    className="rounded-md pl-10"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />{" "}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-        <Card>
-          <CardContent>
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto rounded-md border">
               <Table>
                 <TableHeader>
-                  <TableColumn>Order ID</TableColumn>
-                  <TableColumn>Customer</TableColumn>
-                  <TableColumn>Product</TableColumn>
-                  <TableColumn>Date</TableColumn>
-                  <TableColumn>Amount Paid</TableColumn>
-                  <TableColumn>Status</TableColumn>
+                  <TableRow>
+                    <TableHead>Order ID</TableHead>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Product</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Amount Paid</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
                 </TableHeader>
                 <TableBody>
                   {currentData.map((order) => (
@@ -110,22 +112,19 @@ export default function OrdersTable() {
                 </TableBody>
               </Table>
             </div>
-          </CardContent>
-        </Card>
-        <div className="flex justify-center items-center mt-2">
-          <PaginationWithoutLinks
-            totalData={filteredData.length}
-            currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
-            perPage={10}
-            setCurrentLimit={() => {}}
-          />
+            <div className="flex justify-center items-center mt-2">
+              <PaginationWithoutLinks
+                totalData={filteredData.length}
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
+                perPage={10}
+                setCurrentLimit={() => {}}
+              />
+            </div>
+          </div>
+          <FilterOrder isOpen={isFilterModalOpen} onClose={() => {}} />
         </div>
-      </div>
-      <FilterOrder
-        isOpen={isFilterModalOpen}
-        onClose={() => setIsFilterModalOpen(false)}
-      />
-    </div>
+      </CardContent>
+    </Card>
   );
 }

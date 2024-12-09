@@ -1,24 +1,29 @@
+/* eslint-disable react/jsx-boolean-value */
 import React, { useState } from "react";
 import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
-import { Plus, Search } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
+import { EllipsisVertical, Plus, Search } from "lucide-react";
 import { Card, CardContent } from "../../ui/card";
 import {
   Table,
   TableHeader,
-  TableColumn,
   TableBody,
   TableRow,
   TableCell,
+  TableHead,
 } from "../../ui/table";
 import PaginationWithoutLinks from "../PaginationWithoutLinks";
 import ConfirmDeleteModal from "../Modals/ModalDelete";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../../ui/dropdown-menu";
+import ModalToggleDuration from "../Modals/ModalToggleDuration";
+import ModalDuration from "../Modals/ModalDuration";
 
 const DURATIONS = Array.from({ length: 90 }, (_, i) => ({
   no: i + 1,
@@ -32,18 +37,12 @@ const DURATIONS = Array.from({ length: 90 }, (_, i) => ({
 export default function DurationTable() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [entityToDelete, setEntityToDelete] = useState("");
-  const itemsPerPage = 10;
-
-  const handleOpenDeleteModal = (entityName: string) => {
-    setEntityToDelete(entityName);
-    setIsDeleteModalOpen(true);
-  };
-
-  const handleDelete = () => {
-    setIsDeleteModalOpen(false);
-  };
+  const [openDelete, setOpenDelete] = useState(false);
+  const [openToggle, setOpenToggle] = useState(false);
+  const [openAdd, setOpenAdd] = useState(false);
+  const [isActive, setIsActive] = useState(false);
+  const [isNew, setIsNew] = useState(false);
+  const itemsPerPage = 5;
 
   const filteredData = DURATIONS.filter((data) =>
     data.duration.toLowerCase().includes(searchTerm.toLowerCase()),
@@ -55,38 +54,47 @@ export default function DurationTable() {
   );
 
   return (
-    <div className="p-6 bg-white min-h-screen shadow-lg rounded-md">
-      <div className="flex justify-between items-center mb-4">
-        <div>
-          <h2 className="text-xl font-bold">Duration</h2>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="relative">
-            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500" />
-            <Input
-              placeholder="Search by Subject"
-              className="rounded-md pr-2 bordered-input"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+    <Card>
+      <CardContent className="p-0 shadow-lg">
+        <div className="p-6 bg-white rounded-md">
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h2 className="text-xl font-bold">Duration</h2>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <Input
+                  placeholder="Search by Subject"
+                  className="rounded-md bordered-input"
+                  value={searchTerm}
+                  startContent={<Search className="ml-2 text-gray-500" />}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <Button
+                onClick={() => {
+                  setIsNew(true);
+                  setOpenAdd(true);
+                }}
+                className="bg-primary text-white flex items-center gap-2 px-4 py-2 rounded-md"
+              >
+                Create New Duration <Plus className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
-          <Button className="bg-primary text-white flex items-center gap-2 px-4 py-2 rounded-md">
-            Create New Duration <Plus className="w-4 h-4" />
-          </Button>
-        </div>
-      </div>
-      <Card>
-        <CardContent>
-          <div className="overflow-x-auto">
+
+          <div className="overflow-x-auto rounded-md border">
             <Table>
               <TableHeader>
-                <TableColumn>No</TableColumn>
-                <TableColumn>Created on</TableColumn>
-                <TableColumn>Status</TableColumn>
-                <TableColumn>Duration</TableColumn>
-                <TableColumn>Product Active</TableColumn>
-                <TableColumn>Product Non Active</TableColumn>
-                <TableColumn>Action</TableColumn>
+                <TableRow>
+                  <TableHead>No</TableHead>
+                  <TableHead>Created on</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Duration</TableHead>
+                  <TableHead>Product Active</TableHead>
+                  <TableHead>Product Non Active</TableHead>
+                  <TableHead>Action</TableHead>
+                </TableRow>
               </TableHeader>
               <TableBody>
                 {currentData.map((product) => (
@@ -114,23 +122,41 @@ export default function DurationTable() {
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            className="h-6 w-6 p-0 text-gray-900 hover:text-gray-700"
-                          >
-                            ...
-                          </Button>
+                          <EllipsisVertical className="w-5 h-5 mt-4 cursor-pointer" />
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" sideOffset={4}>
-                          <DropdownMenuItem>Edit</DropdownMenuItem>
-                          <DropdownMenuItem>{product.status}</DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() =>
-                              handleOpenDeleteModal(product.createdAt)
-                            }
-                          >
-                            Delete
-                          </DropdownMenuItem>
+                        <DropdownMenuContent className="w-56">
+                          <DropdownMenuGroup>
+                            <DropdownMenuItem
+                              className="cursor-pointer"
+                              onClick={() => {
+                                setIsNew(false);
+                                setOpenAdd(true);
+                              }}
+                            >
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="cursor-pointer"
+                              onClick={() => {
+                                setOpenToggle(true);
+                                setIsActive(product.status === "Active");
+                              }}
+                            >
+                              {product.status === "Active" ? (
+                                <span className="text-red-500">Deactivate</span>
+                              ) : (
+                                <span className="text-primary">Activate</span>
+                              )}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="cursor-pointer"
+                              onClick={() => {
+                                setOpenDelete(true);
+                              }}
+                            >
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuGroup>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -139,23 +165,35 @@ export default function DurationTable() {
               </TableBody>
             </Table>
           </div>
-        </CardContent>
-      </Card>
-      <div className="flex justify-center items-center mt-2">
-        <PaginationWithoutLinks
-          totalData={filteredData.length}
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-          perPage={10}
-          setCurrentLimit={() => {}}
-        />
-      </div>
-      <ConfirmDeleteModal
-        isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
-        onDelete={handleDelete}
-        entityName={entityToDelete}
-      />
-    </div>
+
+          <div className="flex justify-center items-center mt-2">
+            <PaginationWithoutLinks
+              totalData={filteredData.length}
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+              perPage={10}
+              setCurrentLimit={() => {}}
+            />
+          </div>
+          <ConfirmDeleteModal
+            isOpen={openDelete}
+            setIsOpen={() => setOpenDelete(false)}
+            title="Attention"
+            subtitle="Are you sure you want to delete this duration?"
+          />
+          <ModalToggleDuration
+            isOpen={openToggle}
+            setIsOpen={() => setOpenToggle(false)}
+            isActive={isActive}
+            isDuration={true}
+          />
+          <ModalDuration
+            isOpen={openAdd}
+            setIsOpen={() => setOpenAdd(false)}
+            isNew={isNew}
+          />
+        </div>
+      </CardContent>
+    </Card>
   );
 }

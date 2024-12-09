@@ -1,13 +1,15 @@
 import React, { useState } from "react";
 import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
-import { Plus, Search } from "lucide-react";
+import { EllipsisVertical, Plus, Search } from "lucide-react";
+import { useRouter } from "next/navigation";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "../../ui/dropdown-menu";
 import {
   Table,
   TableHeader,
@@ -23,7 +25,9 @@ import {
   SelectContent,
   Select,
 } from "../../ui/select";
+import { Card, CardContent } from "../../ui/card";
 import ConfirmDeleteModal from "../Modals/ModalDelete";
+import ModalToggleDuration from "../Modals/ModalToggleDuration";
 
 const DURATIONS = Array.from({ length: 90 }, (_, i) => ({
   no: i + 1,
@@ -35,20 +39,13 @@ const DURATIONS = Array.from({ length: 90 }, (_, i) => ({
 }));
 
 export default function Subscription() {
+  const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [entityToDelete, setEntityToDelete] = useState("");
-  const itemsPerPage = 10;
-
-  const handleOpenDeleteModal = (entityName: string) => {
-    setEntityToDelete(entityName);
-    setIsDeleteModalOpen(true);
-  };
-
-  const handleDelete = () => {
-    setIsDeleteModalOpen(false);
-  };
+  const [openDelete, setOpenDelete] = useState(false);
+  const [openToggle, setOpenToggle] = useState(false);
+  const [isActive, setIsActive] = useState(false);
+  const itemsPerPage = 5;
 
   const filteredData = DURATIONS.filter((data) =>
     data.duration.toLowerCase().includes(searchTerm.toLowerCase()),
@@ -60,115 +57,144 @@ export default function Subscription() {
   );
 
   return (
-    <div className="p-6 bg-white shadow-lg rounded-md">
-      <div className="flex justify-evenly items-center mb-4">
-        <div className="flex items-center gap-4 w-full">
-          <h2 className="text-xl font-bold">Duration Category</h2>
-          <div className="max-w-lg ">
-            <Select>
-              <SelectTrigger className="bg-primary text-white">
-                <p>3 Month</p>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="3">3 Month</SelectItem>
-                <SelectItem value="6">6 Month</SelectItem>
-                <SelectItem value="12">12 Month</SelectItem>
-              </SelectContent>
-            </Select>
+    <Card>
+      <CardContent className="p-0 shadow-lg">
+        <div className="p-6 bg-white rounded-md">
+          <div className="flex justify-evenly items-center mb-4">
+            <div className="flex items-center gap-4 w-full">
+              <h2 className="text-xl font-bold">Duration Category</h2>
+              <div className="max-w-lg ">
+                <Select>
+                  <SelectTrigger className="bg-primary text-white">
+                    <p>3 Month</p>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="3">3 Month</SelectItem>
+                    <SelectItem value="6">6 Month</SelectItem>
+                    <SelectItem value="12">12 Month</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+                <Input
+                  placeholder="Search by Subject"
+                  className="rounded-md pl-10 bordered-input"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <Button
+                onClick={() => router.push("/bo/subscription/create")}
+                className="bg-primary text-white flex items-center gap-2 px-4 py-2 rounded-md"
+              >
+                Create New Product <Plus className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
-            <Input
-              placeholder="Search by Subject"
-              className="rounded-md pl-10 bordered-input"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+          <div className="overflow-x-auto rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Product Name</TableHead>
+                  <TableHead>Price</TableHead>
+                  <TableHead>Duration</TableHead>
+                  <TableHead>Benefit</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {currentData.map((product) => (
+                  <TableRow key={product.no}>
+                    <TableCell>{product.productName}</TableCell>
+                    <TableCell>{product.price}</TableCell>
+                    <TableCell>{product.duration}</TableCell>
+                    <TableCell>{product.benefit}</TableCell>
+                    <TableCell>
+                      <span
+                        className={`px-2 py-1 rounded-full text-white ${
+                          product.status === "Open"
+                            ? "bg-blue-500"
+                            : product.status === "In Progress"
+                              ? "bg-orange-500"
+                              : product.status === "Resolve"
+                                ? "bg-green-500"
+                                : "bg-gray-500"
+                        }`}
+                      >
+                        {product.status}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <EllipsisVertical className="w-5 h-5 mt-4 cursor-pointer" />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-56">
+                          <DropdownMenuGroup>
+                            <DropdownMenuItem
+                              className="cursor-pointer"
+                              onClick={() => {
+                                router.push("/bo/subscription/update/1");
+                              }}
+                            >
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="cursor-pointer"
+                              onClick={() => {
+                                setOpenToggle(true);
+                                setIsActive(product.status === "Active");
+                              }}
+                            >
+                              {product.status === "Active" ? (
+                                <span className="text-red-500">Deactivate</span>
+                              ) : (
+                                <span className="text-primary">Activate</span>
+                              )}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="cursor-pointer"
+                              onClick={() => {
+                                setOpenDelete(true);
+                              }}
+                            >
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuGroup>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+          <div className="flex justify-center items-center mt-2">
+            <PaginationWithoutLinks
+              totalData={filteredData.length}
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+              perPage={10}
+              setCurrentLimit={() => {}}
             />
           </div>
-          <Button className="bg-primary text-white flex items-center gap-2 px-4 py-2 rounded-md">
-            Create New Product <Plus className="w-4 h-4" />
-          </Button>
+          <ConfirmDeleteModal
+            isOpen={openDelete}
+            setIsOpen={() => setOpenDelete(false)}
+            title="Attention"
+            subtitle="Are you sure you want to delete this Subscription?"
+          />
+          <ModalToggleDuration
+            isOpen={openToggle}
+            setIsOpen={() => setOpenToggle(false)}
+            isActive={isActive}
+          />
         </div>
-      </div>
-      <div className="overflow-x-auto rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Product Name</TableHead>
-              <TableHead>Price</TableHead>
-              <TableHead>Duration</TableHead>
-              <TableHead>Benefit</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Action</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {currentData.map((product) => (
-              <TableRow key={product.no}>
-                <TableCell>{product.productName}</TableCell>
-                <TableCell>{product.price}</TableCell>
-                <TableCell>{product.duration}</TableCell>
-                <TableCell>{product.benefit}</TableCell>
-                <TableCell>
-                  <span
-                    className={`px-2 py-1 rounded-full text-white ${
-                      product.status === "Open"
-                        ? "bg-blue-500"
-                        : product.status === "In Progress"
-                          ? "bg-orange-500"
-                          : product.status === "Resolve"
-                            ? "bg-green-500"
-                            : "bg-gray-500"
-                    }`}
-                  >
-                    {product.status}
-                  </span>
-                </TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        className="h-6 w-6 p-0 text-gray-900 hover:text-gray-700"
-                      >
-                        ...
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" sideOffset={4}>
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
-                      <DropdownMenuItem>{product.status}</DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() =>
-                          handleOpenDeleteModal(product.productName)
-                        }
-                      >
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-      <div className="flex justify-center items-center mt-2">
-        <PaginationWithoutLinks
-          totalData={filteredData.length}
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-          perPage={10}
-          setCurrentLimit={() => {}}
-        />
-      </div>
-      <ConfirmDeleteModal
-        isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
-        onDelete={handleDelete}
-        entityName={entityToDelete}
-      />
-    </div>
+      </CardContent>
+    </Card>
   );
 }

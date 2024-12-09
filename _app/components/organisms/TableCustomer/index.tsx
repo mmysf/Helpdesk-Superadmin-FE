@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import {
   Table,
   TableHeader,
-  TableColumn,
   TableBody,
   TableRow,
   TableCell,
+  TableHead,
 } from "@/ui/table";
 import {
   DropdownMenu,
@@ -16,8 +16,8 @@ import {
 import { Card, CardContent } from "@/ui/card";
 import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
-import { Plus, Search } from "lucide-react";
-import Link from "next/link";
+import { EllipsisVertical, Plus, Search } from "lucide-react";
+import { useRouter } from "next/navigation";
 import PaginationWithoutLinks from "../PaginationWithoutLinks";
 import ConfirmDeleteModal from "../Modals/ModalDelete";
 
@@ -31,20 +31,12 @@ const CUSTOMERS = Array.from({ length: 50 }, (_, i) => ({
 }));
 
 export default function CustomerTable() {
+  const router = useRouter();
+  const [isOpen, setIsOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [entityToDelete, setEntityToDelete] = useState("");
   const itemsPerPage = 10;
 
-  const handleOpenDeleteModal = (entityName: string) => {
-    setEntityToDelete(entityName);
-    setIsDeleteModalOpen(true);
-  };
-
-  const handleDelete = () => {
-    setIsDeleteModalOpen(false);
-  };
   const filteredData = CUSTOMERS.filter(
     (customer) =>
       customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -57,43 +49,50 @@ export default function CustomerTable() {
   );
 
   return (
-    <div className="p-6 bg-white min-h-screen shadow-lg rounded-md">
-      <div className="flex flex-col gap-4">
-        <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-xl font-bold">Customer Information Table</h2>
-            <p className="text-gray-600">
-              Manage, Track, and Grow your Customer
-            </p>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
-              <Input
-                placeholder="Search by Name"
-                className="rounded-md pl-10"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+    <Card>
+      <CardContent className="p-0 shadow-lg">
+        <div className="p-6 bg-white rounded-md">
+          <div className="flex flex-col gap-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-xl font-bold">
+                  Customer Information Table
+                </h2>
+                <p className="text-gray-600">
+                  Manage, Track, and Grow your Customer
+                </p>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+                  <Input
+                    placeholder="Search by Name"
+                    className="rounded-md pl-10"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+                <Button
+                  onClick={() => {
+                    router.push("/bo/customer/add-customer");
+                  }}
+                  className="bg-primary text-white flex items-center gap-2 px-4 py-2 rounded-md"
+                >
+                  Add New Customer <Plus className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
-            <Link href="/bo/customer/add-customer">
-              <Button className="bg-primary text-white text-sm px-4 py-2">
-                Add New Customer <Plus className="w-4 h-4" />
-              </Button>
-            </Link>
-          </div>
-        </div>
-        <Card>
-          <CardContent>
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto rounded-md border">
               <Table>
                 <TableHeader>
-                  <TableColumn>Name</TableColumn>
-                  <TableColumn>Company</TableColumn>
-                  <TableColumn>Subscription</TableColumn>
-                  <TableColumn>Last Activity</TableColumn>
-                  <TableColumn>Time Remaining</TableColumn>
-                  <TableColumn>Action</TableColumn>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Company</TableHead>
+                    <TableHead>Subscription</TableHead>
+                    <TableHead>Last Activity</TableHead>
+                    <TableHead>Time Remaining</TableHead>
+                    <TableHead>Action</TableHead>
+                  </TableRow>
                 </TableHeader>
                 <TableBody>
                   {currentData.map((customer) => (
@@ -126,15 +125,23 @@ export default function CustomerTable() {
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="h-6 w-6 p-0">
-                              ...
+                              <EllipsisVertical className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" sideOffset={4}>
-                            <DropdownMenuItem>Edit</DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() =>
-                                handleOpenDeleteModal(customer.name)
-                              }
+                              onClick={() => {
+                                router.push(
+                                  `/bo/customer/update-customer/${customer.email}`,
+                                );
+                              }}
+                            >
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setIsOpen(true);
+                              }}
                             >
                               Delete
                             </DropdownMenuItem>
@@ -146,24 +153,24 @@ export default function CustomerTable() {
                 </TableBody>
               </Table>
             </div>
-          </CardContent>
-        </Card>
-        <div className="flex justify-center items-center mt-2">
-          <PaginationWithoutLinks
-            totalData={filteredData.length}
-            currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
-            perPage={10}
-            setCurrentLimit={() => {}}
+            <div className="flex justify-center items-center mt-2">
+              <PaginationWithoutLinks
+                totalData={filteredData.length}
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
+                perPage={10}
+                setCurrentLimit={() => {}}
+              />
+            </div>
+          </div>
+          <ConfirmDeleteModal
+            isOpen={isOpen}
+            setIsOpen={setIsOpen}
+            title="Attention"
+            subtitle="Are you sure want to delete this Customer"
           />
         </div>
-      </div>
-      <ConfirmDeleteModal
-        isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
-        onDelete={handleDelete}
-        entityName={entityToDelete}
-      />
-    </div>
+      </CardContent>
+    </Card>
   );
 }

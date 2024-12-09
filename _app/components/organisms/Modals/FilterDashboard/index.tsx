@@ -45,7 +45,7 @@ export default function FilterModal({ isOpen, onClose }: FilterDashboardProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-sm rounded-lg p-6">
+      <DialogContent className=" rounded-lg p-6">
         <DialogHeader>
           <DialogTitle className="text-center text-lg font-semibold">
             Filter
@@ -98,7 +98,7 @@ export default function FilterModal({ isOpen, onClose }: FilterDashboardProps) {
             Reset
           </Button>
           <Button
-            className="px-4 py-2 rounded-lg bg-gray-700 items-center"
+            className="px-4 py-2 rounded-lg items-center"
             onClick={applyFilters}
           >
             Filter
