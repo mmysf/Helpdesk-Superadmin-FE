@@ -1,4 +1,4 @@
-import Duration from "@/organisms/duration";
+import Duration from "@/organisms/Duration";
 
 const AdminProductDuration = () => {
   return (
