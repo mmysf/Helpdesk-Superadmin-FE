@@ -16,8 +16,10 @@ import {
 import { Input } from "@/ui/input";
 import { Plus, Search } from "lucide-react";
 import YecLogo from "@/assets/logo/yec-logo.png";
+import Link from "next/link";
 import Image from "next/image";
 import PaginationWithoutLinks from "../PaginationWithoutLinks";
+import ConfirmDeleteModal from "../Modals/ModalDelete";
 
 const COMPANY = Array.from({ length: 30 }, (_, index) => ({
   name: `Company ${index + 1}`,
@@ -30,7 +32,18 @@ const COMPANY = Array.from({ length: 30 }, (_, index) => ({
 const CompanyTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [entityToDelete, setEntityToDelete] = useState("");
   const itemsPerPage = 10;
+
+  const handleOpenDeleteModal = (entityName: string) => {
+    setEntityToDelete(entityName);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDelete = () => {
+    setIsDeleteModalOpen(false);
+  };
 
   const filteredData = COMPANY.filter(
     (customer) =>
@@ -58,9 +71,11 @@ const CompanyTable = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <Button className="bg-primary text-white text-sm px-4 py-2">
-              Add New Company <Plus className="w-4 h-4" />
-            </Button>
+            <Link href="/bo/company/add-company">
+              <Button className="bg-primary text-white text-sm px-4 py-2">
+                Add New Company <Plus className="w-4 h-4" />
+              </Button>
+            </Link>
           </div>
         </div>
 
@@ -105,7 +120,11 @@ const CompanyTable = () => {
                     <DropdownMenuContent align="end" sideOffset={4}>
                       <DropdownMenuItem>Detail</DropdownMenuItem>
                       <DropdownMenuItem>Edit</DropdownMenuItem>
-                      <DropdownMenuItem>Delete</DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleOpenDeleteModal(company.name)}
+                      >
+                        Delete
+                      </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
@@ -124,6 +143,12 @@ const CompanyTable = () => {
           />
         </div>
       </div>
+      <ConfirmDeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onDelete={handleDelete}
+        entityName={entityToDelete}
+      />
     </div>
   );
 };

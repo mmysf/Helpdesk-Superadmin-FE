@@ -7,33 +7,38 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
 
-export default function ConfirmDeleteModal() {
-  const [isOpen, setIsOpen] = useState(false);
+interface ConfirmDeleteModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onDelete: () => void;
+  entityName: string;
+}
 
-  const handleDelete = () => {
-    setIsOpen(false);
-  };
-
+export default function ConfirmDeleteModal({
+  isOpen,
+  onClose,
+  onDelete,
+  entityName,
+}: ConfirmDeleteModalProps) {
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
           <h2 className="text-lg font-bold">ATTENTION</h2>
         </DialogHeader>
         <p className="text-gray-600 text-sm">
-          Are you sure you want to delete this customer?
+          Are you sure you want to delete this {entityName}?
         </p>
 
         <DialogFooter className="flex justify-between mt-6">
-          <Button variant="outline" onClick={() => setIsOpen(false)}>
+          <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
           <Button
             className="bg-red-600"
             variant="destructive"
-            onClick={handleDelete}
+            onClick={onDelete}
           >
             Delete
           </Button>

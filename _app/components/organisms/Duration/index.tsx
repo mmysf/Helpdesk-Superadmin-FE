@@ -2,6 +2,12 @@ import React, { useState } from "react";
 import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
 import { Plus, Search } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Card, CardContent } from "../../ui/card";
 import {
   Table,
@@ -12,6 +18,7 @@ import {
   TableCell,
 } from "../../ui/table";
 import PaginationWithoutLinks from "../PaginationWithoutLinks";
+import ConfirmDeleteModal from "../Modals/ModalDelete";
 
 const DURATIONS = Array.from({ length: 90 }, (_, i) => ({
   no: i + 1,
@@ -25,7 +32,18 @@ const DURATIONS = Array.from({ length: 90 }, (_, i) => ({
 export default function DurationTable() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
-  const itemsPerPage = 5;
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [entityToDelete, setEntityToDelete] = useState("");
+  const itemsPerPage = 10;
+
+  const handleOpenDeleteModal = (entityName: string) => {
+    setEntityToDelete(entityName);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDelete = () => {
+    setIsDeleteModalOpen(false);
+  };
 
   const filteredData = DURATIONS.filter((data) =>
     data.duration.toLowerCase().includes(searchTerm.toLowerCase()),
@@ -94,9 +112,27 @@ export default function DurationTable() {
                     <TableCell>{product.productActive}</TableCell>
                     <TableCell>{product.productNonActive}</TableCell>
                     <TableCell>
-                      <Button variant="ghost" className="text-primary">
-                        view
-                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            className="h-6 w-6 p-0 text-gray-900 hover:text-gray-700"
+                          >
+                            ...
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" sideOffset={4}>
+                          <DropdownMenuItem>Edit</DropdownMenuItem>
+                          <DropdownMenuItem>{product.status}</DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() =>
+                              handleOpenDeleteModal(product.createdAt)
+                            }
+                          >
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -114,6 +150,12 @@ export default function DurationTable() {
           setCurrentLimit={() => {}}
         />
       </div>
+      <ConfirmDeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onDelete={handleDelete}
+        entityName={entityToDelete}
+      />
     </div>
   );
 }

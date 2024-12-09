@@ -12,6 +12,7 @@ import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
 import { Search, Filter } from "lucide-react";
 import PaginationWithoutLinks from "../PaginationWithoutLinks";
+import FilterDashboard from "../Modals/FilterDashboard";
 
 const TICKETS = Array.from({ length: 50 }, (_, i) => ({
   ticketId: `ID-123456${i}`,
@@ -27,6 +28,7 @@ const TICKETS = Array.from({ length: 50 }, (_, i) => ({
 export default function NewTicket() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const itemsPerPage = 10;
 
   const filteredData = TICKETS.filter((ticket) =>
@@ -55,7 +57,10 @@ export default function NewTicket() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <Button className="bg-slate-500 text-white flex items-center gap-2 px-4 py-2 rounded-md">
+          <Button
+            className="bg-slate-500 text-white flex items-center gap-2 px-4 py-2 rounded-md"
+            onClick={() => setIsFilterModalOpen(true)}
+          >
             <Filter className="w-4 h-4" /> Filter
           </Button>
         </div>
@@ -121,6 +126,10 @@ export default function NewTicket() {
           setCurrentLimit={() => {}}
         />
       </div>
+      <FilterDashboard
+        isOpen={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
+      />
     </div>
   );
 }

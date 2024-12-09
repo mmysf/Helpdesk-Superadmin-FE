@@ -12,6 +12,7 @@ import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
 import { Filter, Search } from "lucide-react";
 import PaginationWithoutLinks from "../PaginationWithoutLinks";
+import FilterOrder from "../Modals/FilterOrder";
 
 const ORDERS = Array.from({ length: 90 }, (_, i) => ({
   orderId: `OrderID${i + 1}`,
@@ -25,6 +26,7 @@ const ORDERS = Array.from({ length: 90 }, (_, i) => ({
 export default function OrdersTable() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const itemsPerPage = 10;
 
   const filteredData = ORDERS.filter((order) =>
@@ -60,7 +62,10 @@ export default function OrdersTable() {
             History of All Orders from Customer
           </h2>
           <div className="flex items-center gap-2">
-            <Button className="bg-slate-500 text-white">
+            <Button
+              className="bg-slate-500 text-white"
+              onClick={() => setIsFilterModalOpen(true)}
+            >
               <Filter /> Filter
             </Button>
             <div className="relative">
@@ -117,6 +122,10 @@ export default function OrdersTable() {
           />
         </div>
       </div>
+      <FilterOrder
+        isOpen={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
+      />
     </div>
   );
 }
