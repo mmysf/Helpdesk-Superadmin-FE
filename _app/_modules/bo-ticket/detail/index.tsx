@@ -3,6 +3,7 @@
 
 "use-client";
 
+import ModalAssignAgent from "@/root/_app/components/organisms/Modals/ModalAssignAgent";
 import { Button } from "@/root/_app/components/ui/button";
 import { Input } from "@/root/_app/components/ui/input";
 import {
@@ -40,6 +41,8 @@ const AdminTicketDetail = () => {
     },
   ];
 
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
     <div className="w-full p-6">
       <div className="flex items-center">
@@ -62,7 +65,6 @@ const AdminTicketDetail = () => {
                 <Search className="text-slate-400" />
               </Button>
             </div>
-
             <div className="bg-[#2C4251] relative rounded-md h-full">
               {comments.map((item) => (
                 <div
@@ -188,10 +190,11 @@ const AdminTicketDetail = () => {
             </div>
           </div>
           <div className="flex justify-center w-full mt-5">
-            <Button>Assign To</Button>
+            <Button onClick={() => setIsOpen(true)}>Assign To</Button>
           </div>
         </div>
       </div>
+      <ModalAssignAgent isOpen={isOpen} setIsOpen={setIsOpen} />
     </div>
   );
 };

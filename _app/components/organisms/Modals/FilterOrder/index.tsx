@@ -42,7 +42,7 @@ export default function FilterOrder({ isOpen, onClose }: FilterOrderProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-sm rounded-lg p-6">
+      <DialogContent className="rounded-lg p-6">
         <DialogHeader className="text-center pb-4">
           <h2 className="text-lg font-semibold">Filter</h2>
         </DialogHeader>
@@ -124,7 +124,7 @@ export default function FilterOrder({ isOpen, onClose }: FilterOrderProps) {
               Reset
             </Button>
             <Button
-              className="px-4 py-2 rounded-lg bg-gray-700 text-white hover:bg-gray-800"
+              className="px-4 py-2 rounded-lg text-white hover:bg-gray-800"
               onClick={handleFilter}
             >
               Filter

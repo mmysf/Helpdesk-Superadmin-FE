@@ -5,11 +5,15 @@ import { cn } from "@/helpers/utils";
 export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
   endContent?: React.ReactNode;
+  startContent?: React.ReactNode;
   wrapperClass?: string;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, endContent, wrapperClass, ...props }, ref) => {
+  (
+    { className, type, endContent, startContent, wrapperClass, ...props },
+    ref,
+  ) => {
     return (
       <div
         className={cn(
@@ -17,6 +21,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           wrapperClass,
         )}
       >
+        {startContent}
         <input
           type={type}
           className={cn(

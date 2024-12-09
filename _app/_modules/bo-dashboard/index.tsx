@@ -13,7 +13,7 @@ const AdminDashboard = () => {
       <Stats />
       <div className="container mx-auto">
         <h1 className="text-2xl font-semibold ml-5">Our Company Partner</h1>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 mt-2">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-2">
           {[1, 2, 3].map((item, index) => (
             <CompanyItem key={index} />
           ))}
