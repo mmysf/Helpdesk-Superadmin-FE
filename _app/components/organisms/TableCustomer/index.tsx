@@ -17,7 +17,9 @@ import { Card, CardContent } from "@/ui/card";
 import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
 import { Plus, Search } from "lucide-react";
+import Link from "next/link";
 import PaginationWithoutLinks from "../PaginationWithoutLinks";
+import ConfirmDeleteModal from "../Modals/ModalDelete";
 
 const CUSTOMERS = Array.from({ length: 50 }, (_, i) => ({
   name: `Customer ${i + 1}`,
@@ -31,8 +33,18 @@ const CUSTOMERS = Array.from({ length: 50 }, (_, i) => ({
 export default function CustomerTable() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [entityToDelete, setEntityToDelete] = useState("");
   const itemsPerPage = 10;
 
+  const handleOpenDeleteModal = (entityName: string) => {
+    setEntityToDelete(entityName);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDelete = () => {
+    setIsDeleteModalOpen(false);
+  };
   const filteredData = CUSTOMERS.filter(
     (customer) =>
       customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -64,9 +76,11 @@ export default function CustomerTable() {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <Button className="bg-primary text-white flex items-center gap-2 px-4 py-2 rounded-md">
-              Add New Customer <Plus className="w-4 h-4" />
-            </Button>
+            <Link href="/bo/customer/add-customer">
+              <Button className="bg-primary text-white text-sm px-4 py-2">
+                Add New Customer <Plus className="w-4 h-4" />
+              </Button>
+            </Link>
           </div>
         </div>
         <Card>
@@ -117,7 +131,13 @@ export default function CustomerTable() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" sideOffset={4}>
                             <DropdownMenuItem>Edit</DropdownMenuItem>
-                            <DropdownMenuItem>Delete</DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                handleOpenDeleteModal(customer.name)
+                              }
+                            >
+                              Delete
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -138,6 +158,12 @@ export default function CustomerTable() {
           />
         </div>
       </div>
+      <ConfirmDeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onDelete={handleDelete}
+        entityName={entityToDelete}
+      />
     </div>
   );
 }
