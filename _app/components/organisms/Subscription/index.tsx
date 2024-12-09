@@ -70,7 +70,7 @@ export default function Subscription() {
             />
           </div>
           <Button className="bg-primary text-white flex items-center gap-2 px-4 py-2 rounded-md">
-            Create New Duration <Plus className="w-4 h-4" />
+            Create New Product <Plus className="w-4 h-4" />
           </Button>
         </div>
       </div>
