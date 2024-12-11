@@ -19,7 +19,7 @@ declare global {
   const useDeferredValue: typeof import('react')['useDeferredValue']
   const useEffect: typeof import('react')['useEffect']
   const useHttp: (typeof import("./_core/hooks/http"))["useHttp"]
-  const useHttpMutation: (typeof import("./_core/hooks/http"))["useHttpMutation"]
+  const useHttpMutation: (typeof import("./_app/hooks/http"))["useHttpMutation"]
   const useId: typeof import('react')['useId']
   const useImperativeHandle: typeof import('react')['useImperativeHandle']
   const useInsertionEffect: typeof import('react')['useInsertionEffect']
