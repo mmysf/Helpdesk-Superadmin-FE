@@ -1,5 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 "use client";
-import type { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
+
+import type {
+  AxiosError,
+  AxiosRequestConfig,
+  AxiosResponse,
+  InternalAxiosRequestConfig,
+} from "axios";
 import {
   type UseQueryOptions,
   type UseMutationOptions,
@@ -16,10 +24,12 @@ export const http = axios.create({
 
 http.interceptors.request.use((config) => {
   const token = Cookies.get("accessToken");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
+  return token
+    ? ({
+        ...config,
+        headers: { Authorization: `Bearer ${token}` },
+      } as InternalAxiosRequestConfig)
+    : config;
 });
 
 http.interceptors.response.use(
@@ -28,29 +38,28 @@ http.interceptors.response.use(
   },
   async (error) => {
     // If the error is not 401, just reject as-is & check if the error response and add notification
-    if (error?.response?.status !== 403) {
+    if (error?.response?.status !== 403)
       // window.message.error(message)
       return Promise.reject(error);
-    } else {
-      Cookies.remove("accessToken");
 
-      setTimeout(() => {
-        window.location.href = "/auth/sign-in";
-      }, 200);
-    }
+    Cookies.remove("accessToken");
+    return setTimeout(() => {
+      window.location.href = "/auth/sign-in";
+    }, 200);
   },
 );
 
-type Config<TData = any, TError = DefaultError> = {
+type DefaultError = {
+  message: string;
+  validation: unknown;
+};
+
+type Config<TData = unknown, TError = DefaultError> = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   keys?: any[];
   params?: Record<string, any>;
   httpOptions?: AxiosRequestConfig;
   queryOptions?: UseQueryOptions<TData, TError>;
-};
-
-type DefaultError = {
-  message: string;
-  validation: {};
 };
 
 /**
@@ -142,7 +151,7 @@ export function useHttpMutation<
       return new Promise<TData>((resolve, reject) => {
         return http
           .request<TData>({
-            url: url,
+            url,
             method: options.method,
             ...options.httpOptions,
             data: value,
