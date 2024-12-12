@@ -4,25 +4,25 @@ import { useForm, Controller } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AUTH_KEY, USER } from "@/constants/auth";
-import { useHttpMutation } from "@/hooks/http";
 import Cookie from "js-cookie";
-import { Env } from "@/config/env";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ResponseLogin } from "@/models/auth/index.types";
 import { HiOutlineEye, HiOutlineEyeOff } from "react-icons/hi";
 import Image from "next/image";
-import { toast } from "sonner";
-
-type Form = {
-  email: string;
-  password: string;
-};
+import {
+  AuthLoginPayload,
+  useAuthLogin,
+} from "@/services_remote/repository/auth/index.service";
+import useToastError from "@/hooks/useToastError";
+import useToastSuccess from "@/hooks/useToastSuccess";
 
 export default function Page() {
   const router = useRouter();
-  const { control, handleSubmit, setValue } = useForm<Form>({
+
+  const { mutate, isPending } = useAuthLogin();
+
+  const { control, handleSubmit, setValue } = useForm<AuthLoginPayload>({
     mode: "all",
   });
 
@@ -32,32 +32,25 @@ export default function Page() {
     setIsVisiblePass(!isVisiblePass);
   };
 
+  const toastError = useToastError();
+  const toastSuccess = useToastSuccess();
+
   useEffect(() => {
     setValue("email", "");
     setValue("password", "");
   }, [setValue]);
 
-  const { mutate, isPending } = useHttpMutation("/superadmin/auth/login", {
-    method: "POST",
-    queryOptions: {
-      onSuccess: (data: ResponseLogin) => {
-        Cookie.set(AUTH_KEY, data.data.token);
-        Cookie.set(USER, JSON.stringify(data.data.user));
+  const onSubmit = handleSubmit((payload) => {
+    mutate(payload, {
+      onSuccess: ({ data }) => {
+        Cookie.set(AUTH_KEY, data.token);
+        Cookie.set(USER, JSON.stringify(data.user));
         router.push("/bo/dashboard");
-
-        toast.success("Login successful!");
+        toastSuccess("Login successfull!");
       },
-      onError: () => {
-        toast.error("Login failed. Please try again.");
+      onError: (error) => {
+        toastError(error.data.message || "Something went wrong!");
       },
-    },
-  });
-
-  const onSubmit = handleSubmit((data) => {
-    mutate({
-      email: data.email,
-      password: data.password,
-      accessKey: Env().API_ACCESS_KEY,
     });
   });
 
