@@ -49,7 +49,7 @@ http.interceptors.response.use(
   },
 );
 
-type DefaultError = {
+export type DefaultError = {
   message: string;
   validation: unknown;
 };
@@ -143,8 +143,8 @@ type HttpMutationOptions<
  */
 export function useHttpMutation<
   TData = any,
-  TError = AxiosResponse<DefaultError>,
   TVariables = any,
+  TError = AxiosResponse<DefaultError>,
 >(url: string, options: HttpMutationOptions<TData, TError>) {
   return useMutation({
     mutationFn: (value: TVariables) => {
