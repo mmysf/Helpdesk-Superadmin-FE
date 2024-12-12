@@ -10,6 +10,7 @@ import { Plus_Jakarta_Sans } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { Providers } from "@/root/src/app/providers";
+import { Toaster } from "@/components/ui/toaster";
 
 const fonts = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -28,6 +29,7 @@ const Layout: React.FC<any> = async ({ children }) => {
         <Providers>
           <NextIntlClientProvider messages={messages}>
             {children}
+            <Toaster />
           </NextIntlClientProvider>
         </Providers>
       </body>
