@@ -36,10 +36,11 @@ module.exports = {
     // "plugin:react-hooks/recommended",
   ],
   rules: {
-    "no-unused-vars": "error",
+    "no-unused-vars": "warn",
     "@typescript-eslint/no-unused-vars": "error",
     "@typescript-eslint/no-explicit-any": "error",
     "react/react-in-jsx-scope": "off",
+    "react/require-default-props": "off",
     "@typescript-eslint/ban-ts-comment": [
       "error",
       {

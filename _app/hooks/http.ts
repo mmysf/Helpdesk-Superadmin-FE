@@ -17,13 +17,15 @@ import {
 } from "@tanstack/react-query";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { AUTH_KEY } from "../constants/auth";
 
 export const http = axios.create({
   baseURL: process.env.NEXT_PUBLIC_BASE_URL,
 });
 
 http.interceptors.request.use((config) => {
-  const token = Cookies.get("accessToken");
+  const token = Cookies.get(AUTH_KEY);
+  console.log(token);
   return token
     ? ({
         ...config,
@@ -92,7 +94,7 @@ export function useHttp<TData = any, TError = any>(
         if (options?.params) {
           Object.assign(defaultConfig, { params: options.params });
         }
-        const { data } = await http.get<TData>(url, defaultConfig);
+        const { data } = await http.get<TData>(url, options?.httpOptions);
         return data ?? null;
       } catch (e: any) {
         Promise.reject(e?.response ?? e);

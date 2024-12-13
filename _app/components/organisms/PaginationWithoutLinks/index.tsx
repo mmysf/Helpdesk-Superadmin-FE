@@ -1,11 +1,3 @@
-/* eslint-disable react/require-default-props */
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable no-plusplus */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable react/no-array-index-key */
-/* eslint-disable import/no-unresolved */
-/* eslint-disable import/extensions */
-
 "use client";
 
 import React from "react";
@@ -31,29 +23,30 @@ import {
 } from "../../ui/select";
 
 interface PaginationProps {
-  totalData: any;
-  perPage: any;
-  currentPage: number;
-  setCurrentPage: any;
+  totalData?: number;
+  perPage?: number;
+  currentPage?: number;
   hasLimit?: boolean;
-  setCurrentLimit: any;
+  setCurrentPage?: (val: number) => void;
+  setCurrentLimit?: (val: number) => void;
 }
 
 export default function PaginationWithoutLinks(props: PaginationProps) {
   const {
-    totalData,
-    perPage,
-    currentPage,
-    setCurrentPage,
+    totalData = 1,
+    perPage = 10,
+    currentPage = 1,
     hasLimit = false,
+    setCurrentPage,
     setCurrentLimit,
   } = props;
+
   const pageNumbers = [];
-  for (let i = 1; i <= Math.ceil(totalData / perPage); i++) {
+  for (let i = 1; i <= Math.ceil(totalData / perPage); i += 1) {
     pageNumbers.push(i);
   }
 
-  if (perPage) {
+  if (perPage && setCurrentLimit) {
     setCurrentLimit(perPage);
   }
 
@@ -75,29 +68,29 @@ export default function PaginationWithoutLinks(props: PaginationProps) {
   }, [currentPage]);
 
   const handleNextPage = () => {
-    if (currentPage < pageNumbers.length) {
+    if (currentPage < pageNumbers.length && setCurrentPage) {
       setCurrentPage(currentPage + 1);
     }
   };
 
   const handlePrevPage = () => {
-    if (currentPage > 1) {
+    if (currentPage > 1 && setCurrentPage) {
       setCurrentPage(currentPage - 1);
     }
   };
 
   // Function to render page numbers with ellipsis
   const renderPages = () => {
-    const renderedPages = activePages.map((page, idx) => (
+    const renderedPages = activePages.map((page) => (
       <PaginationItem
-        key={idx}
+        key={page}
         className={cn(
           "cursor-pointer rounded-md",
           currentPage === page ? "bg-primary" : "border-[1px] border-slate-300",
         )}
       >
         <PaginationLink
-          onClick={() => setCurrentPage(page)}
+          onClick={() => setCurrentPage && setCurrentPage(page)}
           className={cn(currentPage === page ? "text-white" : "")}
         >
           {page}
@@ -150,8 +143,8 @@ export default function PaginationWithoutLinks(props: PaginationProps) {
             value={perPage.toString()}
             defaultValue="10"
             onValueChange={(value) => {
-              setCurrentLimit(Number(value));
-              setCurrentPage(1);
+              if (setCurrentLimit) setCurrentLimit(Number(value));
+              if (setCurrentPage) setCurrentPage(1);
             }}
           >
             <SelectTrigger>
