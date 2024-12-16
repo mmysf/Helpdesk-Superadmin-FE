@@ -2,6 +2,12 @@ import { DefaultError } from "@/hooks/http";
 import { UseMutationOptions, UseQueryOptions } from "@tanstack/react-query";
 import { AxiosRequestConfig, AxiosResponse } from "axios";
 
+export interface DefaultListParams {
+  search?: string;
+  page?: number;
+  limit?: number;
+}
+
 export interface DefaultResponse<R = unknown> {
   data: R;
   message: string;
@@ -31,4 +37,14 @@ export interface ServiceConfig<Res = unknown> {
 export interface IdName {
   id: string;
   name: string;
+}
+
+export interface DataAttachment {
+  id: string;
+  name: string;
+  size: number;
+  url: string;
+  type: string;
+  isPrivate: boolean;
+  providerKey: string;
 }
