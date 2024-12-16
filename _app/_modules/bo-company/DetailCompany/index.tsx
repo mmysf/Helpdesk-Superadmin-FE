@@ -2,21 +2,32 @@
 
 "use client";
 
+import Link from "next/link";
+import { Routes } from "@/root/_app/config/routes";
 import { HiOutlineArrowCircleLeft } from "react-icons/hi";
+import { useCompanyDetail } from "@/services_remote/repository/company/index.service";
 import CompanyItem from "../../../components/molecules/CompanyItem";
 import NewTicket from "../../../components/organisms/NewTicket";
 import ChartTicket from "../../../components/molecules/ChartTicket";
 import ChartTime from "../../../components/molecules/ChartTime";
 
-const DetailCompany = () => {
+interface Params {
+  id: string;
+}
+
+const DetailCompany = ({ params }: { params: Params }) => {
+  const { data, isFetching } = useCompanyDetail(params.id);
+
   return (
     <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-      <div className="flex space-x-3 items-center cursor-pointer mb-4 mt-5">
-        <HiOutlineArrowCircleLeft className="text-2xl" />
+      <div className="flex space-x-3 items-center mb-4 mt-5">
+        <Link href={Routes.BO_COMPANY}>
+          <HiOutlineArrowCircleLeft className="text-2xl" />
+        </Link>
         <p className="font-semibold">COMPANY 1</p>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <CompanyItem />
+        <CompanyItem data={data?.data} isLoading={isFetching} />
         <ChartTicket />
         <ChartTime />
       </div>

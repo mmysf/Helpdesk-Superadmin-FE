@@ -17,13 +17,14 @@ import {
 } from "@tanstack/react-query";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { AUTH_KEY } from "../constants/auth";
 
 export const http = axios.create({
   baseURL: process.env.NEXT_PUBLIC_BASE_URL,
 });
 
 http.interceptors.request.use((config) => {
-  const token = Cookies.get("accessToken");
+  const token = Cookies.get(AUTH_KEY);
   return token
     ? ({
         ...config,
@@ -37,15 +38,15 @@ http.interceptors.response.use(
     return response;
   },
   async (error) => {
-    // If the error is not 401, just reject as-is & check if the error response and add notification
-    if (error?.response?.status !== 403)
-      // window.message.error(message)
-      return Promise.reject(error);
+    if (error?.response?.status === 401) {
+      console.log("p", "unauth");
+      Cookies.remove(AUTH_KEY);
+      return setTimeout(() => {
+        window.location.href = "/";
+      }, 200);
+    }
 
-    Cookies.remove("accessToken");
-    return setTimeout(() => {
-      window.location.href = "/auth/sign-in";
-    }, 200);
+    return Promise.reject(error);
   },
 );
 
@@ -92,7 +93,7 @@ export function useHttp<TData = any, TError = any>(
         if (options?.params) {
           Object.assign(defaultConfig, { params: options.params });
         }
-        const { data } = await http.get<TData>(url, defaultConfig);
+        const { data } = await http.get<TData>(url, options?.httpOptions);
         return data ?? null;
       } catch (e: any) {
         Promise.reject(e?.response ?? e);

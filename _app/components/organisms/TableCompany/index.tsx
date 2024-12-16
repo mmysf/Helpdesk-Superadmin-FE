@@ -1,4 +1,9 @@
 /* eslint-disable react/jsx-curly-brace-presence */
+import {
+  CompanyListParams,
+  useCompanyDelete,
+  useCompanyList,
+} from "@/services_remote/repository/company/index.service";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import {
@@ -15,6 +20,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import useToastSuccess from "@/hooks/useToastSuccess";
+import useToastError from "@/hooks/useToastError";
 import { Input } from "@/ui/input";
 import { EllipsisVertical, Plus, Search } from "lucide-react";
 import YecLogo from "@/assets/logo/yec-logo.png";
@@ -24,31 +31,59 @@ import PaginationWithoutLinks from "../PaginationWithoutLinks";
 import { CardContent, Card } from "../../ui/card";
 import ConfirmDeleteModal from "../Modals/ModalDelete";
 
-const COMPANY = Array.from({ length: 30 }, (_, index) => ({
-  name: `Company ${index + 1}`,
-  logo: `@/assets/logo/yec-logo-${index + 1}.png`,
-  email: `company${index + 1}@example.com`,
-  totalBrand: Math.floor(Math.random() * 10) + 1,
-  totalTickets: Math.floor(Math.random() * 50) + 1,
-}));
-
 const CompanyTable = () => {
+  const [params, setParams] = useState<Partial<CompanyListParams>>({});
+  const toastSuccess = useToastSuccess();
+  const toastError = useToastError();
+
   const router = useRouter();
+  const selectedId = useRef("");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [currentLimit, setCurrentLimit] = useState(10);
   const [isOpenDelete, setOpenDelete] = useState(false);
-  const itemsPerPage = 10;
 
-  const filteredData = COMPANY.filter(
-    (customer) =>
-      customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.name.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  const { data, isFetching, refetch } = useCompanyList({
+    axios: { params },
+    query: { queryKey: ["company-list", params] },
+  });
+  const { mutate: actDeleteCompany } = useCompanyDelete(selectedId.current);
 
-  const currentData = filteredData.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage,
-  );
+  const handleDelete = (id: string) => {
+    selectedId.current = id;
+    setOpenDelete(true);
+  };
+
+  const handleConfirmDelete = () => {
+    actDeleteCompany(
+      {},
+      {
+        onSuccess: () => {
+          refetch();
+          toastSuccess("Data company berhasil dihapus");
+          setOpenDelete(false);
+        },
+        onError: (err) => {
+          toastError(err.data.message);
+        },
+      },
+    );
+  };
+
+  useEffect(() => {
+    const setParamsTimeout = setTimeout(() => {
+      setParams((val) => ({
+        ...val,
+        search: searchTerm,
+        page: currentPage,
+        limit: currentLimit,
+      }));
+    }, 3e2);
+
+    return () => {
+      clearTimeout(setParamsTimeout);
+    };
+  }, [searchTerm, currentPage, currentLimit]);
 
   return (
     <Card>
@@ -64,7 +99,7 @@ const CompanyTable = () => {
                     placeholder="Search by Name"
                     className="rounded-md pl-10"
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={({ target }) => setSearchTerm(target.value)}
                   />
                 </div>
                 <Button
@@ -88,76 +123,85 @@ const CompanyTable = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {currentData.map((company) => (
-                    <TableRow key={company.name}>
-                      <TableCell>
-                        <div className="flex items-center space-x-2">
-                          <Image
-                            src={YecLogo}
-                            alt="company logo"
-                            width={50}
-                            height={50}
-                          />
-                          <div>
-                            <p className="text-sm font-medium">
-                              {company.name}
-                            </p>
-                            <p className="text-sm text-gray-500">
-                              {company.email}
-                            </p>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{company.totalBrand} Brand</TableCell>
-                      <TableCell>{company.totalTickets} Tickets</TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              className="h-6 w-6 p-0 text-gray-900 hover:text-gray-700"
-                            >
-                              <EllipsisVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" sideOffset={4}>
-                            <DropdownMenuItem
-                              onClick={() => {
-                                router.push(`/bo/company/${company.name}`);
-                              }}
-                            >
-                              Detail
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => {
-                                router.push(
-                                  `/bo/company/update-company/${company.name}`,
-                                );
-                              }}
-                            >
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => setOpenDelete(true)}
-                            >
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                  {isFetching ? (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center">
+                        Memuat...
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ) : (
+                    data?.data?.list.map((company) => (
+                      <TableRow key={company.id}>
+                        <TableCell>
+                          <div className="flex items-center space-x-2">
+                            <Image
+                              src={company.logo.url || YecLogo}
+                              alt="company logo"
+                              width={50}
+                              height={50}
+                            />
+                            <div>
+                              <p className="text-sm font-medium">
+                                {company.name}
+                              </p>
+                              <p className="text-sm text-gray-500">
+                                {company.settings.email}
+                              </p>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>{company.productTotal} Brand</TableCell>
+                        <TableCell>{company.ticketTotal} Tickets</TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                className="h-6 w-6 p-0 text-gray-900 hover:text-gray-700"
+                              >
+                                <EllipsisVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" sideOffset={4}>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  router.push(`/bo/company/${company.id}`);
+                                }}
+                              >
+                                Detail
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  router.push(
+                                    `/bo/company/update-company/${company.id}`,
+                                  );
+                                }}
+                              >
+                                Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="text-red-500"
+                                onClick={() => handleDelete(company.id)}
+                              >
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </div>
 
             <div className="flex justify-center items-center mt-2">
               <PaginationWithoutLinks
-                totalData={filteredData.length}
+                totalData={data?.data?.total}
                 currentPage={currentPage}
+                perPage={currentLimit}
                 setCurrentPage={setCurrentPage}
-                perPage={10}
-                setCurrentLimit={() => {}}
+                setCurrentLimit={setCurrentLimit}
               />
             </div>
           </div>
@@ -166,6 +210,7 @@ const CompanyTable = () => {
             setIsOpen={() => setOpenDelete(false)}
             title={"Attention"}
             subtitle={"Are you sure want to delete this company"}
+            onConfirm={handleConfirmDelete}
           />
         </div>
       </CardContent>
