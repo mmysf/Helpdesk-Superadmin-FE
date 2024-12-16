@@ -1,6 +1,7 @@
 /* eslint-disable react/jsx-curly-brace-presence */
 import {
   CompanyListParams,
+  useCompanyDelete,
   useCompanyList,
 } from "@/services_remote/repository/company/index.service";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import useToastSuccess from "@/hooks/useToastSuccess";
+import useToastError from "@/hooks/useToastError";
 import { Input } from "@/ui/input";
 import { EllipsisVertical, Plus, Search } from "lucide-react";
 import YecLogo from "@/assets/logo/yec-logo.png";
@@ -30,17 +33,42 @@ import ConfirmDeleteModal from "../Modals/ModalDelete";
 
 const CompanyTable = () => {
   const [params, setParams] = useState<Partial<CompanyListParams>>({});
-
-  const { data, isFetching } = useCompanyList({
-    axios: { params },
-    query: { queryKey: ["company-list", params] },
-  });
+  const toastSuccess = useToastSuccess();
+  const toastError = useToastError();
 
   const router = useRouter();
+  const selectedId = useRef("");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [currentLimit, setCurrentLimit] = useState(10);
   const [isOpenDelete, setOpenDelete] = useState(false);
+
+  const { data, isFetching, refetch } = useCompanyList({
+    axios: { params },
+    query: { queryKey: ["company-list", params] },
+  });
+  const { mutate: actDeleteCompany } = useCompanyDelete(selectedId.current);
+
+  const handleDelete = (id: string) => {
+    selectedId.current = id;
+    setOpenDelete(true);
+  };
+
+  const handleConfirmDelete = () => {
+    actDeleteCompany(
+      {},
+      {
+        onSuccess: () => {
+          refetch();
+          toastSuccess("Data company berhasil dihapus");
+          setOpenDelete(false);
+        },
+        onError: (err) => {
+          toastError(err.data.message);
+        },
+      },
+    );
+  };
 
   useEffect(() => {
     const setParamsTimeout = setTimeout(() => {
@@ -107,7 +135,7 @@ const CompanyTable = () => {
                         <TableCell>
                           <div className="flex items-center space-x-2">
                             <Image
-                              src={YecLogo}
+                              src={company.logo.url || YecLogo}
                               alt="company logo"
                               width={50}
                               height={50}
@@ -152,7 +180,8 @@ const CompanyTable = () => {
                                 Edit
                               </DropdownMenuItem>
                               <DropdownMenuItem
-                                onClick={() => setOpenDelete(true)}
+                                className="text-red-500"
+                                onClick={() => handleDelete(company.id)}
                               >
                                 Delete
                               </DropdownMenuItem>
@@ -181,6 +210,7 @@ const CompanyTable = () => {
             setIsOpen={() => setOpenDelete(false)}
             title={"Attention"}
             subtitle={"Are you sure want to delete this company"}
+            onConfirm={handleConfirmDelete}
           />
         </div>
       </CardContent>

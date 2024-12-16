@@ -25,7 +25,6 @@ export const http = axios.create({
 
 http.interceptors.request.use((config) => {
   const token = Cookies.get(AUTH_KEY);
-  console.log(token);
   return token
     ? ({
         ...config,
@@ -39,15 +38,15 @@ http.interceptors.response.use(
     return response;
   },
   async (error) => {
-    // If the error is not 401, just reject as-is & check if the error response and add notification
-    if (error?.response?.status !== 403)
-      // window.message.error(message)
-      return Promise.reject(error);
+    if (error?.response?.status === 401) {
+      console.log("p", "unauth");
+      Cookies.remove(AUTH_KEY);
+      return setTimeout(() => {
+        window.location.href = "/";
+      }, 200);
+    }
 
-    Cookies.remove("accessToken");
-    return setTimeout(() => {
-      window.location.href = "/auth/sign-in";
-    }, 200);
+    return Promise.reject(error);
   },
 );
 

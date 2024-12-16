@@ -15,13 +15,14 @@ interface ConfirmDeleteModalProps {
   setIsOpen: (isOpen: boolean) => void;
   title: string;
   subtitle: string;
+  onConfirm?: () => void;
 }
 
 export default function ConfirmDeleteModal(props: ConfirmDeleteModalProps) {
-  const { isOpen, setIsOpen, title, subtitle } = props;
+  const { isOpen, setIsOpen, title, subtitle, onConfirm } = props;
 
   const handleDelete = () => {
-    setIsOpen(false);
+    if (onConfirm) onConfirm();
   };
 
   return (

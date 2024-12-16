@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import clsx from "clsx";
 import {
   Table,
   TableHeader,
@@ -46,6 +47,9 @@ export default function NewTicket() {
     <Card>
       <CardContent className="p-0 shadow-lg ">
         <div className="p-6 bg-white rounded-md">
+          <div className="text-gray-500 text-center text-xs italic">
+            unintegrated
+          </div>
           <div className="flex justify-between items-center mb-4">
             <div>
               <h2 className="text-xl font-bold">All Tickets from Customer</h2>
@@ -95,15 +99,16 @@ export default function NewTicket() {
                     <TableCell>{ticket.createdOn}</TableCell>
                     <TableCell>
                       <span
-                        className={`px-2 py-1 rounded-full text-white ${
+                        className={clsx(
+                          "px-2 py-1 rounded-full text-white whitespace-nowrap",
                           ticket.status === "Open"
                             ? "bg-blue-500"
                             : ticket.status === "In Progress"
                               ? "bg-orange-500"
                               : ticket.status === "Resolve"
                                 ? "bg-green-500"
-                                : "bg-gray-500"
-                        }`}
+                                : "bg-gray-500",
+                        )}
                       >
                         {ticket.status}
                       </span>

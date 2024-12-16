@@ -11,6 +11,7 @@ import Navbar from "@/layout/layout-admin/navbar";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
+import { Toaster } from "../../ui/toaster";
 
 const fonts = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -35,6 +36,7 @@ const Layout: React.FC<any> = async ({ children }) => {
             <div className="flex flex-col">
               <Navbar />
               {children}
+              <Toaster />
             </div>
           </div>
         </NextIntlClientProvider>

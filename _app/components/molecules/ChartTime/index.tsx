@@ -40,6 +40,9 @@ export default function ChartTime() {
         width="99%"
         height={100}
       />
+      <div className="text-gray-500 text-center text-xs italic">
+        unintegrated
+      </div>
     </Card>
   );
 }

@@ -9,6 +9,15 @@ const withNextIntl = createNextIntlPlugin();
 
 const nextConfig = {
   output: "standalone",
+  images: {
+    // domains: ["id-cgk-1.linodeobjects.com"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**", // Wildcard to allow all domains
+      },
+    ],
+  },
   webpack: (config) => {
     /** @type {import('webpack').Configuration} */
     const c = config;
