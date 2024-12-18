@@ -1,20 +1,15 @@
-import { DefaultListResponse, DefaultResponse, IdName } from "..";
+import {
+  DataAttachment,
+  DefaultListResponse,
+  DefaultResponse,
+  IdName,
+} from "..";
 
 export interface CompanySetting {
   code: string;
   email: string;
   color: string;
   subdomain: string;
-}
-
-export interface CompanyLogo {
-  id: string;
-  name: string;
-  size: number;
-  url: string;
-  type: string;
-  isPrivate: boolean;
-  providerKey: string;
 }
 
 export interface Company {
@@ -25,7 +20,7 @@ export interface Company {
   type: string;
   productTotal: number;
   ticketTotal: number;
-  logo: CompanyLogo;
+  logo: DataAttachment;
   settings: CompanySetting;
   createdAt: string;
   updatedAt: string;

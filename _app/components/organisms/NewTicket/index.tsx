@@ -8,48 +8,41 @@ import {
   TableCell,
   TableHead,
 } from "@/ui/table";
+import { useTicketList } from "@/root/_app/services/remote/repository/ticket/index.service";
 import { Card, CardContent } from "@/ui/card";
 import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
 import { Search, Filter } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { DefaultListParams } from "@/root/_app/services/remote/repository";
 import PaginationWithoutLinks from "../PaginationWithoutLinks";
 import FilterDashboard from "../Modals/FilterDashboard";
 
-const TICKETS = Array.from({ length: 50 }, (_, i) => ({
-  ticketId: `ID-123456${i}`,
-  customer: `Bakat`,
-  company: "Yec",
-  subject: "Update New Feature",
-  createdOn: "07/09/2024",
-  status: ["Open", "In Progress", "Resolve", "Closed"][i % 4],
-  priority: "Critical",
-  agent: i % 3 === 0 ? "Agent123, Agent2" : "Agent123",
-}));
-
 export default function NewTicket() {
   const router = useRouter();
+  const [params, setParams] = useState<DefaultListParams>({});
   const [currentPage, setCurrentPage] = useState(1);
+  const [currentLimit, setCurrentLimit] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
-  const itemsPerPage = 10;
 
-  const filteredData = TICKETS.filter((ticket) =>
-    ticket.subject.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  const { data, isFetching } = useTicketList({
+    axios: { params },
+    query: { queryKey: ["ticket-list", params] },
+  });
 
-  const currentData = filteredData.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage,
-  );
+  useEffect(() => {
+    setParams({
+      page: currentPage,
+      limit: currentLimit,
+      search: searchTerm,
+    });
+  }, [currentPage, currentLimit, searchTerm]);
 
   return (
     <Card>
       <CardContent className="p-0 shadow-lg ">
         <div className="p-6 bg-white rounded-md">
-          <div className="text-gray-500 text-center text-xs italic">
-            unintegrated
-          </div>
           <div className="flex justify-between items-center mb-4">
             <div>
               <h2 className="text-xl font-bold">All Tickets from Customer</h2>
@@ -90,54 +83,67 @@ export default function NewTicket() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {currentData.map((ticket) => (
-                  <TableRow key={ticket.ticketId}>
-                    <TableCell>{ticket.ticketId}</TableCell>
-                    <TableCell>{ticket.customer}</TableCell>
-                    <TableCell>{ticket.company}</TableCell>
-                    <TableCell>{ticket.subject}</TableCell>
-                    <TableCell>{ticket.createdOn}</TableCell>
-                    <TableCell>
-                      <span
-                        className={clsx(
-                          "px-2 py-1 rounded-full text-white whitespace-nowrap",
-                          ticket.status === "Open"
-                            ? "bg-blue-500"
-                            : ticket.status === "In Progress"
-                              ? "bg-orange-500"
-                              : ticket.status === "Resolve"
-                                ? "bg-green-500"
-                                : "bg-gray-500",
-                        )}
-                      >
-                        {ticket.status}
-                      </span>
-                    </TableCell>
-                    <TableCell>{ticket.priority}</TableCell>
-                    <TableCell>{ticket.agent}</TableCell>
-                    <TableCell>
-                      <Button
-                        onClick={() => {
-                          router.push(`/bo/ticket/${ticket.ticketId}`);
-                        }}
-                        variant="ghost"
-                        className="text-primary"
-                      >
-                        view
-                      </Button>
+                {isFetching ? (
+                  <TableRow>
+                    <TableCell colSpan={9} className="text-center">
+                      {" "}
+                      Memuat...
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : (
+                  (data?.data.list || []).map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell className="whitespace-nowrap">
+                        {item.code}
+                      </TableCell>
+                      <TableCell>{item.customer.name}</TableCell>
+                      <TableCell>{item.company.name}</TableCell>
+                      <TableCell>{item.subject}</TableCell>
+                      <TableCell>{item.createdAt}</TableCell>
+                      <TableCell>
+                        <span
+                          className={clsx(
+                            "px-2 py-1 rounded-full text-white whitespace-nowrap",
+                            item.status === "open"
+                              ? "bg-blue-500"
+                              : item.status === "in_progress"
+                                ? "bg-amber-500"
+                                : item.status === "resolve"
+                                  ? "bg-green-500"
+                                  : item.status === "closed"
+                                    ? "bg-red-500"
+                                    : "bg-gray-500",
+                          )}
+                        >
+                          {item.status}
+                        </span>
+                      </TableCell>
+                      <TableCell>{item.priority}</TableCell>
+                      <TableCell>{item.agents}</TableCell>
+                      <TableCell>
+                        <Button
+                          onClick={() => {
+                            router.push(`/bo/ticket/${item.id}`);
+                          }}
+                          variant="ghost"
+                          className="text-primary"
+                        >
+                          view
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </div>
           <div className="flex justify-center items-center mt-2">
             <PaginationWithoutLinks
-              totalData={filteredData.length}
+              totalData={data?.data.total || 0}
               currentPage={currentPage}
+              perPage={currentLimit}
               setCurrentPage={setCurrentPage}
-              perPage={10}
-              setCurrentLimit={() => {}}
+              setCurrentLimit={setCurrentLimit}
             />
           </div>
           <FilterDashboard

@@ -16,6 +16,11 @@ export const COMPANY = {
   UPLOAD_LOGO: `superadmin/company/upload-logo`,
 };
 
-const API = { AUTH, COMPANY };
+export const TICKET = {
+  LIST: `superadmin/ticket/list`,
+  DETAIL: (id: string) => `superadmin/ticket/detail/${id}`,
+};
+
+const API = { AUTH, COMPANY, TICKET };
 
 export default API;
