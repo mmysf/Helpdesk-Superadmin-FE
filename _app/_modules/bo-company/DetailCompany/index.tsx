@@ -16,7 +16,8 @@ interface Params {
 }
 
 const DetailCompany = ({ params }: { params: Params }) => {
-  const { data, isFetching } = useCompanyDetail(params.id);
+  const companyId = useMemo(() => params.id, [params.id]);
+  const { data, isFetching } = useCompanyDetail(companyId);
 
   return (
     <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
@@ -28,8 +29,8 @@ const DetailCompany = ({ params }: { params: Params }) => {
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <CompanyItem data={data?.data} isLoading={isFetching} />
-        <ChartTicket />
-        <ChartTime />
+        <ChartTicket companyId={companyId} />
+        <ChartTime companyId={companyId} />
       </div>
 
       <div className="container mx-auto">
