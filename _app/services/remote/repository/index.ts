@@ -19,6 +19,11 @@ export const COMPANY = {
 export const TICKET = {
   LIST: `superadmin/ticket/list`,
   DETAIL: (id: string) => `superadmin/ticket/detail/${id}`,
+  ASSIGN: (id: string) => `superadmin/ticket/assign-agent/${id}`,
+  TOTAL_DBD: (companyId: string) =>
+    `superadmin/ticket/total-ticket-day/${companyId}`,
+  AVERAGE: (companyId: string) =>
+    `superadmin/ticket/average-duration/${companyId}`,
 };
 
 const API = { AUTH, COMPANY, TICKET };
