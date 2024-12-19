@@ -13,6 +13,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import Image from "next/image";
+import {
+  useAgentDelete,
+  useAgentList,
+} from "@/services_remote/repository/agent/index.service";
+import useToastSuccess from "@/hooks/useToastSuccess";
+import useToastError from "@/hooks/useToastError";
+import { AgentListParams } from "@/services_remote/repository/agent/types";
 import { Card, CardContent } from "@/ui/card";
 import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
@@ -21,32 +29,56 @@ import { useRouter } from "next/navigation";
 import PaginationWithoutLinks from "../PaginationWithoutLinks";
 import ConfirmDeleteModal from "../Modals/ModalDelete";
 
-const CUSTOMERS = Array.from({ length: 50 }, (_, i) => ({
-  name: `Customer ${i + 1}`,
-  email: `customer${i + 1}@example.com`,
-  company: i % 2 === 0 ? "Company A" : "Company B",
-  subscription: "Basic Plan",
-  lastActivity: "Sept, 25 2024",
-  timeRemaining: "10d 7h 3m",
-}));
-
 export default function CustomerTable() {
   const router = useRouter();
+  const toastSuccess = useToastSuccess();
+  const toastError = useToastError();
+
+  const [selectedId, setSelectedId] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [currentLimit, setCurrentLimit] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
-  const itemsPerPage = 10;
+  const [params, setParams] = useState<AgentListParams>();
 
-  const filteredData = CUSTOMERS.filter(
-    (customer) =>
-      customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.company.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  const { data, isPending, refetch } = useAgentList({
+    axios: { params },
+    query: { queryKey: ["agent-list", params] },
+  });
 
-  const currentData = filteredData.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage,
-  );
+  const { mutate } = useAgentDelete(selectedId);
+
+  const tableData = useMemo(() => data?.data.list, [data]);
+
+  const handleDelete = () => {
+    mutate(
+      {},
+      {
+        onSuccess: () => {
+          toastSuccess("Data customer berhasil dihapus");
+          setIsOpen(false);
+          refetch();
+        },
+        onError: (err) => {
+          toastError(err.data.message);
+        },
+      },
+    );
+  };
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setParams({
+        page: currentPage,
+        limit: currentLimit,
+        q: searchTerm,
+        sort: "createdAt",
+        dir: "desc",
+      });
+    }, 3e2);
+
+    return () => clearTimeout(timeout);
+  }, [currentPage, currentLimit, searchTerm]);
 
   return (
     <Card>
@@ -95,71 +127,92 @@ export default function CustomerTable() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {currentData.map((customer) => (
-                    <TableRow key={customer.email}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <span className="bg-green-100 text-primary p-2 rounded-full">
-                            S
-                          </span>
-                          <div>
-                            <p className="font-medium">{customer.name}</p>
-                            <p className="text-sm text-gray-600">
-                              {customer.email}
-                            </p>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <span className="bg-blue-100 text-blue-600 p-2 rounded-full">
-                            {customer.company[0]}
-                          </span>
-                          <p className="font-medium">{customer.company}</p>
-                        </div>
-                      </TableCell>
-                      <TableCell>{customer.subscription}</TableCell>
-                      <TableCell>{customer.lastActivity}</TableCell>
-                      <TableCell>{customer.timeRemaining}</TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-6 w-6 p-0">
-                              <EllipsisVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" sideOffset={4}>
-                            <DropdownMenuItem
-                              onClick={() => {
-                                router.push(
-                                  `/bo/customer/update-customer/${customer.email}`,
-                                );
-                              }}
-                            >
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setIsOpen(true);
-                              }}
-                            >
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                  {isPending ? (
+                    <TableRow>
+                      <TableCell className="text-center" colSpan={6}>
+                        Memuat...
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ) : (
+                    (tableData || []).map((item) => (
+                      <TableRow key={item.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            {item.logo.url !== "" ? (
+                              <Image
+                                className="flex-none w-10 h-10 rounded-full object-cover"
+                                src={item.logo.url}
+                                alt="company logo"
+                                width={50}
+                                height={50}
+                              />
+                            ) : (
+                              <span className="flex flex-none justify-center items-center bg-green-100 text-primary w-10 h-10 rounded-full text-xl font-bold">
+                                {item.name[0]}
+                              </span>
+                            )}
+
+                            <div>
+                              <p className="font-medium">{item.name}</p>
+                              <p className="text-sm text-gray-600">
+                                {/* {item.email} */}
+                              </p>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <span className="flex-none flex justify-center items-center bg-blue-100 text-blue-600 w-10 h-10 rounded-full text-xl font-bold">
+                              {item.company.name[0]}
+                            </span>
+                            <p className="font-medium">{item.company.name}</p>
+                          </div>
+                        </TableCell>
+                        <TableCell>{"-"}</TableCell>
+                        <TableCell>{item.lastActivityAt}</TableCell>
+                        <TableCell>{"-"}</TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" className="h-6 w-6 p-0">
+                                <EllipsisVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" sideOffset={4}>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  router.push(
+                                    `/bo/customer/update-customer/${item.id}`,
+                                  );
+                                }}
+                              >
+                                Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="text-red-500 hover:text-red-500 hover:bg-red-100"
+                                onClick={() => {
+                                  setSelectedId(item.id);
+                                  setIsOpen(true);
+                                }}
+                              >
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </div>
             <div className="flex justify-center items-center mt-2">
               <PaginationWithoutLinks
-                totalData={filteredData.length}
+                totalData={data?.data.total || 1}
                 currentPage={currentPage}
+                perPage={currentLimit}
                 setCurrentPage={setCurrentPage}
-                perPage={10}
-                setCurrentLimit={() => {}}
+                setCurrentLimit={setCurrentLimit}
               />
             </div>
           </div>
@@ -168,6 +221,7 @@ export default function CustomerTable() {
             setIsOpen={setIsOpen}
             title="Attention"
             subtitle="Are you sure want to delete this Customer"
+            onConfirm={handleDelete}
           />
         </div>
       </CardContent>
