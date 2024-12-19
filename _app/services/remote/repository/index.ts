@@ -26,6 +26,16 @@ export const TICKET = {
     `superadmin/ticket/average-duration/${companyId}`,
 };
 
-const API = { AUTH, COMPANY, TICKET };
+// di postman ditulis company product - customer
+export const AGENT = {
+  LIST: `superadmin/company-product/list`,
+  DETAIL: (id: string) => `superadmin/company-product/detail/${id}`,
+  CREATE: `superadmin/company-product/create`,
+  UPDATE: (id: string) => `superadmin/company-product/update/${id}`,
+  DELETE: (id: string) => `superadmin/company-product/delete/${id}`,
+  UPLOAD_LOGO: `superadmin/company-product/upload-logo`,
+};
+
+const API = { AUTH, COMPANY, TICKET, AGENT };
 
 export default API;
