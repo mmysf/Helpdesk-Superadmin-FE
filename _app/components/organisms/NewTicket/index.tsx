@@ -8,19 +8,25 @@ import {
   TableCell,
   TableHead,
 } from "@/ui/table";
-import { useTicketList } from "@/root/_app/services/remote/repository/ticket/index.service";
+import {
+  TicketListParams,
+  useTicketList,
+} from "@/root/_app/services/remote/repository/ticket/index.service";
 import { Card, CardContent } from "@/ui/card";
 import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
 import { Search, Filter } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { DefaultListParams } from "@/root/_app/services/remote/repository";
 import PaginationWithoutLinks from "../PaginationWithoutLinks";
 import FilterDashboard from "../Modals/FilterDashboard";
 
-export default function NewTicket() {
+interface Props {
+  companyID?: string;
+}
+
+export default function NewTicket({ companyID }: Props) {
   const router = useRouter();
-  const [params, setParams] = useState<DefaultListParams>({});
+  const [params, setParams] = useState<TicketListParams>({});
   const [currentPage, setCurrentPage] = useState(1);
   const [currentLimit, setCurrentLimit] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
@@ -33,11 +39,12 @@ export default function NewTicket() {
 
   useEffect(() => {
     setParams({
+      companyID,
       page: currentPage,
       limit: currentLimit,
       search: searchTerm,
     });
-  }, [currentPage, currentLimit, searchTerm]);
+  }, [currentPage, currentLimit, searchTerm, companyID]);
 
   return (
     <Card>
