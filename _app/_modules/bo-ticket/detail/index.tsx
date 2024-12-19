@@ -1,8 +1,9 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 "use-client";
 
+import {
+  TicketLogTime,
+  useTicketDetail,
+} from "@/services_remote/repository/ticket/index.service";
 import ModalAssignAgent from "@/root/_app/components/organisms/Modals/ModalAssignAgent";
 import { Button } from "@/root/_app/components/ui/button";
 import { Input } from "@/root/_app/components/ui/input";
@@ -23,7 +24,57 @@ import {
   FilePlus,
 } from "lucide-react";
 
-const AdminTicketDetail = () => {
+interface RenderTimerProps {
+  logTime?: TicketLogTime;
+}
+
+interface Props {
+  params?: { [key: string]: string };
+  // searchParams?: { [key: string]: string };
+}
+
+const format = (str: string, ...values: (string | number)[]) =>
+  str.replace(/%s/g, () => String(values.shift()));
+
+const RenderTimer: React.FC<RenderTimerProps> = ({ logTime }) => {
+  const interval = useRef<NodeJS.Timeout>();
+  const [seconds, setSeconds] = useState<number>(
+    logTime?.totalDurationInSeconds || 0,
+  );
+
+  const total = useMemo(() => {
+    let h = 0;
+    let m = 0;
+    let s = 0;
+
+    if (seconds && seconds > 0) {
+      h = Math.floor(seconds / 3600);
+      m = Math.floor((seconds % 3600) / 60);
+      s = seconds % 60;
+    }
+
+    return format(
+      "%s:%s:%s",
+      h.toString().padStart(2, "0"),
+      m.toString().padStart(2, "0"),
+      s.toString().padStart(2, "0"),
+    );
+  }, [seconds]);
+
+  useEffect(() => {
+    if (logTime?.status === "running") {
+      interval.current = setInterval(() => {
+        setSeconds((v) => (v || 0) + 1);
+      }, 1e3);
+    }
+
+    return () => clearInterval(interval.current);
+  }, [logTime]);
+
+  return <p className="text-slate-600 font-light">{total}</p>;
+};
+
+const AdminTicketDetail = ({ params }: Props) => {
   const comments = [
     {
       id: 1,
@@ -41,7 +92,9 @@ const AdminTicketDetail = () => {
     },
   ];
 
+  const { data } = useTicketDetail(params?.id || "");
   const [isOpen, setIsOpen] = useState(false);
+  const detail = useMemo(() => data?.data, [data]);
 
   return (
     <div className="w-full p-6">
@@ -93,7 +146,7 @@ const AdminTicketDetail = () => {
                 <Input
                   type="text"
                   placeholder="Type your message here"
-                  onChange={(e) => {}}
+                  onChange={() => {}}
                   className="w-full"
                   endContent={
                     <div className="flex">
@@ -133,50 +186,46 @@ const AdminTicketDetail = () => {
             </div>
           </div>
         </div>
+
         <div className="w-full px-6">
           <div className="w-full flex justify-center">
             <p className="font-semibold text-lg">Ticket Iformation</p>
           </div>
           <div className="mt-5">
             <p className="text-xs text-slate-400">Subject</p>
-            <p>Unable click button</p>
+            <p>{detail?.subject}</p>
           </div>
           <div className="mt-5">
             <p className="text-xs text-slate-400">description</p>
-            <p>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Totam ut
-              quia dolorum delectus, debitis fugiat possimus, exercitationem
-              amet quo nobis et illo laboriosam rerum corporis nostrum earum ex
-              ducimus animi?
-            </p>
+            <p>{detail?.content}</p>
           </div>
           <div className="mt-5">
             <p className="text-xs text-slate-400">Ticket ID</p>
-            <p>TICKET-123</p>
+            <p>{detail?.code}</p>
           </div>
           <div className="mt-5">
             <p className="text-xs text-slate-400">Creted On</p>
-            <p>12 Dec 2024, 12:23</p>
+            <p>{detail?.createdAt}</p>
           </div>
           <div className="mt-5">
             <p className="text-xs text-slate-400">Requester</p>
-            <p>email@email.com</p>
+            <p>{detail?.customer.name}</p>
           </div>
           <div className="mt-5">
             <p className="text-xs text-slate-400">Status</p>
             <div className="flex items-center space-x-2">
               <div className="w-2 h-2 rounded-full bg-slate-400" />
-              <p>Pending</p>
+              <div>{detail?.status}</div>
             </div>
           </div>
           <div className="mt-5">
             <p className="text-xs text-slate-400">Priority</p>
-            <p>High</p>
+            <p>{detail?.priority}</p>
           </div>
-          <div className="mt-5 bg-slate-300 rounded-md flex justify-between items-center p-3">
+          <div className="mt-5 bg-slate-300 rounded-md flex gap-2 justify-between items-center p-3">
             <div className="flex items-center gap-2">
               <Timer />
-              <p className="text-slate-600 font-light">00:00:00</p>
+              <RenderTimer logTime={detail?.logTime} />
             </div>
             <div className="flex gap-2">
               <Button className="bg-white text-slate-900">

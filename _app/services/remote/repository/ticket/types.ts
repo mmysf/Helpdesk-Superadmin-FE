@@ -1,5 +1,6 @@
 import {
   DataAttachment,
+  DefaultListParams,
   DefaultListResponse,
   DefaultResponse,
   IdName,
@@ -51,6 +52,10 @@ export interface Ticket {
   updatedAt: string;
 }
 
+export interface TicketListParams extends DefaultListParams {
+  companyID?: string;
+}
+
 export interface TicketAverage {
   averageDuration: number;
   day: string;
@@ -63,7 +68,11 @@ export interface TicketTotalDBD {
   open: number;
 }
 
+export interface TicketAssignToPayload {
+  agentIds: string[];
+}
+
 export type TicketListResponse = DefaultListResponse<Ticket>;
-export type TicketDetailResponse = DefaultResponse;
+export type TicketDetailResponse = DefaultResponse<Ticket>;
 export type TicketAverageResponse = DefaultResponse<TicketAverage[]>;
 export type TicketTotalDBDResponse = DefaultResponse<TicketTotalDBD[]>;

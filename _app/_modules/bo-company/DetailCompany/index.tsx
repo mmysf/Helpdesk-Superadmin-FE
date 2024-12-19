@@ -34,7 +34,7 @@ const DetailCompany = ({ params }: { params: Params }) => {
       </div>
 
       <div className="container mx-auto">
-        <NewTicket />
+        <NewTicket companyID={companyId} />
       </div>
     </main>
   );
