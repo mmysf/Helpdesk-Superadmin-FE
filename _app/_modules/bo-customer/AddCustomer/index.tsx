@@ -69,9 +69,9 @@ export default function AddCustomer({ params }: Props) {
   };
 
   const onSubmit = async (payload: AgentCreatePayload) => {
-    console.log(payload);
+    const { email, ...updatePayload } = payload;
 
-    const action = isEdit ? handleUpdate(payload) : handleCreate(payload);
+    const action = isEdit ? handleUpdate(updatePayload) : handleCreate(payload);
     await action;
     toastSuccess(
       isEdit ? "Data berhasil disimpan" : "Data berhasil ditambahkan",
@@ -130,16 +130,18 @@ export default function AddCustomer({ params }: Props) {
                   className="text-gray-500"
                 />
               </div>
-              <div>
-                <Label>Email</Label>
-                <Input
-                  {...register("email")}
-                  id="customerName"
-                  placeholder="Email"
-                  type="email"
-                  className="text-gray-500"
-                />
-              </div>
+              {!isEdit && (
+                <div>
+                  <Label>Email</Label>
+                  <Input
+                    {...register("email")}
+                    id="customerName"
+                    placeholder="Email"
+                    type="email"
+                    className="text-gray-500"
+                  />
+                </div>
+              )}
               <div>
                 <Label>Subscription Type</Label>
                 <div className="text-xs text-gray-500 italic">

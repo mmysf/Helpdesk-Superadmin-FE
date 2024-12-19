@@ -20,7 +20,7 @@ export interface AgentCreatePayload {
   code: string;
 }
 
-export type AgentUpdatePayload = AgentCreatePayload;
+export type AgentUpdatePayload = Omit<AgentCreatePayload, "email">;
 
 export interface AgentUploadLogoPayload {
   file: File;
