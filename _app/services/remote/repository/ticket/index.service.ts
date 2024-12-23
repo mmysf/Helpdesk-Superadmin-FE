@@ -50,7 +50,7 @@ export const useTicketAverage = (
 
 export const useTicketAssignTo = (
   id: string,
-  config?: ServiceMutationConfig<TicketAssignToPayload>,
+  config?: ServiceMutationConfig<unknown, TicketAssignToPayload>,
 ) => {
   return useHttpMutation<unknown, TicketAssignToPayload>(TICKET.ASSIGN(id), {
     method: "POST",
