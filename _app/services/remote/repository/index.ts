@@ -27,7 +27,7 @@ export const TICKET = {
 };
 
 // di postman ditulis company product - customer
-export const AGENT = {
+export const CUSTOMER = {
   LIST: `superadmin/company-product/list`,
   DETAIL: (id: string) => `superadmin/company-product/detail/${id}`,
   CREATE: `superadmin/company-product/create`,
@@ -36,6 +36,6 @@ export const AGENT = {
   UPLOAD_LOGO: `superadmin/company-product/upload-logo`,
 };
 
-const API = { AUTH, COMPANY, TICKET, AGENT };
+const API = { AUTH, COMPANY, TICKET, CUSTOMER };
 
 export default API;

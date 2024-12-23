@@ -6,13 +6,13 @@ import {
   IdName,
 } from "../types";
 
-export interface AgentListParams extends DefaultListParams {
+export interface CustomerListParams extends DefaultListParams {
   q?: string;
   sort?: string;
   dir?: string;
 }
 
-export interface AgentCreatePayload {
+export interface CustomerCreatePayload {
   name: string;
   email: string;
   logoAttachId: string;
@@ -20,13 +20,13 @@ export interface AgentCreatePayload {
   code: string;
 }
 
-export type AgentUpdatePayload = Omit<AgentCreatePayload, "email">;
+export type CustomerUpdatePayload = Omit<CustomerCreatePayload, "email">;
 
-export interface AgentUploadLogoPayload {
+export interface CustomerUploadLogoPayload {
   file: File;
 }
 
-export interface Agent {
+export interface Customer {
   id: string;
   company: IdName;
   name: string;
@@ -38,7 +38,7 @@ export interface Agent {
   lastActivityAt: string | null;
 }
 
-export type AgentLogo = {
+export type CustomerLogo = {
   id: string;
   company: IdName;
   name: string;
@@ -47,16 +47,16 @@ export type AgentLogo = {
   type: string;
   size: number;
   url: string;
-  expiredUrlAt: any;
+  expiredUrlAt: string | null;
   isUsed: boolean;
   isPrivate: boolean;
   createdAt: string;
   updatedAt: string;
 };
 
-export type AgentListResponse = DefaultListResponse<Agent>;
-export type AgentDetailResponse = DefaultResponse<Agent>;
-export type AgentCreateResponse = DefaultResponse;
-export type AgentUpdateResponse = DefaultResponse;
-export type AgentDeleteResponse = DefaultResponse;
-export type AgentUploadLogoResponse = DefaultResponse<AgentLogo>;
+export type CustomerListResponse = DefaultListResponse<Customer>;
+export type CustomerDetailResponse = DefaultResponse<Customer>;
+export type CustomerCreateResponse = DefaultResponse;
+export type CustomerUpdateResponse = DefaultResponse;
+export type CustomerDeleteResponse = DefaultResponse;
+export type CustomerUploadLogoResponse = DefaultResponse<CustomerLogo>;
