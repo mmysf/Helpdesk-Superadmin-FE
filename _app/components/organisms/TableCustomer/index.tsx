@@ -14,13 +14,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Image from "next/image";
-import {
-  useAgentDelete,
-  useAgentList,
-} from "@/services_remote/repository/agent/index.service";
+import { CustomerListParams, useCustomerDelete, useCustomerList } from "@/services_remote/repository/customer/index.service";
 import useToastSuccess from "@/hooks/useToastSuccess";
 import useToastError from "@/hooks/useToastError";
-import { AgentListParams } from "@/services_remote/repository/agent/types";
 import { Card, CardContent } from "@/ui/card";
 import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
@@ -39,14 +35,14 @@ export default function CustomerTable() {
   const [currentPage, setCurrentPage] = useState(1);
   const [currentLimit, setCurrentLimit] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
-  const [params, setParams] = useState<AgentListParams>();
+  const [params, setParams] = useState<CustomerListParams>();
 
-  const { data, isPending, refetch } = useAgentList({
+  const { data, isPending, refetch } = useCustomerList({
     axios: { params },
     query: { queryKey: ["agent-list", params] },
   });
 
-  const { mutate } = useAgentDelete(selectedId);
+  const { mutate } = useCustomerDelete(selectedId);
 
   const tableData = useMemo(() => data?.data.list, [data]);
 

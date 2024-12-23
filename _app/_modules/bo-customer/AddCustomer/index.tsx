@@ -5,12 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { CardContent } from "@/components/ui/card";
 import {
-  AgentCreatePayload,
-  useAgentCreate,
-  useAgentDetail,
-  useAgentUpdate,
-  useAgentUploadLogo,
-} from "@/services_remote/repository/agent/index.service";
+  CustomerCreatePayload,
+  useCustomerCreate,
+  useCustomerDetail,
+  useCustomerUpdate,
+  useCustomerUploadLogo,
+} from "@/services_remote/repository/customer/index.service";
 import {
   Select,
   SelectTrigger,
@@ -39,9 +39,9 @@ export default function AddCustomer({ params }: Props) {
   const [imgUrl, setImgUrl] = useState("");
 
   const { watch, setValue, handleSubmit, register } =
-    useForm<AgentCreatePayload>();
+    useForm<CustomerCreatePayload>();
 
-  const { data, isLoading } = useAgentDetail(agentId || "", {
+  const { data, isLoading } = useCustomerDetail(agentId || "", {
     query: { queryKey: ["agent-detail", agentId], enabled: isEdit },
   });
 
@@ -49,9 +49,9 @@ export default function AddCustomer({ params }: Props) {
     axios: { params: { limit: 1e3 } },
   });
 
-  const { mutateAsync: handleUploadLogo } = useAgentUploadLogo();
-  const { mutateAsync: handleCreate } = useAgentCreate();
-  const { mutateAsync: handleUpdate } = useAgentUpdate(agentId || "");
+  const { mutateAsync: handleUploadLogo } = useCustomerUploadLogo();
+  const { mutateAsync: handleCreate } = useCustomerCreate();
+  const { mutateAsync: handleUpdate } = useCustomerUpdate(agentId || "");
 
   const detail = useMemo(() => data?.data, [data]);
   const companyList = useMemo(() => company?.data.list || [], [company]);
@@ -62,13 +62,17 @@ export default function AddCustomer({ params }: Props) {
     if (file) {
       const formData = new FormData();
       formData.append("file", file);
-      const { data } = await handleUploadLogo(formData);
-      setValue("logoAttachId", data.id);
-      setImgUrl(data.url);
+      const { data: res } = await handleUploadLogo(formData);
+      setValue("logoAttachId", res.id);
+      setImgUrl(res.url);
     }
   };
 
-  const onSubmit = async (payload: AgentCreatePayload) => {
+  const handleBack = () => {
+    router.push(Routes.BO_CUSTOMER);
+  };
+
+  const onSubmit = async (payload: CustomerCreatePayload) => {
     const { email, ...updatePayload } = payload;
 
     const action = isEdit ? handleUpdate(updatePayload) : handleCreate(payload);
@@ -77,10 +81,6 @@ export default function AddCustomer({ params }: Props) {
       isEdit ? "Data berhasil disimpan" : "Data berhasil ditambahkan",
     );
     handleBack();
-  };
-
-  const handleBack = () => {
-    router.push(Routes.BO_CUSTOMER);
   };
 
   useEffect(() => {
