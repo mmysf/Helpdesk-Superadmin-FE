@@ -36,6 +36,26 @@ export const CUSTOMER = {
   UPLOAD_LOGO: `superadmin/company-product/upload-logo`,
 };
 
-const API = { AUTH, COMPANY, TICKET, CUSTOMER };
+export const PRODUCT = {
+  DURATION: {
+    LIST: `superadmin/package-category/list`,
+    DETAIL: (id: string) => `superadmin/package-category/detail/${id}`,
+    CREATE: `superadmin/package-category/create`,
+    UPDATE: (id: string) => `superadmin/package-category/update/${id}`,
+    UPDATE_STATUS: (id: string) =>
+      `superadmin/package-category/update-status/${id}`,
+    DELETE: (id: string) => `superadmin/package-category/delete/${id}`,
+  },
+  SUBSCRIPTION: {
+    LIST: `superadmin/package/list`,
+    DETAIL: (id: string) => `superadmin/package/detail/${id}`,
+    CREATE: `superadmin/package/create`,
+    UPDATE: (id: string) => `superadmin/package/update/${id}`,
+    UPDATE_STATUS: (id: string) => `superadmin/package/update-status/${id}`,
+    DELETE: (id: string) => `superadmin/package/delete/${id}`,
+  },
+};
+
+const API = { AUTH, COMPANY, TICKET, CUSTOMER, PRODUCT };
 
 export default API;

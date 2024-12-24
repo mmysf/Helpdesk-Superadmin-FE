@@ -16,13 +16,14 @@ interface ModalToggleDurationProps {
   setIsOpen: (isOpen: boolean) => void;
   isActive: boolean;
   isDuration?: boolean;
+  onConfirm?: () => void;
 }
 
 export default function ModalToggleDuration(props: ModalToggleDurationProps) {
-  const { isOpen, setIsOpen, isActive, isDuration = false } = props;
+  const { isOpen, setIsOpen, isActive, isDuration = false, onConfirm } = props;
 
   const handleDelete = () => {
-    setIsOpen(false);
+    if (onConfirm) onConfirm();
   };
 
   return (
