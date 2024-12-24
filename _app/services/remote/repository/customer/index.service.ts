@@ -35,7 +35,7 @@ export const useCustomerDetail = (
 };
 
 export const useCustomerCreate = (
-  config?: ServiceMutationConfig<CustomerCreatePayload, CustomerCreateResponse>,
+  config?: ServiceMutationConfig<CustomerCreateResponse, CustomerCreatePayload>,
 ) => {
   return useHttpMutation<CustomerCreateResponse, CustomerCreatePayload>(
     CUSTOMER.CREATE,
@@ -49,7 +49,7 @@ export const useCustomerCreate = (
 
 export const useCustomerUpdate = (
   id: string,
-  config?: ServiceMutationConfig<CustomerUpdatePayload, CustomerUpdateResponse>,
+  config?: ServiceMutationConfig<CustomerUpdateResponse, CustomerUpdatePayload>,
 ) => {
   return useHttpMutation<CustomerUpdateResponse, CustomerUpdatePayload>(
     CUSTOMER.UPDATE(id),
@@ -74,8 +74,8 @@ export const useCustomerDelete = (
 
 export const useCustomerUploadLogo = (
   config?: ServiceMutationConfig<
-    CustomerUploadLogoPayload,
-    CustomerUploadLogoResponse
+    CustomerUploadLogoResponse,
+    CustomerUploadLogoPayload
   >,
 ) => {
   return useHttpMutation<CustomerUploadLogoResponse, FormData>(

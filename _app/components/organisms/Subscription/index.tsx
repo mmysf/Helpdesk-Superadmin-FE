@@ -1,4 +1,14 @@
 import React, { useState } from "react";
+import useToastError from "@/root/_app/hooks/useToastError";
+import useToastSuccess from "@/root/_app/hooks/useToastSuccess";
+import {
+  ProductSubscription,
+  ProductSubscriptionListParams,
+  useProductSubscriptionDelete,
+  useProductSubscriptionList,
+  useProductSubscriptionUpdateStatus,
+} from "@/services_remote/repository/product-subscription/index.service";
+import { useProductDurationList } from "@/services_remote/repository/product-duration/index.service";
 import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
 import { EllipsisVertical, Plus, Search } from "lucide-react";
@@ -9,7 +19,7 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "../../ui/dropdown-menu";
+} from "@/ui/dropdown-menu";
 import {
   Table,
   TableHeader,
@@ -17,44 +27,105 @@ import {
   TableRow,
   TableCell,
   TableHead,
-} from "../../ui/table";
-import PaginationWithoutLinks from "../PaginationWithoutLinks";
-import {
-  SelectItem,
-  SelectTrigger,
-  SelectContent,
-  Select,
-} from "../../ui/select";
-import { Card, CardContent } from "../../ui/card";
+} from "@/ui/table";
+import { SelectItem, SelectTrigger, SelectContent, Select } from "@/ui/select";
+import { Card, CardContent } from "@/ui/card";
 import ConfirmDeleteModal from "../Modals/ModalDelete";
 import ModalToggleDuration from "../Modals/ModalToggleDuration";
-
-const DURATIONS = Array.from({ length: 90 }, (_, i) => ({
-  no: i + 1,
-  productName: "Basic Plan",
-  duration: `70 hours`,
-  price: `55$`,
-  benefit: "Up to 7 tickets per month",
-  status: i % 2 === 0 ? "Active" : "Non-Active",
-}));
+import PaginationWithoutLinks from "../PaginationWithoutLinks";
 
 export default function Subscription() {
   const router = useRouter();
+
+  const toastError = useToastError();
+  const toastSuccess = useToastSuccess();
+
+  const { data: dataDuration } = useProductDurationList({
+    axios: { params: { limit: 1e3 } },
+  });
+  const optsDuration = useMemo(
+    () => dataDuration?.data.list || [],
+    [dataDuration],
+  );
+
+  const [currentLimit, setCurrentLimit] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchCategory, setSearchCategory] = useState("");
+
   const [openDelete, setOpenDelete] = useState(false);
   const [openToggle, setOpenToggle] = useState(false);
-  const [isActive, setIsActive] = useState(false);
-  const itemsPerPage = 5;
+  const [selected, setSelected] = useState<ProductSubscription>();
+  const [params, setParams] = useState<ProductSubscriptionListParams>({
+    page: currentPage,
+    limit: currentLimit,
+    q: searchTerm,
+  });
 
-  const filteredData = DURATIONS.filter((data) =>
-    data.duration.toLowerCase().includes(searchTerm.toLowerCase()),
+  const { isFetching, data, refetch } = useProductSubscriptionList({
+    query: { queryKey: ["subscription-list", params] },
+    axios: { params },
+  });
+
+  const { mutateAsync: handleUpdateStatusProduct } =
+    useProductSubscriptionUpdateStatus(selected?.id || "");
+
+  const { mutateAsync: handleDeleteProduct } = useProductSubscriptionDelete(
+    selected?.id || "",
   );
 
-  const currentData = filteredData.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage,
-  );
+  const tableData = useMemo(() => data?.data.list, [data]);
+
+  const reset = () => {
+    setSelected(undefined);
+    setOpenDelete(false);
+    setOpenToggle(false);
+    refetch();
+  };
+
+  const handleUpdateStatus = (item: ProductSubscription) => {
+    setSelected(item);
+    setOpenToggle(true);
+  };
+
+  const handleDelete = (item: ProductSubscription) => {
+    setSelected(item);
+    setOpenDelete(true);
+  };
+
+  const handleConfirmUpdateStatus = async () => {
+    await handleUpdateStatusProduct({
+      status: selected?.status !== "active" ? "active" : "inactive",
+    }).catch((err) => {
+      toastError(err.data?.message || err.message);
+      throw err;
+    });
+    toastSuccess("Status berhasil diubah");
+    reset();
+  };
+
+  const handleConfirmDelete = async () => {
+    await handleDeleteProduct({}).catch((err) => {
+      toastError(err.data?.message || err.message);
+      throw err;
+    });
+    toastSuccess("Data berhasil dihapus");
+    reset();
+  };
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setParams((v) => ({
+        ...v,
+        page: currentPage,
+        limit: currentLimit,
+        q: searchTerm,
+        categoryId: searchCategory,
+      }));
+    }, 3e2);
+
+    return () => clearTimeout(timeout);
+  }, [currentPage, currentLimit, searchTerm, searchCategory]);
 
   return (
     <Card>
@@ -64,14 +135,19 @@ export default function Subscription() {
             <div className="flex items-center gap-4 w-full">
               <h2 className="text-xl font-bold">Duration Category</h2>
               <div className="max-w-lg ">
-                <Select>
+                <Select
+                  value={searchCategory}
+                  onValueChange={(v) => setSearchCategory(v)}
+                >
                   <SelectTrigger className="bg-primary text-white">
-                    <p>3 Month</p>
+                    Select Category
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="3">3 Month</SelectItem>
-                    <SelectItem value="6">6 Month</SelectItem>
-                    <SelectItem value="12">12 Month</SelectItem>
+                    {optsDuration.map((item) => (
+                      <SelectItem key={item.id} value={item.id}>
+                        {item.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -107,91 +183,102 @@ export default function Subscription() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {currentData.map((product) => (
-                  <TableRow key={product.no}>
-                    <TableCell>{product.productName}</TableCell>
-                    <TableCell>{product.price}</TableCell>
-                    <TableCell>{product.duration}</TableCell>
-                    <TableCell>{product.benefit}</TableCell>
-                    <TableCell>
-                      <span
-                        className={`px-2 py-1 rounded-full text-white ${
-                          product.status === "Open"
-                            ? "bg-blue-500"
-                            : product.status === "In Progress"
-                              ? "bg-orange-500"
-                              : product.status === "Resolve"
-                                ? "bg-green-500"
-                                : "bg-gray-500"
-                        }`}
-                      >
-                        {product.status}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <EllipsisVertical className="w-5 h-5 mt-4 cursor-pointer" />
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-56">
-                          <DropdownMenuGroup>
-                            <DropdownMenuItem
-                              className="cursor-pointer"
-                              onClick={() => {
-                                router.push("/bo/subscription/update/1");
-                              }}
-                            >
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              className="cursor-pointer"
-                              onClick={() => {
-                                setOpenToggle(true);
-                                setIsActive(product.status === "Active");
-                              }}
-                            >
-                              {product.status === "Active" ? (
-                                <span className="text-red-500">Deactivate</span>
-                              ) : (
-                                <span className="text-primary">Activate</span>
-                              )}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              className="cursor-pointer"
-                              onClick={() => {
-                                setOpenDelete(true);
-                              }}
-                            >
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuGroup>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                {isFetching ? (
+                  <TableRow>
+                    <TableCell className="text-center" colSpan={6}>
+                      Memuat...
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : (
+                  tableData?.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell>{item.name}</TableCell>
+                      <TableCell>{item.price}</TableCell>
+                      <TableCell>{item.category.durationInDays} days</TableCell>
+                      <TableCell>
+                        <ul className="default">
+                          {item.benefit.map((v) => (
+                            <li key={v}>{v}</li>
+                          ))}
+                        </ul>
+                      </TableCell>
+                      <TableCell>
+                        <span
+                          className={`px-2 py-1 rounded-full text-white ${
+                            item.status === "active"
+                              ? "bg-green-500"
+                              : "bg-gray-500"
+                          }`}
+                        >
+                          {item.status}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <EllipsisVertical className="w-5 h-5 mt-4 cursor-pointer" />
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-56">
+                            <DropdownMenuGroup>
+                              <DropdownMenuItem
+                                className="cursor-pointer"
+                                onClick={() => {
+                                  router.push(
+                                    `/bo/subscription/update/${item.id}`,
+                                  );
+                                }}
+                              >
+                                Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="cursor-pointer"
+                                onClick={() => handleUpdateStatus(item)}
+                              >
+                                {item.status === "active" ? (
+                                  <span className="text-red-500">
+                                    Deactivate
+                                  </span>
+                                ) : (
+                                  <span className="text-primary">Activate</span>
+                                )}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="cursor-pointer"
+                                onClick={() => handleDelete(item)}
+                              >
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuGroup>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </div>
           <div className="flex justify-center items-center mt-2">
             <PaginationWithoutLinks
-              totalData={filteredData.length}
+              totalData={data?.data.total}
               currentPage={currentPage}
+              perPage={currentLimit}
               setCurrentPage={setCurrentPage}
-              perPage={10}
-              setCurrentLimit={() => {}}
+              setCurrentLimit={setCurrentLimit}
             />
           </div>
           <ConfirmDeleteModal
             isOpen={openDelete}
-            setIsOpen={() => setOpenDelete(false)}
             title="Attention"
             subtitle="Are you sure you want to delete this Subscription?"
+            onConfirm={handleConfirmDelete}
+            setIsOpen={() => setOpenDelete(false)}
           />
           <ModalToggleDuration
             isOpen={openToggle}
+            isActive={selected?.status === "active"}
+            onConfirm={handleConfirmUpdateStatus}
             setIsOpen={() => setOpenToggle(false)}
-            isActive={isActive}
           />
         </div>
       </CardContent>

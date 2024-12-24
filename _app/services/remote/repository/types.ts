@@ -24,7 +24,7 @@ export interface DefaultListResponse<R = unknown> extends DefaultResponse {
   };
 }
 
-export interface ServiceMutationConfig<Var = unknown, Res = unknown> {
+export interface ServiceMutationConfig<Res = unknown, Var = unknown> {
   axios?: AxiosRequestConfig;
   query?: UseMutationOptions<Res, AxiosResponse<DefaultError>, Var>;
 }

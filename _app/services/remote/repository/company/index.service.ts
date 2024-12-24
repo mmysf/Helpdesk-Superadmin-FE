@@ -5,7 +5,6 @@ import {
   CompanyCreateResponse,
   CompanyDetailResponse,
   CompanyListResponse,
-  CompanyLogoUploadPayload,
   CompanyLogoUploadResponse,
 } from "./types";
 
@@ -29,7 +28,7 @@ export const useCompanyDetail = (
 };
 
 export const useCompanyCreate = (
-  config?: ServiceMutationConfig<CompanyCreatePayload, CompanyCreateResponse>,
+  config?: ServiceMutationConfig<CompanyCreateResponse, CompanyCreatePayload>,
 ) => {
   return useHttpMutation<CompanyCreateResponse, CompanyCreatePayload>(
     COMPANY.CREATE,
@@ -43,13 +42,16 @@ export const useCompanyCreate = (
 
 export const useCompanyUpdate = (
   id: string,
-  config?: ServiceMutationConfig<CompanyCreatePayload, CompanyCreateResponse>,
+  config?: ServiceMutationConfig<CompanyCreateResponse, CompanyCreatePayload>,
 ) => {
-  return useHttpMutation(COMPANY.UPDATE(id), {
-    method: "PUT",
-    httpOptions: config?.axios,
-    queryOptions: config?.query,
-  });
+  return useHttpMutation<CompanyCreateResponse, CompanyCreatePayload>(
+    COMPANY.UPDATE(id),
+    {
+      method: "PUT",
+      httpOptions: config?.axios,
+      queryOptions: config?.query,
+    },
+  );
 };
 
 export const useCompanyDelete = (
@@ -64,12 +66,9 @@ export const useCompanyDelete = (
 };
 
 export const useCompanyUploadLogo = (
-  config?: ServiceMutationConfig<
-    CompanyLogoUploadPayload,
-    CompanyLogoUploadResponse
-  >,
+  config?: ServiceMutationConfig<CompanyLogoUploadResponse>,
 ) => {
-  return useHttpMutation(COMPANY.UPLOAD_LOGO, {
+  return useHttpMutation<CompanyLogoUploadResponse>(COMPANY.UPLOAD_LOGO, {
     method: "POST",
     httpOptions: config?.axios,
     queryOptions: config?.query,

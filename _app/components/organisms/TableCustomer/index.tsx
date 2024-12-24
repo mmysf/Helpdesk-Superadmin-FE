@@ -14,7 +14,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Image from "next/image";
-import { CustomerListParams, useCustomerDelete, useCustomerList } from "@/services_remote/repository/customer/index.service";
+import {
+  CustomerListParams,
+  useCustomerDelete,
+  useCustomerList,
+} from "@/services_remote/repository/customer/index.service";
 import useToastSuccess from "@/hooks/useToastSuccess";
 import useToastError from "@/hooks/useToastError";
 import { Card, CardContent } from "@/ui/card";

@@ -5,7 +5,7 @@ import { AuthLoginPayload, AuthLoginResponse } from "./types";
 export * from "./types";
 
 export const useAuthLogin = (
-  config?: ServiceMutationConfig<AuthLoginPayload, AuthLoginResponse>,
+  config?: ServiceMutationConfig<AuthLoginResponse, AuthLoginPayload>,
 ) =>
   useHttpMutation<AuthLoginResponse, AuthLoginPayload>(AUTH.LOGIN, {
     method: "POST",

@@ -63,4 +63,10 @@
   body {
     @apply bg-background text-foreground;
   }
+  ul.default {
+    @apply list-disc pl-4 space-y-2;
+  }
+  ol.default {
+    @apply list-decimal pl-4 space-y-2;
+  }
 }
