@@ -56,6 +56,14 @@ export const PRODUCT = {
   },
 };
 
-const API = { AUTH, COMPANY, TICKET, CUSTOMER, PRODUCT };
+export const AGENT = {
+  LIST: `superadmin/agent/list`,
+  CREATE: `superadmin/agent/create`,
+  DETAIL: (id: string) => `superadmin/agent/detail/${id}`,
+  UPDATE: (id: string) => `superadmin/agent/update/${id}`,
+  DELETE: (id: string) => `superadmin/agent/delete/${id}`,
+};
+
+const API = { AUTH, COMPANY, TICKET, CUSTOMER, PRODUCT, AGENT };
 
 export default API;
