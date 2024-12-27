@@ -23,6 +23,12 @@ import {
   History,
   FilePlus,
 } from "lucide-react";
+import { useAgentList } from "@/root/_app/services/remote/repository/agent/index.service";
+import {
+  useTicketCommentCreate,
+  useTicketCommentList,
+} from "@/root/_app/services/remote/repository/ticket-comment/index.service";
+import clsx from "clsx";
 
 interface RenderTimerProps {
   logTime?: TicketLogTime;
@@ -32,6 +38,8 @@ interface Props {
   params?: { [key: string]: string };
   // searchParams?: { [key: string]: string };
 }
+
+const statuses = ["Open", "In Progress", "Resolve"];
 
 const format = (str: string, ...values: (string | number)[]) =>
   str.replace(/%s/g, () => String(values.shift()));
@@ -75,26 +83,51 @@ const RenderTimer: React.FC<RenderTimerProps> = ({ logTime }) => {
 };
 
 const AdminTicketDetail = ({ params }: Props) => {
-  const comments = [
-    {
-      id: 1,
-      sender: "customer",
-      content: "Lorem ipsum dolor sit amet consectetur adipisicing elit.",
-      createdAt: "2023-08-22T12:00:00.000Z",
-      customerName: "John Doe",
-    },
-    {
-      id: 2,
-      sender: "agent",
-      content: "Lorem ipsum dolor sit amet consectetur adipisicing elit.",
-      createdAt: "2023-08-22T12:00:00.000Z",
-      customerName: "John Doe",
-    },
-  ];
-
-  const { data } = useTicketDetail(params?.id || "");
   const [isOpen, setIsOpen] = useState(false);
+  const [status, setStatus] = useState("Open");
+  const [content, setContent] = useState("");
+  const [agentId, setAgentId] = useState("");
+
+  const { data: agent } = useAgentList({ axios: { params: { limit: 1e3 } } });
+
+  const { refetch, data } = useTicketDetail(params?.id || "");
   const detail = useMemo(() => data?.data, [data]);
+
+  const { refetch: refetchTicketComment, data: dataTicketComment } =
+    useTicketCommentList(detail?.id || "", {
+      query: {
+        queryKey: ["ticket-comment", detail?.id],
+        enabled: !!detail?.id,
+      },
+    });
+  const ticketComments = useMemo(
+    () => dataTicketComment?.data?.list || [],
+    [dataTicketComment],
+  );
+
+  const { mutateAsync: handleCreatComment } = useTicketCommentCreate();
+
+  const handleOnCallback = () => {
+    refetch();
+    setIsOpen(false);
+  };
+
+  const handleSent = async () => {
+    if (!detail?.id) return;
+    await handleCreatComment({
+      agentId,
+      content,
+      status,
+      ticketId: detail?.id,
+    });
+    setContent("");
+    refetchTicketComment();
+  };
+
+  const handleSentComment = async (evt: React.KeyboardEvent) => {
+    if (evt.code !== "Enter") return;
+    handleSent();
+  };
 
   return (
     <div className="w-full p-6">
@@ -112,14 +145,14 @@ const AdminTicketDetail = ({ params }: Props) => {
                 <div className="w-10 h-10 rounded-full bg-slate-300 overflow-hidden flex items-center justify-center">
                   {/* <LogoBrand /> */}
                 </div>
-                <p>Ticket Title</p>
+                <p>{detail?.customer.name}</p>
               </div>
               <Button className="bg-transparent">
                 <Search className="text-slate-400" />
               </Button>
             </div>
-            <div className="bg-[#2C4251] relative rounded-md h-full">
-              {comments.map((item) => (
+            <div className="bg-[#2C4251] relative rounded-md h-full max-h-[560px] overflow-auto">
+              {ticketComments.map((item) => (
                 <div
                   key={item.id}
                   className="flex flex-col w-full p-3 bg-[#2C4251]"
@@ -132,7 +165,7 @@ const AdminTicketDetail = ({ params }: Props) => {
                     } rounded-b-lg`}
                   >
                     <div className="font-semibold text-xs">
-                      {item.customerName}
+                      {item.agent.name}
                     </div>
                     <div className="text-sm">{item.content}</div>
                     <div className="text-xs text-slate-400">
@@ -142,46 +175,69 @@ const AdminTicketDetail = ({ params }: Props) => {
                 </div>
               ))}
 
-              <div className="p-2 bg-transparent rounded-md">
-                <Input
-                  type="text"
-                  placeholder="Type your message here"
-                  onChange={() => {}}
-                  className="w-full"
-                  endContent={
-                    <div className="flex">
-                      <Button className="bg-transparent text-slate-400">
-                        <FilePlus />
-                      </Button>
-                      <Button className="bg-transparent text-slate-400">
-                        <SendHorizonal />
-                      </Button>
+              <div className="sticky bottom-0 bg-[#2C4251]">
+                <div className="p-2 bg-transparent rounded-md">
+                  <Input
+                    type="text"
+                    placeholder="Type your message here"
+                    onKeyDown={handleSentComment}
+                    value={content}
+                    onChange={({ target }) => setContent(target.value)}
+                    className="w-full"
+                    endContent={
+                      <div className="flex">
+                        <Button className="bg-transparent text-slate-400">
+                          <FilePlus />
+                        </Button>
+                        <Button
+                          className="bg-transparent text-slate-400"
+                          onClick={handleSent}
+                        >
+                          <SendHorizonal />
+                        </Button>
+                      </div>
+                    }
+                  />
+                </div>
+                <div className="flex space-x-2 w-full p-4 justify-center items-center">
+                  <Select value={agentId} onValueChange={(v) => setAgentId(v)}>
+                    <SelectTrigger className="w-fit text-gray-500 h-5">
+                      <SelectValue placeholder="Select Agent" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {agent?.data.list.map((item) => (
+                        <SelectItem key={item.id} value={item.id}>
+                          {item.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {statuses.map((item, i) => (
+                    <div
+                      key={item}
+                      className={clsx(
+                        "flex items-center space-x-1 rounded-full px-2 py-1 cursor-pointer",
+                        status == item ? "bg-primary" : "bg-white",
+                      )}
+                      onClick={() => setStatus(item)}
+                      aria-hidden
+                    >
+                      <div
+                        className={clsx(
+                          "w-2 h-2 rounded-full",
+                          i === 0
+                            ? "bg-blue-600"
+                            : i === 1
+                              ? "bg-orange-400"
+                              : "bg-green-500",
+                        )}
+                      />
+                      <div>
+                        <p className="text-xs">{item}</p>
+                      </div>
                     </div>
-                  }
-                />
-              </div>
-              <div className="flex space-x-2 w-full p-4 justify-center items-center">
-                <Select>
-                  <SelectTrigger className="w-fit text-gray-500 h-5">
-                    <SelectValue placeholder="Select Agent" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="agent">Agent 1</SelectItem>
-                    <SelectItem value="closed">Agent 2</SelectItem>
-                    <SelectItem value="in progress">Agent 3</SelectItem>
-                  </SelectContent>
-                </Select>
-                {[1, 2, 3].map((item) => (
-                  <div
-                    key={item}
-                    className="flex items-center space-x-1 bg-white rounded-full px-2 py-1"
-                  >
-                    <div className="w-2 h-2 rounded-full bg-slate-400" />
-                    <div>
-                      <p className="text-xs">Pending</p>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -243,7 +299,12 @@ const AdminTicketDetail = ({ params }: Props) => {
           </div>
         </div>
       </div>
-      <ModalAssignAgent isOpen={isOpen} setIsOpen={setIsOpen} />
+      <ModalAssignAgent
+        ticketId={detail?.id}
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        onCallback={handleOnCallback}
+      />
     </div>
   );
 };

@@ -26,6 +26,12 @@ export const TICKET = {
     `superadmin/ticket/average-duration/${companyId}`,
 };
 
+export const TICKET_COMMENT = {
+  LIST: (ticketId: string) => `superadmin/ticket-comment/list/${ticketId}`,
+  CREATE: `superadmin/ticket-comment/add`,
+  DETAIL: (id: string) => `superadmin/ticket-comment/detail/${id}`,
+};
+
 // di postman ditulis company product - customer
 export const CUSTOMER = {
   LIST: `superadmin/company-product/list`,
@@ -56,6 +62,14 @@ export const PRODUCT = {
   },
 };
 
-const API = { AUTH, COMPANY, TICKET, CUSTOMER, PRODUCT };
+export const AGENT = {
+  LIST: `superadmin/agent/list`,
+  CREATE: `superadmin/agent/create`,
+  DETAIL: (id: string) => `superadmin/agent/detail/${id}`,
+  UPDATE: (id: string) => `superadmin/agent/update/${id}`,
+  DELETE: (id: string) => `superadmin/agent/delete/${id}`,
+};
+
+const API = { AUTH, COMPANY, TICKET, TICKET_COMMENT, CUSTOMER, PRODUCT, AGENT };
 
 export default API;
