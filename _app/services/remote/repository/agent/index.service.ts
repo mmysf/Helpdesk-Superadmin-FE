@@ -1,10 +1,11 @@
 import { useHttp, useHttpMutation } from "@/root/_app/hooks/http";
 import { ServiceConfig, ServiceMutationConfig } from "../types";
 import { AGENT } from "..";
+import { AgentListResponse } from "./types";
 
 export * from "./types";
 
-export const useAgentList = (config?: ServiceConfig) => {
+export const useAgentList = (config?: ServiceConfig<AgentListResponse>) => {
   return useHttp(AGENT.LIST, {
     queryOptions: config?.query,
     httpOptions: config?.axios,
