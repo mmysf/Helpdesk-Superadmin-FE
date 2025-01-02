@@ -1,3 +1,5 @@
+/* eslint-disable sonarjs/no-duplicate-string */
+
 "use client";
 
 import { CompanyCreatePayload } from "@/services_remote/repository/company/types";
@@ -18,6 +20,8 @@ import useToastError from "@/root/_app/hooks/useToastError";
 import useToastSuccess from "@/root/_app/hooks/useToastSuccess";
 import { useRouter } from "next/navigation";
 import { Routes } from "@/root/_app/config/routes";
+import { Switch } from "@/components/ui/switch";
+import Image from "next/image";
 
 interface Props {
   params?: { id: string };
@@ -27,6 +31,7 @@ export default function AddCompanyForm({ params }: Props) {
   const router = useRouter();
   const isEdit = useMemo(() => params?.id !== undefined, [params?.id]);
 
+  const [color, setColor] = useState("");
   const { register, watch, handleSubmit, setValue } =
     useForm<CompanyCreatePayload>();
 
@@ -87,12 +92,21 @@ export default function AddCompanyForm({ params }: Props) {
   useEffect(() => {
     if (!detailCompany?.data) return;
     const { data } = detailCompany;
+    setColor(data.settings.colorMode.light.primary);
     setValue("name", data.name);
     setValue("email", data.settings.email);
-    setValue("primaryColor", data.settings.color);
-    setValue("subdomain", data.settings.subdomain);
+    setValue("domain", data.settings.domain);
+    setValue("colorMode", data.settings.colorMode);
+    setValue("logoAttachId", data.logo.id);
     setValue("logoAttachId", data.logo.id);
   }, [detailCompany]);
+
+  useEffect(() => {
+    setValue("colorMode", {
+      dark: { primary: color, secondary: color },
+      light: { primary: color, secondary: color },
+    });
+  }, [color]);
 
   return (
     <div className="flex flex-col space-y-4">
@@ -115,6 +129,16 @@ export default function AddCompanyForm({ params }: Props) {
 
           <div>
             <Label>Company Logo</Label>
+
+            {detailCompany?.data.logo.url && (
+              <Image
+                className="w-[128px] h-[128px] object-cover mb-2"
+                src={detailCompany.data.logo.url}
+                alt={detailCompany.data.name}
+                width={300}
+                height={300}
+              />
+            )}
             <Input
               id="companyLogo"
               type="file"
@@ -133,35 +157,61 @@ export default function AddCompanyForm({ params }: Props) {
           </div>
 
           <div>
-            <Label>Setting Subdomain</Label>
-            <div className="flex items-center space-x-2">
-              <Input
-                {...register("subdomain")}
-                id="subdomain"
-                placeholder="company.example.com"
-                className="flex-1"
+            <Label className="mb-2">Setting Subdomain</Label>
+            <div className="flex items-center gap-2 mb-2">
+              <Switch
+                checked={watch("domain.isCustom")}
+                onCheckedChange={(e) => setValue("domain.isCustom", e)}
               />
-              <Button className="p-2 text-primary bg-gray-100 rounded-md hover:bg-gray-200">
-                <FiCopy size={16} />
-              </Button>
-              <Button className="p-2 text-primary bg-gray-100 rounded-md hover:bg-gray-200">
-                <FiExternalLink size={16} />
-              </Button>
+              <div className="text-xs">Gunakan custom domain</div>
             </div>
+
+            {watch("domain.isCustom") ? (
+              <div className="flex items-center space-x-2">
+                <Input
+                  {...register("domain.fullUrl")}
+                  value={watch("domain.fullUrl")}
+                  placeholder="company.example.com"
+                  className="flex-1"
+                />
+                <Button className="p-2 text-primary bg-gray-100 rounded-md hover:bg-gray-200">
+                  <FiCopy size={16} />
+                </Button>
+                <Button className="p-2 text-primary bg-gray-100 rounded-md hover:bg-gray-200">
+                  <FiExternalLink size={16} />
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-2">
+                <Input
+                  {...register("domain.subdomain")}
+                  value={watch("domain.subdomain")}
+                  endContent={<span className="px-2">.solutionlab.id</span>}
+                  placeholder="company.example.com"
+                  className="flex-1"
+                />
+                <Button className="p-2 text-primary bg-gray-100 rounded-md hover:bg-gray-200">
+                  <FiCopy size={16} />
+                </Button>
+                <Button className="p-2 text-primary bg-gray-100 rounded-md hover:bg-gray-200">
+                  <FiExternalLink size={16} />
+                </Button>
+              </div>
+            )}
           </div>
 
           <div>
             <Label>Application Color Default</Label>
             <div className="flex items-center space-x-2">
               <Input
-                {...register("primaryColor")}
                 id="color"
                 type="color"
-                defaultValue="#068804"
+                value={color}
                 className="h-10 w-10 p-0 border-none"
+                onChange={({ target }) => setColor(target.value)}
               />
               <Input
-                value={watch("primaryColor")}
+                value={color}
                 readOnly
                 className="w-24 text-center bg-gray-100"
               />
