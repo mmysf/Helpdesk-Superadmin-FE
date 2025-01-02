@@ -5,11 +5,32 @@ import {
   IdName,
 } from "..";
 
+export interface CompanyListParams {
+  page: number;
+  limit: number;
+}
+
+export interface CompanyColor {
+  primary: string;
+  secondary: string;
+}
+
+export interface CompanyColorMode {
+  light: CompanyColor;
+  dark: CompanyColor;
+}
+
+export interface CompanyDomain {
+  isCustom: boolean;
+  subdomain: string;
+  fullUrl: string;
+}
+
 export interface CompanySetting {
   code: string;
   email: string;
-  color: string;
-  subdomain: string;
+  colorMode: CompanyColorMode;
+  domain: CompanyDomain;
 }
 
 export interface Company {
@@ -26,17 +47,12 @@ export interface Company {
   updatedAt: string;
 }
 
-export interface CompanyListParams {
-  page: number;
-  limit: number;
-}
-
 export interface CompanyCreatePayload {
   name: string;
   email: string;
   logoAttachId: string;
-  primaryColor: string;
-  subdomain: string;
+  colorMode: CompanyColorMode;
+  domain: CompanyDomain;
 }
 
 export interface CompanyLogoUpload {
