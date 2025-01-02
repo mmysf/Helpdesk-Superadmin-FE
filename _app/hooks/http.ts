@@ -39,7 +39,6 @@ http.interceptors.response.use(
   },
   async (error) => {
     if (error?.response?.status === 401) {
-      console.log("p", "unauth");
       Cookies.remove(AUTH_KEY);
       return setTimeout(() => {
         window.location.href = "/";
