@@ -1,7 +1,7 @@
 "use client";
 
 import { useOrderList } from "@/root/_app/services/remote/repository/order/index.service";
-import {
+import type {
   List,
   OrderHourListParams,
 } from "@/root/_app/services/remote/repository/order/type";
@@ -37,14 +37,14 @@ export default function OrdersTable() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [isActionOpen, setIsActionOpen] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState<List | null>(null);
+  const [selectedServer, setSelectedServer] = useState<List>();
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
   const [params, setParams] = useState<OrderHourListParams>({
     page: currentPage,
     limit: currentLimit,
     q: searchTerm,
-    types: "HOUR",
+    types: "SERVER",
   });
   useEffect(() => {
     setParams((prev) => ({
@@ -52,7 +52,7 @@ export default function OrdersTable() {
       page: currentPage,
       limit: currentLimit,
       q: searchTerm,
-      types: "HOUR",
+      types: "SERVER",
       status: selectedStatus,
       sortBy: selectedSort,
       plan: selectedPlan,
@@ -65,13 +65,19 @@ export default function OrdersTable() {
     selectedSort,
     selectedPlan,
   ]);
-
-  const { data: orders } = useOrderList({
+  const { data: servers } = useOrderList({
     query: { queryKey: ["order-list", params] },
     axios: { params },
   });
+  // const filteredData = ORDERS.filter((order) =>
+  //   order.orderId.toLowerCase().includes(searchTerm.toLowerCase()),
+  // );
+  const tableData = useMemo(() => servers?.data.list, [servers]);
 
-  const tableData = useMemo(() => orders?.data.list ?? [], [orders]);
+  // const currentData = filteredData.slice(
+  //   (currentPage - 1) * itemsPerPage,
+  //   currentPage * itemsPerPage,
+  // );
 
   const renderStatus = useCallback((status: string) => {
     let color = "";
@@ -117,7 +123,7 @@ export default function OrdersTable() {
     setParams((prev) => ({
       ...prev,
       page: 1,
-      types: "HOUR",
+      types: "SERVER",
       q: searchTerm,
       sortBy: sortByValue,
       plan: planValue,
@@ -140,7 +146,7 @@ export default function OrdersTable() {
           <div className="flex flex-col gap-4">
             <div className="flex justify-between items-center">
               <h2 className="text-lg font-bold">
-                Order History of Credit Hour
+                Order History of Server Product
               </h2>
               <div className="flex items-center gap-2">
                 <Button
@@ -156,7 +162,7 @@ export default function OrdersTable() {
                     className="rounded-md pl-10"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                  />
+                  />{" "}
                 </div>
               </div>
             </div>
@@ -169,25 +175,30 @@ export default function OrdersTable() {
                     <TableHead>Email</TableHead>
                     <TableHead>Date</TableHead>
                     <TableHead>Product</TableHead>
-                    <TableHead>Credit Hour</TableHead>
+                    <TableHead>Validity</TableHead>
                     <TableHead>Amount Paid</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead />
+                    <TableHead> </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {tableData.map((order) => (
-                    <TableRow key={order.id}>
-                      <TableCell>{order.orderNumber}</TableCell>
-                      <TableCell>{order.customer.name}</TableCell>
-                      <TableCell>{order.customer.email}</TableCell>
+                  {tableData?.map((server) => (
+                    <TableRow key={server.id}>
+                      {" "}
+                      <TableCell>{server.orderNumber}</TableCell>
+                      <TableCell>{server.customer.name}</TableCell>
+                      <TableCell>{server.customer.email}</TableCell>
                       <TableCell>
-                        {new Date(order.createdAt).toLocaleDateString("en-US")}
+                        {new Date(server.createdAt).toLocaleString("en-US", {
+                          year: "numeric",
+                          month: "numeric",
+                          day: "numeric",
+                        })}
                       </TableCell>
-                      <TableCell>{order.hourPackage?.name}</TableCell>
-                      <TableCell>{order.hourPackage?.hours}</TableCell>
-                      <TableCell>{order.grandTotal}</TableCell>
-                      <TableCell>{renderStatus(order.status)}</TableCell>
+                      <TableCell>{server.serverPackage?.name}</TableCell>
+                      <TableCell>{server.serverPackage?.validity}</TableCell>
+                      <TableCell>{server.grandTotal}</TableCell>
+                      <TableCell>{renderStatus(server.status)}</TableCell>
                       <TableCell className="text-center">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -198,7 +209,7 @@ export default function OrdersTable() {
                               <DropdownMenuItem
                                 className="cursor-pointer"
                                 onClick={() => {
-                                  setSelectedOrder(order);
+                                  setSelectedServer(server);
                                   setIsActionOpen(true);
                                 }}
                               >
@@ -215,7 +226,7 @@ export default function OrdersTable() {
             </div>
             <div className="flex justify-center items-center mt-2">
               <PaginationWithoutLinks
-                totalData={orders?.data.total}
+                totalData={servers?.data.total}
                 currentPage={currentPage}
                 setCurrentPage={setCurrentPage}
                 perPage={10}
@@ -234,14 +245,14 @@ export default function OrdersTable() {
           />
         </div>
       </CardContent>
-      {isActionOpen && selectedOrder && (
+      {isActionOpen && (
         <OrderDetailModal
           isOpen={isActionOpen}
           onClose={() => setIsActionOpen(false)}
-          id={selectedOrder.id}
+          id={selectedServer?.id as string}
           title="Credit Hour Order Detail"
           setIsOpen={setIsActionOpen}
-          isServer={false}
+          isServer
         />
       )}
     </Card>

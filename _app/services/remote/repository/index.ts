@@ -70,6 +70,22 @@ export const AGENT = {
   DELETE: (id: string) => `superadmin/agent/delete/${id}`,
 };
 
-const API = { AUTH, COMPANY, TICKET, TICKET_COMMENT, CUSTOMER, PRODUCT, AGENT };
+export const ORDER = {
+  LIST: `superadmin/order/list`,
+  DETAIL: (id: string) => `superadmin/order/detail/${id}`,
+  UPDATE_PAYMENT: (id: string) =>
+    `superadmin/order/update-manual-payment/${id}`,
+};
+
+const API = {
+  AUTH,
+  COMPANY,
+  TICKET,
+  TICKET_COMMENT,
+  CUSTOMER,
+  PRODUCT,
+  AGENT,
+  ORDER,
+};
 
 export default API;
