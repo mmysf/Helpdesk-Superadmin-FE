@@ -57,19 +57,14 @@ export default function FilterOrder({
 
   const handleFilter = () => {
     const updatedFilters = { ...filters };
-    console.log("Filters Sebelum Submit:", updatedFilters);
 
     const data: SubmitData[] = Object.entries(updatedFilters)
       .filter(([, value]) => value !== "")
       .map(([key, value]) => ({ key, value }));
 
-    console.log("Filter Data yang Dikirim:", data);
-
     if (data.length > 0) {
-      console.log("Memanggil submit...");
       submit(data);
     } else {
-      console.log("Tidak ada data yang dikirim.");
       onClose();
     }
   };

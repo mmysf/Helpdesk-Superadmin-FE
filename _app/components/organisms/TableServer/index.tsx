@@ -112,8 +112,6 @@ export default function OrdersTable() {
     value: string;
   };
   const handleSubmitFilter = (data: SubmitData[]) => {
-    console.log("Data Diterima di Parent:", JSON.stringify(data, null, 2));
-
     const statusValue = data.find((item) => item.key === "status")?.value || "";
     const sortByValue = data.find((item) => item.key === "sortBy")?.value || "";
     const planValue = data.find((item) => item.key === "plan")?.value || "";
