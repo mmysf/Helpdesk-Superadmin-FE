@@ -43,6 +43,22 @@ export const CUSTOMER = {
 };
 
 export const PRODUCT = {
+  HOUR: {
+    LIST: `superadmin/package/hour/list`,
+    CREATE: `superadmin/package/hour/create`,
+    UPDATE: (id: string) => `superadmin/package/hour/update/${id}`,
+    UPDATE_STATUS: (id: string) =>
+      `superadmin/package/hour/update-status/${id}`,
+    DELETE: (id: string) => `superadmin/package/hour/delete/${id}`,
+  },
+  SERVER: {
+    LIST: `superadmin/package/server/list`,
+    CREATE: `superadmin/package/server/create`,
+    UPDATE: (id: string) => `superadmin/package/server/update/${id}`,
+    UPDATE_STATUS: (id: string) =>
+      `superadmin/package/server/update-status/${id}`,
+    DELETE: (id: string) => `superadmin/package/server/delete/${id}`,
+  },
   DURATION: {
     LIST: `superadmin/package-category/list`,
     DETAIL: (id: string) => `superadmin/package-category/detail/${id}`,

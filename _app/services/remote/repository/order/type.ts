@@ -87,7 +87,7 @@ export interface List {
   updatedAt: string;
 }
 
-export interface OrderHourListParams extends DefaultListParams {
+export interface OrderListParams extends DefaultListParams {
   q?: string;
   types?: string;
 }

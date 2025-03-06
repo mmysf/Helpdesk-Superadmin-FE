@@ -3,7 +3,7 @@
 import { useOrderList } from "@/root/_app/services/remote/repository/order/index.service";
 import type {
   List,
-  OrderHourListParams,
+  OrderListParams,
 } from "@/root/_app/services/remote/repository/order/type";
 import { Button } from "@/ui/button";
 import { Card, CardContent } from "@/ui/card";
@@ -40,7 +40,7 @@ export default function OrdersTable() {
   const [selectedServer, setSelectedServer] = useState<List>();
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
-  const [params, setParams] = useState<OrderHourListParams>({
+  const [params, setParams] = useState<OrderListParams>({
     page: currentPage,
     limit: currentLimit,
     q: searchTerm,
