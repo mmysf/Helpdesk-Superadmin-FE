@@ -68,7 +68,7 @@ jobs:
       - name: Lowercase Repository Name
         run: |
           echo "IMAGE_NAME=$(echo ${{ env.IMAGE_NAME }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
-    
+
       - name: Get data from Dokploy
         id: dokployProjects
         uses: fjogeleit/http-request-action@v1
@@ -77,7 +77,7 @@ jobs:
           method: "GET"
           customHeaders: '{"x-api-key": "${{ env.DOKPLOY_TOKEN }}"}'
           responseFile: "./res.json"
-      
+
       - name: Retrieve Application ID and Registry Credentials
         id: parsingResult
         run: |
@@ -85,25 +85,25 @@ jobs:
           echo "application_id=$(echo $application | jq -r '.applicationId')" >> $GITHUB_OUTPUT
           echo "cr_username=$(echo $application | jq -r '.username')" >> $GITHUB_OUTPUT
           echo "cr_password=$(echo $application | jq -r '.password')" >> $GITHUB_OUTPUT
-      
+
       - name: Update Application on Dokploy
         uses: fjogeleit/http-request-action@v1
         with:
           url: "${{ env.DOKPLOY_API_URL }}/application.saveDockerProvider"
-          method: 'POST'
-          bearerToken: ${{ env.DOKPLOY_TOKEN }}
+          method: "POST"
+          customHeaders: '{"x-api-key": "${{ env.DOKPLOY_TOKEN }}"}'
           data: '{
-              "registryUrl": "ghcr.io",
-              "dockerImage": "${{ env.IMAGE_NAME }}",
-              "applicationId": "${{ steps.parsingResult.outputs.application_id }}",
-              "username": "${{ steps.parsingResult.outputs.cr_username }}",
-              "password": "${{ steps.parsingResult.outputs.cr_password }}"
+            "registryUrl": "ghcr.io",
+            "dockerImage": "${{ env.IMAGE_NAME }}",
+            "applicationId": "${{ steps.parsingResult.outputs.application_id }}",
+            "username": "${{ steps.parsingResult.outputs.cr_username }}",
+            "password": "${{ steps.parsingResult.outputs.cr_password }}"
             }'
-        
+
       - name: Deploy Application
         uses: fjogeleit/http-request-action@v1
         with:
           url: "${{ env.DOKPLOY_API_URL }}/application.deploy"
-          method: 'POST'
-          bearerToken: ${{ env.DOKPLOY_TOKEN }}
+          method: "POST"
+          customHeaders: '{"x-api-key": "${{ env.DOKPLOY_TOKEN }}"}'
           data: '{"applicationId": "${{ steps.parsingResult.outputs.application_id }}"}'
