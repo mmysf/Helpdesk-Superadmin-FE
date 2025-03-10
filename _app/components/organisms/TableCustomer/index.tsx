@@ -168,9 +168,9 @@ export default function CustomerTable() {
                             <p className="font-medium">{item.company.name}</p>
                           </div>
                         </TableCell>
-                        <TableCell>{"-"}</TableCell>
+                        <TableCell>-</TableCell>
                         <TableCell>{item.lastActivityAt}</TableCell>
-                        <TableCell>{"-"}</TableCell>
+                        <TableCell>-</TableCell>
                         <TableCell>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>

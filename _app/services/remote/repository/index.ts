@@ -91,6 +91,7 @@ export const ORDER = {
   DETAIL: (id: string) => `superadmin/order/detail/${id}`,
   UPDATE_PAYMENT: (id: string) =>
     `superadmin/order/update-manual-payment/${id}`,
+  UPLOAD_ATTACHMENT: `superadmin/order/upload-attachment`,
 };
 
 const API = {

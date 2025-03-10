@@ -93,8 +93,34 @@ export interface OrderListParams extends DefaultListParams {
 }
 export interface OrderPaymentUpdateStatusPayload {
   status: string;
+  attachmentId?: string;
+  accountName?: string;
+  accountNumber?: string;
+  bankName?: string;
+  note?: string;
 }
 
 export type HistoryHourListResponse = DefaultListResponse<List>;
 export type OrderDetailResponse = DefaultResponse<List>;
 export type OrderPaymentUpdateStatusResponse = DefaultResponse<List>;
+
+// eslint-disable-next-line no-use-before-define
+export type ResponseUploadAttachment = DefaultResponse<UploadAttachmentData>;
+
+export interface Company {
+  id: string;
+  name: string;
+}
+
+export interface UploadAttachmentData {
+  id: string;
+  company: Company;
+  name: string;
+  provider: string;
+  providerKey: string;
+  type: string;
+  size: number;
+  url: string;
+  createdAt: Date;
+  updatedAt: Date;
+}

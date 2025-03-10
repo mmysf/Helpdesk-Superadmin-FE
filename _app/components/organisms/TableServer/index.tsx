@@ -37,7 +37,7 @@ export default function OrdersTable() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [isActionOpen, setIsActionOpen] = useState(false);
-  const [selectedServer, setSelectedServer] = useState<List>();
+  const [selectedServer, setSelectedServer] = useState<List | null>();
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
   const [params, setParams] = useState<OrderListParams>({
@@ -65,7 +65,7 @@ export default function OrdersTable() {
     selectedSort,
     selectedPlan,
   ]);
-  const { data: servers } = useOrderList({
+  const { data: servers, refetch } = useOrderList({
     query: { queryKey: ["order-list", params] },
     axios: { params },
   });
@@ -252,6 +252,11 @@ export default function OrdersTable() {
           id={selectedServer?.id as string}
           title="Credit Hour Order Detail"
           setIsOpen={setIsActionOpen}
+          onSuccessSubmit={() => {
+            setIsActionOpen(false);
+            setSelectedServer(null);
+            refetch();
+          }}
           isServer
         />
       )}

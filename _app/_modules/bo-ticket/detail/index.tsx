@@ -217,7 +217,7 @@ const AdminTicketDetail = ({ params }: Props) => {
                       key={item}
                       className={clsx(
                         "flex items-center space-x-1 rounded-full px-2 py-1 cursor-pointer",
-                        status == item ? "bg-primary" : "bg-white",
+                        status === item ? "bg-primary" : "bg-white",
                       )}
                       onClick={() => setStatus(item)}
                       aria-hidden

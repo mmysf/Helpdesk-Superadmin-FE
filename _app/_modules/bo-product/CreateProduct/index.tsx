@@ -105,7 +105,7 @@ export default function CreateProduct({ params }: Props) {
     setValue("durationHours", itemDetail.duration.hours);
     setValue("name", itemDetail.name);
     setValue("price", itemDetail.price);
-  }, [detail]);
+  }, [detail, setValue]);
 
   return (
     <div className="p-6">

@@ -1,12 +1,19 @@
 "use client";
 
+import { useForm } from "react-hook-form";
+import * as zod from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { Button } from "../../../ui/button";
+import { Dialog, DialogContent, DialogHeader } from "../../../ui/dialog";
 import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-} from "../../../ui/dialog";
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "../../../ui/form";
+import { Input } from "../../../ui/input";
 
 interface ConfirmApproveModalProps {
   isOpen: boolean;
@@ -14,14 +21,28 @@ interface ConfirmApproveModalProps {
   setIsOpen: (isOpen: boolean) => void;
   title: string;
   subtitle: string;
-  onApprove: () => Promise<void>;
+  onApprove: (note: string) => void;
 }
 
 export default function ConfirmApproveModal(props: ConfirmApproveModalProps) {
   const { isOpen, setIsOpen, title, subtitle, onApprove } = props;
 
-  const handleApprove = async () => {
-    await onApprove();
+  const schema = z.object({
+    note: z
+      .string({
+        message: "Note is required",
+      })
+      .min(1, { message: "Note is required" }),
+  });
+
+  const form = useForm<z.infer<typeof schema>>({
+    mode: "all",
+    resolver: zod.zodResolver(schema),
+  });
+
+  const handleApprove = async (data: { note: string }) => {
+    console.log(data);
+    await onApprove(data.note);
   };
 
   return (
@@ -31,17 +52,41 @@ export default function ConfirmApproveModal(props: ConfirmApproveModalProps) {
           <h2 className="text-lg font-bold">{title}</h2>
         </DialogHeader>
         <p className="text-gray-600 text-sm">{subtitle}</p>
-        <DialogFooter className="flex justify-between mt-6">
-          <Button variant="outline" onClick={() => setIsOpen(false)}>
-            Cancel
-          </Button>
-          <Button
-            className="bg-green-600 hover:bg-green-700"
-            onClick={handleApprove}
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(handleApprove)}
+            className="flex flex-col gap-3"
           >
-            Approve Order
-          </Button>
-        </DialogFooter>
+            <div className="mt-2">
+              <FormField
+                name="note"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Note</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="text"
+                        id="note"
+                        data-testid="note"
+                        placeholder="Note"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="flex items-center justify-center mt-8 gap-3">
+              <Button variant="outline" onClick={() => setIsOpen(false)}>
+                cancel
+              </Button>
+              <Button color="primary" type="submit">
+                Approve Order
+              </Button>
+            </div>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
