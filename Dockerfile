@@ -1,6 +1,7 @@
 FROM node:20-alpine AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack install --global pnpm@9.9.0
 RUN corepack enable
 RUN apk add openssl
 
