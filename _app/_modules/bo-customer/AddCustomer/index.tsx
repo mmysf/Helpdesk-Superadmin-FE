@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 "use client";
 
 import { Input } from "@/components/ui/input";
@@ -92,7 +94,7 @@ export default function AddCustomer({ params }: Props) {
       setValue("name", detail.name);
       setImgUrl(detail.logo.url);
     }
-  }, [detail, companyList]);
+  }, [detail, companyList, setValue]);
 
   return (
     <div className="p-6">

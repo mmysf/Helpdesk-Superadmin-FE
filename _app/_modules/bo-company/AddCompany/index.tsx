@@ -99,14 +99,14 @@ export default function AddCompanyForm({ params }: Props) {
     setValue("colorMode", data.settings.colorMode);
     setValue("logoAttachId", data.logo.id);
     setValue("logoAttachId", data.logo.id);
-  }, [detailCompany]);
+  }, [detailCompany, setValue]);
 
   useEffect(() => {
     setValue("colorMode", {
       dark: { primary: color, secondary: color },
       light: { primary: color, secondary: color },
     });
-  }, [color]);
+  }, [color, setValue]);
 
   return (
     <div className="flex flex-col space-y-4">

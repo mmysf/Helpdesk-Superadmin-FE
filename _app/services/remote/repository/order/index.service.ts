@@ -1,11 +1,12 @@
 import { useHttp, useHttpMutation } from "@/root/_app/hooks/http";
-import { ORDER } from "..";
+import API, { ORDER } from "..";
 import { ServiceConfig, ServiceMutationConfig } from "../types";
 import {
   HistoryHourListResponse,
   OrderDetailResponse,
   OrderPaymentUpdateStatusPayload,
   OrderPaymentUpdateStatusResponse,
+  ResponseUploadAttachment,
 } from "./type";
 
 export const useOrderList = (
@@ -43,3 +44,15 @@ export const useOrderStatusPayment = (
     queryOptions: config?.query,
   });
 };
+
+export const useUploadAttachmentProof = (
+  config?: ServiceMutationConfig<ResponseUploadAttachment, unknown>,
+) =>
+  useHttpMutation<ResponseUploadAttachment, unknown>(
+    API.ORDER.UPLOAD_ATTACHMENT,
+    {
+      method: "POST",
+      httpOptions: config?.axios,
+      queryOptions: config?.query,
+    },
+  );

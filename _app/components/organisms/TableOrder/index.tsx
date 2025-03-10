@@ -18,6 +18,7 @@ import {
 } from "@/ui/table";
 import { EllipsisVertical, Filter, Search } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Spinner } from "@nextui-org/react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -66,7 +67,11 @@ export default function OrdersTable() {
     selectedPlan,
   ]);
 
-  const { data: orders } = useOrderList({
+  const {
+    data: orders,
+    refetch,
+    isLoading,
+  } = useOrderList({
     query: { queryKey: ["order-list", params] },
     axios: { params },
   });
@@ -79,7 +84,7 @@ export default function OrdersTable() {
       case "pending":
         color = "bg-[#F7B801]";
         break;
-      case "waiting approval":
+      case "waiting_approval":
         color = "bg-[#007BFF]";
         break;
       case "paid":
@@ -176,51 +181,63 @@ export default function OrdersTable() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {tableData.map((order) => (
-                    <TableRow key={order.id}>
-                      <TableCell>{order.orderNumber}</TableCell>
-                      <TableCell>{order.customer.name}</TableCell>
-                      <TableCell>{order.customer.email}</TableCell>
-                      <TableCell>
-                        {new Date(order.createdAt).toLocaleDateString("en-US")}
-                      </TableCell>
-                      <TableCell>{order.hourPackage?.name}</TableCell>
-                      <TableCell>{order.hourPackage?.hours}</TableCell>
-                      <TableCell>{order.grandTotal}</TableCell>
-                      <TableCell>{renderStatus(order.status)}</TableCell>
-                      <TableCell className="text-center">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <EllipsisVertical className="w-5 h-5 mt-4 cursor-pointer" />
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent className="w-[138px]">
-                            <DropdownMenuGroup>
-                              <DropdownMenuItem
-                                className="cursor-pointer"
-                                onClick={() => {
-                                  setSelectedOrder(order);
-                                  setIsActionOpen(true);
-                                }}
-                              >
-                                Detail
-                              </DropdownMenuItem>
-                            </DropdownMenuGroup>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                  {isLoading && (
+                    <TableRow>
+                      <TableCell colSpan={9} className="text-center">
+                        <Spinner />
                       </TableCell>
                     </TableRow>
-                  ))}
+                  )}
+                  {!isLoading &&
+                    tableData.map((order) => (
+                      <TableRow key={order.id}>
+                        <TableCell>{order.orderNumber}</TableCell>
+                        <TableCell>{order.customer.name}</TableCell>
+                        <TableCell>{order.customer.email}</TableCell>
+                        <TableCell>
+                          {new Date(order.createdAt).toLocaleDateString(
+                            "en-US",
+                          )}
+                        </TableCell>
+                        <TableCell>{order.hourPackage?.name}</TableCell>
+                        <TableCell>{order.hourPackage?.hours}</TableCell>
+                        <TableCell>{order.grandTotal}</TableCell>
+                        <TableCell>{renderStatus(order.status)}</TableCell>
+                        <TableCell className="text-center">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <EllipsisVertical className="w-5 h-5 mt-4 cursor-pointer" />
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-[138px]">
+                              <DropdownMenuGroup>
+                                <DropdownMenuItem
+                                  className="cursor-pointer"
+                                  onClick={() => {
+                                    setSelectedOrder(order);
+                                    setIsActionOpen(true);
+                                  }}
+                                >
+                                  Detail
+                                </DropdownMenuItem>
+                              </DropdownMenuGroup>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
                 </TableBody>
               </Table>
             </div>
             <div className="flex justify-center items-center mt-2">
-              <PaginationWithoutLinks
-                totalData={orders?.data.total}
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
-                perPage={10}
-                setCurrentLimit={setCurrentLimit}
-              />
+              {!isLoading && (orders?.data.total || 0) > 0 && (
+                <PaginationWithoutLinks
+                  totalData={orders?.data.total}
+                  currentPage={currentPage}
+                  setCurrentPage={setCurrentPage}
+                  perPage={10}
+                  setCurrentLimit={setCurrentLimit}
+                />
+              )}
             </div>
           </div>
           <FilterOrder
@@ -241,6 +258,11 @@ export default function OrdersTable() {
           id={selectedOrder.id}
           title="Credit Hour Order Detail"
           setIsOpen={setIsActionOpen}
+          onSuccessSubmit={() => {
+            setIsActionOpen(false);
+            setSelectedOrder(null);
+            refetch();
+          }}
           isServer={false}
         />
       )}

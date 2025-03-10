@@ -25,7 +25,7 @@ const Layout: React.FC<any> = async ({ children }) => {
       <head>
         <title>{process.env.NEXT_PUBLIC_APP_NAME ?? "My App"}</title>
       </head>
-      <body className={fonts.className}>
+      <body suppressHydrationWarning className={fonts.className}>
         <Providers>
           <NextIntlClientProvider messages={messages}>
             {children}
