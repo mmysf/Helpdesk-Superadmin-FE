@@ -294,13 +294,17 @@ const AdminTicketDetail = ({ params }: Props) => {
               </Button>
             </div>
           </div>
-          <div className="flex justify-center w-full mt-5">
-            <Button onClick={() => setIsOpen(true)}>Assign To</Button>
-          </div>
+          {detail?.company.type && detail.company.type === "B2C" && (
+            <div className="flex justify-center w-full mt-5">
+              <Button onClick={() => setIsOpen(true)}>Assign To</Button>
+            </div>
+          )}
         </div>
       </div>
       <ModalAssignAgent
         ticketId={detail?.id}
+        companyId={detail?.company.id}
+        agents={detail?.agents ?? []}
         isOpen={isOpen}
         setIsOpen={setIsOpen}
         onCallback={handleOnCallback}

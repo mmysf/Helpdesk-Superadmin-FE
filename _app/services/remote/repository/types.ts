@@ -6,6 +6,8 @@ export interface DefaultListParams {
   search?: string;
   page?: number;
   limit?: number;
+  sort?: string;
+  dir?: string;
 }
 
 export interface DefaultResponse<R = unknown> {
@@ -37,6 +39,7 @@ export interface ServiceConfig<Res = unknown> {
 export interface IdName {
   id: string;
   name: string;
+  email?: string;
 }
 
 export interface DataAttachment {
