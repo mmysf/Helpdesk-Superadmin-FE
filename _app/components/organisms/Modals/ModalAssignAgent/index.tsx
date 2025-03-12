@@ -15,6 +15,7 @@ import { useTicketAssignTo } from "@/services_remote/repository/ticket/index.ser
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { Search } from "lucide-react";
+import { IdName } from "@/root/_app/services/remote/repository";
 import { Input } from "../../../ui/input";
 import { Checkbox } from "../../../ui/checkbox";
 import { Card, CardContent } from "../../../ui/card";
@@ -22,6 +23,8 @@ import { Card, CardContent } from "../../../ui/card";
 interface ModalAssignAgentProps {
   ticketId?: string;
   isOpen: boolean;
+  companyId?: string;
+  agents?: IdName[];
   setIsOpen: (isOpen: boolean) => void;
   onCallback?: () => void;
 }
@@ -33,6 +36,8 @@ interface FormData {
 export default function ModalAssignAgent({
   isOpen,
   ticketId,
+  companyId,
+  agents,
   setIsOpen,
   onCallback,
 }: ModalAssignAgentProps) {
@@ -41,17 +46,25 @@ export default function ModalAssignAgent({
 
   const [searchAgent, setSearchAgent] = useState("");
 
-  const { data } = useAgentList({ axios: { params: { limit: 1e3 } } });
+  const { data, refetch } = useAgentList({
+    axios: { params: { limit: 1e3, companyID: companyId } },
+  });
   const { mutateAsync: handleAssignTo } = useTicketAssignTo(ticketId || "");
+
+  useEffect(() => {
+    if (isOpen) refetch();
+  }, [isOpen, refetch]);
 
   const agentList = useMemo(
     () =>
-      (data?.data.list || []).filter(
-        (v) =>
-          searchAgent === "" ||
-          v.name.toLocaleLowerCase().includes(searchAgent.toLocaleLowerCase()),
-      ),
-    [data, searchAgent],
+      (data?.data.list || [])
+        .filter(
+          (v) =>
+            searchAgent === "" ||
+            v.name.toLowerCase().includes(searchAgent.toLowerCase()),
+        )
+        .filter((v) => !(agents ?? []).some((agent) => agent.id === v.id)),
+    [data, searchAgent, agents],
   );
 
   const { getValues, handleSubmit, setValue, watch } = useForm<FormData>();
@@ -95,7 +108,7 @@ export default function ModalAssignAgent({
             onChange={(e) => setSearchAgent(e.target.value)}
           />
           <Card className="mt-3">
-            <CardContent className="p-3">
+            <CardContent className="p-3 max-h-60 overflow-y-scroll">
               {agentList.map((item) => (
                 <div
                   key={item.id}

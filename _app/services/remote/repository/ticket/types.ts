@@ -1,3 +1,4 @@
+/* eslint-disable no-use-before-define */
 import {
   DataAttachment,
   DefaultListParams,
@@ -32,11 +33,12 @@ export interface TicketDetailTime {
 
 export interface Ticket {
   id: string;
-  company: IdName;
-  product: IdName;
+  company: Company;
+  product: Company;
   project: IdName;
-  customer: IdName & { email: string };
-  agents: null;
+  category: IdName | null;
+  customer: IdName;
+  agents: IdName[] | null;
   subject: string;
   content: string;
   code: string;
@@ -47,9 +49,17 @@ export interface Ticket {
   reminderSent: boolean;
   detailTime: TicketDetailTime;
   parent: null;
-  closedAt?: string;
+  closedAt?: null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface Company {
+  id: string;
+  name: string;
+  image: string;
+  type?: string;
+  code?: string;
 }
 
 export interface TicketListParams extends DefaultListParams {

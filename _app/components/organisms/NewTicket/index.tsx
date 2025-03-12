@@ -15,8 +15,9 @@ import {
 import { Card, CardContent } from "@/ui/card";
 import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
-import { Search, Filter } from "lucide-react";
+import { Search, Filter, Dot } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { format } from "date-fns";
 import PaginationWithoutLinks from "../PaginationWithoutLinks";
 import FilterDashboard from "../Modals/FilterDashboard";
 
@@ -33,7 +34,7 @@ export default function NewTicket({ companyID }: Props) {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
   const { data, isFetching } = useTicketList({
-    axios: { params },
+    axios: { params: { ...params, sort: "createdAt", dir: "desc" } },
     query: { queryKey: ["ticket-list", params] },
   });
 
@@ -103,10 +104,12 @@ export default function NewTicket({ companyID }: Props) {
                       <TableCell className="whitespace-nowrap">
                         {item.code}
                       </TableCell>
-                      <TableCell>{item.customer.name}</TableCell>
+                      <TableCell>{item.customer?.name}</TableCell>
                       <TableCell>{item.company.name}</TableCell>
                       <TableCell>{item.subject}</TableCell>
-                      <TableCell>{item.createdAt}</TableCell>
+                      <TableCell>
+                        {format(new Date(item.createdAt), "dd MMM yyyy HH:mm")}
+                      </TableCell>
                       <TableCell>
                         <span
                           className={clsx(
@@ -126,7 +129,18 @@ export default function NewTicket({ companyID }: Props) {
                         </span>
                       </TableCell>
                       <TableCell>{item.priority}</TableCell>
-                      <TableCell>{item.agents}</TableCell>
+                      <TableCell>
+                        <div>
+                          {item.agents?.map((agent) => (
+                            <div key={agent.id} className="flex items-center">
+                              <Dot />
+                              <span className="px-2 py-1 whitespace-nowrap">
+                                {agent.name}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </TableCell>
                       <TableCell>
                         <Button
                           onClick={() => {
@@ -145,13 +159,15 @@ export default function NewTicket({ companyID }: Props) {
             </Table>
           </div>
           <div className="flex justify-center items-center mt-2">
-            <PaginationWithoutLinks
-              totalData={data?.data.total || 0}
-              currentPage={currentPage}
-              perPage={currentLimit}
-              setCurrentPage={setCurrentPage}
-              setCurrentLimit={setCurrentLimit}
-            />
+            {!isFetching && (
+              <PaginationWithoutLinks
+                totalData={data?.data.total || 0}
+                currentPage={currentPage}
+                perPage={currentLimit}
+                setCurrentPage={setCurrentPage}
+                setCurrentLimit={setCurrentLimit}
+              />
+            )}
           </div>
           <FilterDashboard
             isOpen={isFilterModalOpen}
