@@ -51,6 +51,7 @@ export default function ProductsTable(props: TableProductProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const toastSuccess = useToastSuccess();
   const toastError = useToastError();
 
@@ -143,7 +144,7 @@ export default function ProductsTable(props: TableProductProps) {
 
   const handleDelete = (product: List) => {
     setSelectedProduct(product);
-    setIsStatusModalOpen(true);
+    setIsDeleteModalOpen(true);
   };
 
   const handleConfirmStatus = async () => {
@@ -324,8 +325,8 @@ export default function ProductsTable(props: TableProductProps) {
         onConfirm={handleConfirmStatus}
       />
       <DeleteModal
-        isOpen={isStatusModalOpen}
-        setIsOpen={setIsStatusModalOpen}
+        isOpen={isDeleteModalOpen}
+        setIsOpen={setIsDeleteModalOpen}
         title="Attention"
         subtitle={`Are you sure you want to delete"${selectedProduct?.name}"?`}
         onConfirm={handleConfirmDelete}

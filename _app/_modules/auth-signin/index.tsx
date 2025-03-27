@@ -24,6 +24,10 @@ export default function Page() {
 
   const { control, handleSubmit, setValue } = useForm<AuthLoginPayload>({
     mode: "all",
+    defaultValues: {
+      email: "",
+      password: "",
+    },
   });
 
   const [isVisiblePass, setIsVisiblePass] = useState<boolean>(false);
@@ -102,7 +106,7 @@ export default function Page() {
                     endContent={
                       <button
                         type="button"
-                        className="focus:outline-none"
+                        className="focus:outline-none mr-1"
                         onClick={toggleVisibilityPass}
                       >
                         {isVisiblePass ? <HiOutlineEyeOff /> : <HiOutlineEye />}

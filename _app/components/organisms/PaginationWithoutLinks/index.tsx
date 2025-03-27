@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+
 "use client";
 
 import React from "react";
@@ -46,9 +48,11 @@ export default function PaginationWithoutLinks(props: PaginationProps) {
     pageNumbers.push(i);
   }
 
-  if (perPage && setCurrentLimit) {
-    setCurrentLimit(perPage);
-  }
+  useEffect(() => {
+    if (perPage && setCurrentLimit) {
+      setCurrentLimit(perPage);
+    }
+  }, [perPage, setCurrentLimit]);
 
   const maxPageNum = 3; // Maximum page numbers to display at once
   const pageNumLimit = Math.floor(maxPageNum / 2); // Current page should be in the middle if possible
@@ -65,7 +69,7 @@ export default function PaginationWithoutLinks(props: PaginationProps) {
 
   const lastPage = useMemo(() => {
     return currentPage === pageNumbers.length;
-  }, [currentPage]);
+  }, [currentPage, pageNumbers.length]);
 
   const handleNextPage = () => {
     if (currentPage < pageNumbers.length && setCurrentPage) {

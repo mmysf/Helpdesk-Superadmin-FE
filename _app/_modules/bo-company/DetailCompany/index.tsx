@@ -25,7 +25,7 @@ const DetailCompany = ({ params }: { params: Params }) => {
         <Link href={Routes.BO_COMPANY}>
           <HiOutlineArrowCircleLeft className="text-2xl" />
         </Link>
-        <p className="font-semibold">COMPANY 1</p>
+        <p className="font-semibold">{data?.data.name}</p>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <CompanyItem data={data?.data} isLoading={isFetching} />
@@ -34,7 +34,7 @@ const DetailCompany = ({ params }: { params: Params }) => {
       </div>
 
       <div className="container mx-auto">
-        <NewTicket companyID={companyId} />
+        <NewTicket companyID={companyId} isCompany />
       </div>
     </main>
   );

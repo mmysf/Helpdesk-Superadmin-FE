@@ -35,7 +35,7 @@ interface DetailOrderProps {
   // eslint-disable-next-line no-unused-vars
   setIsOpen: (isOpen: boolean) => void;
   title: string;
-  onClose: () => void;
+  onClose: (isRefresh?: boolean) => void;
   onSuccessSubmit: () => void;
   id: string;
   isServer?: boolean;
@@ -140,9 +140,10 @@ export default function OrderDetailModal(props: DetailOrderProps) {
     try {
       await handleUpdateStatusPayment({
         status: "reject",
+        note: "reject",
       });
       toastSuccess("Order rejected successfully");
-      onClose();
+      onClose(true);
     } catch (err: unknown) {
       toastError(err as string);
     }
@@ -206,7 +207,7 @@ export default function OrderDetailModal(props: DetailOrderProps) {
       case "paid":
         color = "bg-[#28A745]";
         break;
-      case "rejected":
+      case "reject":
         color = "bg-[#DC3545]";
         break;
       default:
@@ -215,7 +216,7 @@ export default function OrderDetailModal(props: DetailOrderProps) {
     return (
       <div
         aria-label="status"
-        className={`capitalize ${color} text-white px-2 py-1 rounded-3xl`}
+        className={`uppercase ${color} flex items-center justify-center w-fit text-white px-2 py-1 rounded-3xl`}
         role="button"
       >
         {status?.replace("_", " ")}
@@ -233,7 +234,7 @@ export default function OrderDetailModal(props: DetailOrderProps) {
             className="h-8 w-8"
             onClick={() => setIsOpen(false)}
           >
-            <ArrowLeft className="h-4 w-4" onClick={onClose} />
+            <ArrowLeft className="h-4 w-4" onClick={() => onClose()} />
           </Button>
           <h2 className="text-lg font-bold">{title}</h2>
         </DialogHeader>
@@ -253,8 +254,7 @@ export default function OrderDetailModal(props: DetailOrderProps) {
               </h3>
               <div className="mt-1">
                 <span>{renderStatus(detail?.data.status as string)}</span>
-              </div>{" "}
-              {/* Tambahkan ini */}
+              </div>
             </div>
 
             <div>
@@ -456,14 +456,18 @@ export default function OrderDetailModal(props: DetailOrderProps) {
             )}
 
             {!isOpenForm && (
-              <div>
+              <div className="space-y-3">
                 <div>
-                  {/* <h4 className="text-sm font-medium text-muted-foreground">
-                Payment Proof
-              </h4> */}
-                  <p className="text-blue-500 mt-1">
-                    {detail?.data.invoice.invoiceURL}
-                  </p>
+                  <h4 className="text-sm font-medium text-muted-foreground">
+                    Payment proof attachment
+                  </h4>
+                  <a
+                    target="_blank"
+                    href={detail?.data.payment.manualPaid?.attachment?.url}
+                    className="text-blue-500 mt-1"
+                  >
+                    {detail?.data.payment.manualPaid?.attachment?.name}
+                  </a>
                 </div>
 
                 <div>
@@ -471,7 +475,7 @@ export default function OrderDetailModal(props: DetailOrderProps) {
                     Account name
                   </h4>
                   <p className="font-medium">
-                    {detail?.data.invoice.merchantName}
+                    {detail?.data.payment.manualPaid?.accountName}
                   </p>
                 </div>
 
@@ -489,26 +493,28 @@ export default function OrderDetailModal(props: DetailOrderProps) {
                     Bank name
                   </h4>
                   <p className="font-medium">
-                    {detail?.data.invoice.paymentChannel}
+                    {detail?.data.payment.manualPaid?.bankName}
                   </p>
                 </div>
-
-                <div className="flex gap-3 mt-6">
-                  <Button
-                    variant="destructive"
-                    className="flex-1"
-                    onClick={handleReject}
-                  >
-                    Reject
-                  </Button>
-                  <Button
-                    variant="default"
-                    className="flex-1 bg-green-500 hover:bg-green-600"
-                    onClick={handleApprove}
-                  >
-                    Approve
-                  </Button>
-                </div>
+                {detail?.data.status.toString() === "waiting_approval" ||
+                  (detail?.data.status.toString() === "expired" && (
+                    <div className="flex gap-3 mt-6">
+                      <Button
+                        variant="destructive"
+                        className="flex-1"
+                        onClick={handleReject}
+                      >
+                        Reject
+                      </Button>
+                      <Button
+                        variant="default"
+                        className="flex-1 bg-green-500 hover:bg-green-600"
+                        onClick={handleApprove}
+                      >
+                        Approve
+                      </Button>
+                    </div>
+                  ))}
               </div>
             )}
           </div>

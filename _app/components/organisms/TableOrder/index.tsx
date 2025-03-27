@@ -90,7 +90,7 @@ export default function OrdersTable() {
       case "paid":
         color = "bg-[#28A745]";
         break;
-      case "rejected":
+      case "reject":
         color = "bg-[#DC3545]";
         break;
       default:
@@ -99,7 +99,7 @@ export default function OrdersTable() {
     return (
       <div
         aria-label="status"
-        className={`capitalize ${color} text-white px-2 py-1 rounded-3xl`}
+        className={`uppercase ${color} flex items-center justify-center text-white px-2 py-1 rounded-3xl`}
         role="button"
       >
         {status.replace("_", " ")}
@@ -254,7 +254,10 @@ export default function OrdersTable() {
       {isActionOpen && selectedOrder && (
         <OrderDetailModal
           isOpen={isActionOpen}
-          onClose={() => setIsActionOpen(false)}
+          onClose={(isRefresh) => {
+            setIsActionOpen(false);
+            if (isRefresh) refetch();
+          }}
           id={selectedOrder.id}
           title="Credit Hour Order Detail"
           setIsOpen={setIsActionOpen}

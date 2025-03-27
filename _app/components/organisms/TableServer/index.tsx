@@ -248,7 +248,10 @@ export default function OrdersTable() {
       {isActionOpen && (
         <OrderDetailModal
           isOpen={isActionOpen}
-          onClose={() => setIsActionOpen(false)}
+          onClose={(isRefresh) => {
+            setIsActionOpen(false);
+            if (isRefresh) refetch();
+          }}
           id={selectedServer?.id as string}
           title="Credit Hour Order Detail"
           setIsOpen={setIsActionOpen}
