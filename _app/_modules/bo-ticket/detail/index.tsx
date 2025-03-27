@@ -6,29 +6,9 @@ import {
 } from "@/services_remote/repository/ticket/index.service";
 import ModalAssignAgent from "@/root/_app/components/organisms/Modals/ModalAssignAgent";
 import { Button } from "@/root/_app/components/ui/button";
-import { Input } from "@/root/_app/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/root/_app/components/ui/select";
-import {
-  ArrowLeftCircle,
-  Play,
-  Search,
-  SendHorizonal,
-  Timer,
-  History,
-  FilePlus,
-} from "lucide-react";
-import { useAgentList } from "@/root/_app/services/remote/repository/agent/index.service";
-import {
-  useTicketCommentCreate,
-  useTicketCommentList,
-} from "@/root/_app/services/remote/repository/ticket-comment/index.service";
-import clsx from "clsx";
+import { ArrowLeftCircle, Search, Timer } from "lucide-react";
+import { useTicketCommentList } from "@/root/_app/services/remote/repository/ticket-comment/index.service";
+import { formatDate } from "date-fns";
 
 interface RenderTimerProps {
   logTime?: TicketLogTime;
@@ -38,8 +18,6 @@ interface Props {
   params?: { [key: string]: string };
   // searchParams?: { [key: string]: string };
 }
-
-const statuses = ["Open", "In Progress", "Resolve"];
 
 const format = (str: string, ...values: (string | number)[]) =>
   str.replace(/%s/g, () => String(values.shift()));
@@ -84,49 +62,24 @@ const RenderTimer: React.FC<RenderTimerProps> = ({ logTime }) => {
 
 const AdminTicketDetail = ({ params }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [status, setStatus] = useState("Open");
-  const [content, setContent] = useState("");
-  const [agentId, setAgentId] = useState("");
-
-  const { data: agent } = useAgentList({ axios: { params: { limit: 1e3 } } });
 
   const { refetch, data } = useTicketDetail(params?.id || "");
   const detail = useMemo(() => data?.data, [data]);
 
-  const { refetch: refetchTicketComment, data: dataTicketComment } =
-    useTicketCommentList(detail?.id || "", {
-      query: {
-        queryKey: ["ticket-comment", detail?.id],
-        enabled: !!detail?.id,
-      },
-    });
+  const { data: dataTicketComment } = useTicketCommentList(detail?.id || "", {
+    query: {
+      queryKey: ["ticket-comment", detail?.id],
+      enabled: !!detail?.id,
+    },
+  });
   const ticketComments = useMemo(
     () => dataTicketComment?.data?.list || [],
     [dataTicketComment],
   );
 
-  const { mutateAsync: handleCreatComment } = useTicketCommentCreate();
-
   const handleOnCallback = () => {
     refetch();
     setIsOpen(false);
-  };
-
-  const handleSent = async () => {
-    if (!detail?.id) return;
-    await handleCreatComment({
-      agentId,
-      content,
-      status,
-      ticketId: detail?.id,
-    });
-    setContent("");
-    refetchTicketComment();
-  };
-
-  const handleSentComment = async (evt: React.KeyboardEvent) => {
-    if (evt.code !== "Enter") return;
-    handleSent();
   };
 
   return (
@@ -169,76 +122,11 @@ const AdminTicketDetail = ({ params }: Props) => {
                     </div>
                     <div className="text-sm">{item.content}</div>
                     <div className="text-xs text-slate-400">
-                      {item.createdAt}
+                      {formatDate(item.createdAt, "dd/MM/yyyy HH:mm")}
                     </div>
                   </div>
                 </div>
               ))}
-
-              <div className="sticky bottom-0 bg-[#2C4251]">
-                <div className="p-2 bg-transparent rounded-md">
-                  <Input
-                    type="text"
-                    placeholder="Type your message here"
-                    onKeyDown={handleSentComment}
-                    value={content}
-                    onChange={({ target }) => setContent(target.value)}
-                    className="w-full"
-                    endContent={
-                      <div className="flex">
-                        <Button className="bg-transparent text-slate-400">
-                          <FilePlus />
-                        </Button>
-                        <Button
-                          className="bg-transparent text-slate-400"
-                          onClick={handleSent}
-                        >
-                          <SendHorizonal />
-                        </Button>
-                      </div>
-                    }
-                  />
-                </div>
-                <div className="flex space-x-2 w-full p-4 justify-center items-center">
-                  <Select value={agentId} onValueChange={(v) => setAgentId(v)}>
-                    <SelectTrigger className="w-fit text-gray-500 h-5">
-                      <SelectValue placeholder="Select Agent" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {agent?.data.list.map((item) => (
-                        <SelectItem key={item.id} value={item.id}>
-                          {item.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {statuses.map((item, i) => (
-                    <div
-                      key={item}
-                      className={clsx(
-                        "flex items-center space-x-1 rounded-full px-2 py-1 cursor-pointer",
-                        status === item ? "bg-primary" : "bg-white",
-                      )}
-                      onClick={() => setStatus(item)}
-                      aria-hidden
-                    >
-                      <div
-                        className={clsx(
-                          "w-2 h-2 rounded-full",
-                          i === 0
-                            ? "bg-blue-600"
-                            : i === 1
-                              ? "bg-orange-400"
-                              : "bg-green-500",
-                        )}
-                      />
-                      <div>
-                        <p className="text-xs">{item}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -261,7 +149,7 @@ const AdminTicketDetail = ({ params }: Props) => {
           </div>
           <div className="mt-5">
             <p className="text-xs text-slate-400">Creted On</p>
-            <p>{detail?.createdAt}</p>
+            <p> {formatDate(detail?.createdAt ?? "", "dd/MM/yyyy HH:mm")}</p>
           </div>
           <div className="mt-5">
             <p className="text-xs text-slate-400">Requester</p>
@@ -283,7 +171,7 @@ const AdminTicketDetail = ({ params }: Props) => {
               <Timer />
               <RenderTimer logTime={detail?.logTime} />
             </div>
-            <div className="flex gap-2">
+            {/* <div className="flex gap-2">
               <Button className="bg-white text-slate-900">
                 <Play className="text-slate-600" />
                 Resume
@@ -292,7 +180,7 @@ const AdminTicketDetail = ({ params }: Props) => {
                 <History className="text-slate-600" />
                 Time Logs History
               </Button>
-            </div>
+            </div> */}
           </div>
           {detail?.company.type && detail.company.type === "B2C" && (
             <div className="flex justify-center w-full mt-5">

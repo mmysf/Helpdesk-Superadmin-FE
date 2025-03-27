@@ -466,7 +466,7 @@ export default function OrderDetailModal(props: DetailOrderProps) {
                     href={detail?.data.payment.manualPaid?.attachment?.url}
                     className="text-blue-500 mt-1"
                   >
-                    {detail?.data.payment.manualPaid?.attachment?.name}
+                    {detail?.data.payment.manualPaid?.attachment?.name ?? "-"}
                   </a>
                 </div>
 
@@ -475,7 +475,7 @@ export default function OrderDetailModal(props: DetailOrderProps) {
                     Account name
                   </h4>
                   <p className="font-medium">
-                    {detail?.data.payment.manualPaid?.accountName}
+                    {detail?.data.payment.manualPaid?.accountName ?? "-"}
                   </p>
                 </div>
 
@@ -484,7 +484,7 @@ export default function OrderDetailModal(props: DetailOrderProps) {
                     Account number
                   </h4>
                   <p className="font-medium">
-                    {detail?.data?.payment?.manualPaid?.accountNumber}
+                    {detail?.data?.payment?.manualPaid?.accountNumber ?? "-"}
                   </p>
                 </div>
 
@@ -493,28 +493,28 @@ export default function OrderDetailModal(props: DetailOrderProps) {
                     Bank name
                   </h4>
                   <p className="font-medium">
-                    {detail?.data.payment.manualPaid?.bankName}
+                    {detail?.data.payment.manualPaid?.bankName ?? "-"}
                   </p>
                 </div>
-                {detail?.data.status.toString() === "waiting_approval" ||
-                  (detail?.data.status.toString() === "expired" && (
-                    <div className="flex gap-3 mt-6">
-                      <Button
-                        variant="destructive"
-                        className="flex-1"
-                        onClick={handleReject}
-                      >
-                        Reject
-                      </Button>
-                      <Button
-                        variant="default"
-                        className="flex-1 bg-green-500 hover:bg-green-600"
-                        onClick={handleApprove}
-                      >
-                        Approve
-                      </Button>
-                    </div>
-                  ))}
+                {(detail?.data.status.toString() === "waiting_approval" ||
+                  detail?.data.status.toString() === "expired") && (
+                  <div className="flex gap-3 mt-6">
+                    <Button
+                      variant="destructive"
+                      className="flex-1"
+                      onClick={handleReject}
+                    >
+                      Reject
+                    </Button>
+                    <Button
+                      variant="default"
+                      className="flex-1 bg-green-500 hover:bg-green-600"
+                      onClick={handleApprove}
+                    >
+                      Approve
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </div>
