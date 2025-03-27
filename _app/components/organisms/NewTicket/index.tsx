@@ -19,6 +19,7 @@ import { Input } from "@/ui/input";
 import { Search, Filter, Dot } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
+import { Agent } from "@/root/_app/services/remote/repository/agent/types";
 import PaginationWithoutLinks from "../PaginationWithoutLinks";
 import FilterDashboard from "../Modals/FilterDashboard";
 
@@ -80,6 +81,58 @@ export default function NewTicket({
     setIsFilterModalOpen(false);
   };
 
+  const renderTableRow = (item: any) => (
+    <TableRow key={item.id}>
+      <TableCell className="whitespace-nowrap">{item.code}</TableCell>
+      <TableCell>{item.customer?.name}</TableCell>
+      <TableCell>{item.company.name}</TableCell>
+      <TableCell>{item.subject}</TableCell>
+      <TableCell>
+        {format(new Date(item.createdAt), "dd MMM yyyy HH:mm")}
+      </TableCell>
+      <TableCell>
+        <span
+          className={clsx(
+            "px-2 py-1 rounded-full text-white whitespace-nowrap",
+            item.status === "open"
+              ? "bg-blue-500"
+              : item.status === "in_progress"
+                ? "bg-amber-500"
+                : item.status === "resolve"
+                  ? "bg-green-500"
+                  : item.status === "closed"
+                    ? "bg-red-500"
+                    : "bg-gray-500",
+          )}
+        >
+          {item.status}
+        </span>
+      </TableCell>
+      <TableCell>{item.priority}</TableCell>
+      <TableCell>
+        <div>
+          {item.agents?.map((agent: Agent) => (
+            <div key={agent.id} className="flex items-center">
+              <Dot />
+              <span className="px-2 py-1 whitespace-nowrap">{agent.name}</span>
+            </div>
+          ))}
+        </div>
+      </TableCell>
+      <TableCell>
+        <Button
+          onClick={() => {
+            router.push(`/bo/ticket/${item.id}`);
+          }}
+          variant="ghost"
+          className="text-primary"
+        >
+          view
+        </Button>
+      </TableCell>
+    </TableRow>
+  );
+
   return (
     <Card>
       <CardContent className="p-0 shadow-lg ">
@@ -132,61 +185,18 @@ export default function NewTicket({
                     </TableCell>
                   </TableRow>
                 ) : (
-                  (data?.data.list || []).map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell className="whitespace-nowrap">
-                        {item.code}
-                      </TableCell>
-                      <TableCell>{item.customer?.name}</TableCell>
-                      <TableCell>{item.company.name}</TableCell>
-                      <TableCell>{item.subject}</TableCell>
-                      <TableCell>
-                        {format(new Date(item.createdAt), "dd MMM yyyy HH:mm")}
-                      </TableCell>
-                      <TableCell>
-                        <span
-                          className={clsx(
-                            "px-2 py-1 rounded-full text-white whitespace-nowrap",
-                            item.status === "open"
-                              ? "bg-blue-500"
-                              : item.status === "in_progress"
-                                ? "bg-amber-500"
-                                : item.status === "resolve"
-                                  ? "bg-green-500"
-                                  : item.status === "closed"
-                                    ? "bg-red-500"
-                                    : "bg-gray-500",
-                          )}
-                        >
-                          {item.status}
-                        </span>
-                      </TableCell>
-                      <TableCell>{item.priority}</TableCell>
-                      <TableCell>
-                        <div>
-                          {item.agents?.map((agent) => (
-                            <div key={agent.id} className="flex items-center">
-                              <Dot />
-                              <span className="px-2 py-1 whitespace-nowrap">
-                                {agent.name}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          onClick={() => {
-                            router.push(`/bo/ticket/${item.id}`);
-                          }}
-                          variant="ghost"
-                          className="text-primary"
-                        >
-                          view
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))
+                  <>
+                    {(data?.data.list || []).length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={9} className="text-center">
+                          {" "}
+                          No data found
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      data?.data.list.map(renderTableRow)
+                    )}
+                  </>
                 )}
               </TableBody>
             </Table>

@@ -120,7 +120,7 @@ export default function FilterModal({
             placeholder="Search by Ticket ID"
             className="w-full bg-gray-200"
             wrapperClass="p-0 border-none bg-gray-200"
-            onChange={(e) => handleFilterChange("ticketId", e.target.value)}
+            onChange={(e) => handleFilterChange("code", e.target.value)}
             value={filters.code}
           />
           {!isCompany && (
