@@ -78,6 +78,10 @@ export const PRODUCT = {
   },
 };
 
+export const DASHBOARD = {
+  STATS: `superadmin/dashboard/data`,
+};
+
 export const AGENT = {
   LIST: `superadmin/agent/list`,
   CREATE: `superadmin/agent/create`,

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
 import clsx from "clsx";
 import {
@@ -23,29 +24,61 @@ import FilterDashboard from "../Modals/FilterDashboard";
 
 interface Props {
   companyID?: string;
+  isCompany?: boolean;
 }
 
-export default function NewTicket({ companyID }: Props) {
+export default function NewTicket({
+  companyID = "",
+  isCompany = false,
+}: Props) {
   const router = useRouter();
-  const [params, setParams] = useState<TicketListParams>({});
+  const [params, setParams] = useState<TicketListParams>({
+    companyID: companyID || "",
+    page: 1,
+    limit: 10,
+    subject: "",
+  });
   const [currentPage, setCurrentPage] = useState(1);
   const [currentLimit, setCurrentLimit] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
   const { data, isFetching } = useTicketList({
-    axios: { params: { ...params, sort: "createdAt", dir: "desc" } },
+    axios: { params: { ...params, dir: "desc" } },
     query: { queryKey: ["ticket-list", params] },
   });
 
   useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 500); // Adjust delay as needed
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchTerm]);
+
+  useEffect(() => {
     setParams({
-      companyID,
+      ...(companyID !== undefined ? { companyID } : {}),
       page: currentPage,
       limit: currentLimit,
-      search: searchTerm,
+      subject: debouncedSearch,
     });
-  }, [currentPage, currentLimit, searchTerm, companyID]);
+  }, [currentPage, currentLimit, debouncedSearch, companyID]);
+
+  const handleApplyFilters = (filters: any) => {
+    setParams({
+      ...(companyID !== undefined ? { companyID } : {}),
+      page: 1,
+      limit: 10,
+      ...(isCompany ? { code: filters.code, sort: filters.sort } : filters),
+    });
+    setCurrentPage(1);
+    setCurrentLimit(10);
+    setIsFilterModalOpen(false);
+  };
 
   return (
     <Card>
@@ -169,10 +202,13 @@ export default function NewTicket({ companyID }: Props) {
               />
             )}
           </div>
-          <FilterDashboard
-            isOpen={isFilterModalOpen}
-            onClose={() => setIsFilterModalOpen(false)}
-          />
+          {isFilterModalOpen !== undefined && (
+            <FilterDashboard
+              isOpen={isFilterModalOpen}
+              onClose={() => setIsFilterModalOpen(false)}
+              onApplyFilters={handleApplyFilters}
+            />
+          )}
         </div>
       </CardContent>
     </Card>

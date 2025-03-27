@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import {
   Dialog,
   DialogContent,
@@ -12,35 +13,83 @@ import {
   SelectTrigger,
   SelectContent,
   SelectItem,
+  SelectValue,
 } from "@/components/ui/select";
 import { useState } from "react";
+import { DefaultListParams } from "@/root/_app/services/remote/repository";
+import {
+  Company,
+  useCompanyList,
+} from "@/root/_app/services/remote/repository/company/index.service";
 
 interface FilterDashboardProps {
   isOpen: boolean;
+  isCompany?: boolean;
   onClose: () => void;
+  onApplyFilters: (filters: {
+    sort: string;
+    code: string;
+    companyID: string;
+  }) => void;
 }
 
-export default function FilterModal({ isOpen, onClose }: FilterDashboardProps) {
+export default function FilterModal({
+  isOpen,
+  isCompany = false,
+  onClose,
+  onApplyFilters,
+}: FilterDashboardProps) {
+  const [hasMore, setHasMore] = useState(true);
+  const [companies, setCompanies] = useState<Company[]>([]);
   const [filters, setFilters] = useState({
-    sortBy: "",
-    ticketId: "",
-    company: "",
+    sort: "",
+    code: "",
+    companyID: "",
   });
+
+  const [params, setParams] = useState<DefaultListParams>({
+    page: 1,
+    limit: 4,
+    sort: "createdAt",
+    dir: "desc",
+  });
+
+  const { data, isFetching } = useCompanyList({
+    axios: { params },
+    query: { queryKey: ["company-list", params] },
+  });
+
+  useEffect(() => {
+    if (data?.data?.list?.length) {
+      setCompanies((prev) => [...prev, ...data.data.list]);
+    }
+
+    // Ensure "hasMore" is true as long as the fetched companies are less than the total
+    setHasMore(
+      companies.length + (data?.data?.list?.length ?? 0) <
+        (data?.data?.total ?? 0),
+    );
+  }, [data]);
 
   const handleFilterChange = (key: string, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
+  useEffect(() => {
+    console.log("Updated filters:", filters);
+  }, [filters]);
+
   const applyFilters = () => {
-    onClose();
+    onApplyFilters(filters);
   };
 
   const handleReset = () => {
     setFilters({
-      sortBy: "",
-      ticketId: "",
-      company: "",
+      sort: "",
+      code: "",
+      companyID: "",
     });
+    applyFilters();
   };
 
   return (
@@ -53,16 +102,16 @@ export default function FilterModal({ isOpen, onClose }: FilterDashboardProps) {
         </DialogHeader>
         <div className="space-y-4 mt-4">
           <Select
-            onValueChange={(value) => handleFilterChange("sortBy", value)}
-            value={filters.sortBy}
+            onValueChange={(value) => handleFilterChange("sort", value)}
+            value={filters.sort}
+            defaultValue="createdAt"
           >
             <SelectTrigger className="w-full bg-gray-200">
-              Sort by
+              <SelectValue placeholder="Sort By" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="dateCreated">Date Created</SelectItem>
-              <SelectItem value="priority">Last Modified</SelectItem>
-              <SelectItem value="status">Priority</SelectItem>
+              <SelectItem value="createdAt">Date Created</SelectItem>
+              <SelectItem value="updatedAt">Last Modified</SelectItem>
             </SelectContent>
           </Select>
 
@@ -70,23 +119,47 @@ export default function FilterModal({ isOpen, onClose }: FilterDashboardProps) {
             type="text"
             placeholder="Search by Ticket ID"
             className="w-full bg-gray-200"
+            wrapperClass="p-0 border-none bg-gray-200"
             onChange={(e) => handleFilterChange("ticketId", e.target.value)}
-            value={filters.ticketId}
+            value={filters.code}
           />
-
-          <Select
-            onValueChange={(value) => handleFilterChange("company", value)}
-            value={filters.company}
-          >
-            <SelectTrigger className="w-full bg-gray-200">
-              Select Company
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="companyA">Company A</SelectItem>
-              <SelectItem value="companyB">Company B</SelectItem>
-              <SelectItem value="companyC">Company C</SelectItem>
-            </SelectContent>
-          </Select>
+          {!isCompany && (
+            <Select
+              onValueChange={(value) => handleFilterChange("companyID", value)}
+              value={filters.companyID}
+            >
+              <SelectTrigger className="w-full bg-gray-200">
+                <SelectValue placeholder="Select Company" />
+              </SelectTrigger>
+              <SelectContent>
+                {companies.map((company) => (
+                  <SelectItem key={company.id} value={company.id}>
+                    {company.name}
+                  </SelectItem>
+                ))}
+                {isFetching && <p>Loading...</p>}
+                {!isFetching && companies.length === 0 && (
+                  <div className="w-full flex justify-center">
+                    <p>No companies found</p>
+                  </div>
+                )}
+                {!isFetching && hasMore && (
+                  <div className="w-full flex justify-center">
+                    <Button
+                      onClick={() =>
+                        setParams((prev) => ({
+                          ...prev,
+                          page: (params.page ?? 0) + 1,
+                        }))
+                      }
+                    >
+                      load more
+                    </Button>
+                  </div>
+                )}
+              </SelectContent>
+            </Select>
+          )}
         </div>
 
         <DialogFooter className="flex justify-between mt-6 ">

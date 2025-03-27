@@ -64,6 +64,7 @@ export interface Company {
 
 export interface TicketListParams extends DefaultListParams {
   companyID?: string;
+  subject?: string;
 }
 
 export interface TicketAverage {
