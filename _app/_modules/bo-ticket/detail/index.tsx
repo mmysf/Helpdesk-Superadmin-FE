@@ -9,6 +9,7 @@ import { Button } from "@/root/_app/components/ui/button";
 import { ArrowLeftCircle, Search, Timer } from "lucide-react";
 import { useTicketCommentList } from "@/root/_app/services/remote/repository/ticket-comment/index.service";
 import { formatDate } from "date-fns";
+import { useRouter } from "next/navigation";
 
 interface RenderTimerProps {
   logTime?: TicketLogTime;
@@ -61,6 +62,7 @@ const RenderTimer: React.FC<RenderTimerProps> = ({ logTime }) => {
 };
 
 const AdminTicketDetail = ({ params }: Props) => {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
 
   const { refetch, data } = useTicketDetail(params?.id || "");
@@ -85,7 +87,7 @@ const AdminTicketDetail = ({ params }: Props) => {
   return (
     <div className="w-full p-6">
       <div className="flex items-center">
-        <Button onClick={() => {}} variant="ghost">
+        <Button onClick={() => router.back()} variant="ghost">
           <ArrowLeftCircle size={20} />
         </Button>
         <h1>Detail Ticket</h1>
@@ -104,7 +106,12 @@ const AdminTicketDetail = ({ params }: Props) => {
                 <Search className="text-slate-400" />
               </Button>
             </div>
-            <div className="bg-[#2C4251] relative rounded-md h-full max-h-[560px] overflow-auto">
+            <div className="bg-[#2C4251] relative rounded-md h-full min-h-64 max-h-[560px] overflow-auto">
+              {ticketComments.length === 0 && (
+                <div className="h-64 flex items-center justify-center">
+                  <p className="text-slate-400">No Comment Yet</p>
+                </div>
+              )}
               {ticketComments.map((item) => (
                 <div
                   key={item.id}
@@ -133,14 +140,14 @@ const AdminTicketDetail = ({ params }: Props) => {
 
         <div className="w-full px-6">
           <div className="w-full flex justify-center">
-            <p className="font-semibold text-lg">Ticket Iformation</p>
+            <p className="font-semibold text-lg">Ticket Information</p>
           </div>
           <div className="mt-5">
             <p className="text-xs text-slate-400">Subject</p>
             <p>{detail?.subject}</p>
           </div>
           <div className="mt-5">
-            <p className="text-xs text-slate-400">description</p>
+            <p className="text-xs text-slate-400">Description</p>
             <p>{detail?.content}</p>
           </div>
           <div className="mt-5">
@@ -149,7 +156,9 @@ const AdminTicketDetail = ({ params }: Props) => {
           </div>
           <div className="mt-5">
             <p className="text-xs text-slate-400">Creted On</p>
-            <p> {formatDate(detail?.createdAt ?? "", "dd/MM/yyyy HH:mm")}</p>
+            <p>
+              {formatDate(detail?.createdAt ?? Date.now(), "dd/MM/yyyy HH:mm")}
+            </p>
           </div>
           <div className="mt-5">
             <p className="text-xs text-slate-400">Requester</p>
