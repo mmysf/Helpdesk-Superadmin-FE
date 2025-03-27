@@ -44,7 +44,7 @@ const CompanyTable = () => {
   const [isOpenDelete, setOpenDelete] = useState(false);
 
   const { data, isFetching, refetch } = useCompanyList({
-    axios: { params },
+    axios: { params: { ...params, sort: "createdAt", dir: "desc" } },
     query: { queryKey: ["company-list", params] },
   });
   const { mutate: actDeleteCompany } = useCompanyDelete(selectedId.current);
