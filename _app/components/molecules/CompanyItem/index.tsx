@@ -48,6 +48,16 @@ export default function CompanyItem({ isLoading, data }: CompanyItemProps) {
                 </p>
                 <p className="text-xs text-slate-400">{data?.type}</p>
               </div>
+              <div>
+                <p className="text-xs md:text-sm font-medium">Domain</p>
+                <a
+                  target="_blank"
+                  href={data?.settings.domain.fullUrl}
+                  className="text-xs text-primary underline"
+                >
+                  {data?.settings.domain.fullUrl}
+                </a>
+              </div>
             </div>
           </div>
         </>

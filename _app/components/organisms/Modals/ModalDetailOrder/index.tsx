@@ -461,13 +461,17 @@ export default function OrderDetailModal(props: DetailOrderProps) {
                   <h4 className="text-sm font-medium text-muted-foreground">
                     Payment proof attachment
                   </h4>
-                  <a
-                    target="_blank"
-                    href={detail?.data.payment.manualPaid?.attachment?.url}
-                    className="text-blue-500 mt-1"
-                  >
-                    {detail?.data.payment.manualPaid?.attachment?.name ?? "-"}
-                  </a>
+                  {detail?.data.payment.manualPaid?.attachment?.name !== "" ? (
+                    <a
+                      target="_blank"
+                      href={detail?.data.payment.manualPaid?.attachment?.url}
+                      className="text-blue-500 mt-1"
+                    >
+                      {detail?.data.payment.manualPaid.attachment.name}
+                    </a>
+                  ) : (
+                    <span className="text-gray-400 mt-1">No attachment</span>
+                  )}
                 </div>
 
                 <div>

@@ -67,7 +67,7 @@ export default function ChartTicket({ companyId }: Props) {
         series={chartSeries}
         type="line"
         width="99%"
-        height={100}
+        height={250}
       />
     </Card>
   );

@@ -316,7 +316,13 @@ export default function AddCompanyForm({ params }: Props) {
           </div>
 
           <div className="flex justify-start space-x-4">
-            <Button type="button" variant="outline">
+            <Button
+              onClick={() => {
+                router.back();
+              }}
+              type="button"
+              variant="outline"
+            >
               Cancel
             </Button>
             <Button type="submit">{isEdit ? "Save" : "Add"}</Button>

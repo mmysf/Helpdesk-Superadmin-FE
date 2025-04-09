@@ -42,7 +42,9 @@ export default function ChartTime({ companyId }: Props) {
   });
 
   useEffect(() => {
-    const series = (data?.data || []).map((v) => v.averageDuration);
+    const series = (data?.data || []).map((v) =>
+      Number.parseFloat((v.averageDuration / 60 / 60).toFixed(2)),
+    );
     setChartState((value) => ({ ...value, series: [{ data: series }] }));
   }, [data]);
 
@@ -55,7 +57,7 @@ export default function ChartTime({ companyId }: Props) {
         series={chartState.series}
         type="area"
         width="99%"
-        height={100}
+        height={250}
       />
     </Card>
   );

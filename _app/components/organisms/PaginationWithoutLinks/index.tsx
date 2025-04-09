@@ -185,7 +185,7 @@ export default function PaginationWithoutLinks(props: PaginationProps) {
 
             <PaginationItem>
               <Button
-                disabled={lastPage}
+                disabled={lastPage || pageNumbers.length === 0}
                 onClick={handleNextPage}
                 size="sm"
                 variant="outline"
