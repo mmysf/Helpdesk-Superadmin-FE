@@ -38,6 +38,7 @@ export default function NewTicket({
     page: 1,
     limit: 10,
     subject: "",
+    sort: "createdAt",
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [currentLimit, setCurrentLimit] = useState(10);
@@ -61,13 +62,13 @@ export default function NewTicket({
   }, [searchTerm]);
 
   useEffect(() => {
-    setParams({
-      ...(companyID !== undefined ? { companyID } : {}),
+    setParams((prev) => ({
+      ...prev,
       page: currentPage,
       limit: currentLimit,
       subject: debouncedSearch,
-    });
-  }, [currentPage, currentLimit, debouncedSearch, companyID]);
+    }));
+  }, [currentPage, currentLimit, debouncedSearch]);
 
   const handleApplyFilters = (filters: any) => {
     setParams({
@@ -93,7 +94,7 @@ export default function NewTicket({
       <TableCell>
         <span
           className={clsx(
-            "px-2 py-1 rounded-full text-white whitespace-nowrap",
+            "px-2 py-1 rounded-full uppercase text-xs text-white whitespace-nowrap",
             item.status === "open"
               ? "bg-blue-500"
               : item.status === "in_progress"
@@ -105,19 +106,25 @@ export default function NewTicket({
                     : "bg-gray-500",
           )}
         >
-          {item.status}
+          {item.status.replace("_", " ")}
         </span>
       </TableCell>
       <TableCell>{item.priority}</TableCell>
       <TableCell>
-        <div>
-          {item.agents?.map((agent: Agent) => (
-            <div key={agent.id} className="flex items-center">
-              <Dot />
-              <span className="px-2 py-1 whitespace-nowrap">{agent.name}</span>
-            </div>
-          ))}
-        </div>
+        {item.agents !== null ? (
+          <div>
+            {item.agents?.map((agent: Agent) => (
+              <div key={agent.id} className="flex items-center">
+                <Dot />
+                <span className="px-2 py-1 whitespace-nowrap">
+                  {agent.name}
+                </span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p>-</p>
+        )}
       </TableCell>
       <TableCell>
         <Button
@@ -217,6 +224,7 @@ export default function NewTicket({
               isOpen={isFilterModalOpen}
               onClose={() => setIsFilterModalOpen(false)}
               onApplyFilters={handleApplyFilters}
+              isCompany={isCompany}
             />
           )}
         </div>

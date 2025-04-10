@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable sonarjs/no-duplicate-string */
 
 "use client";
@@ -226,7 +227,7 @@ export default function OrderDetailModal(props: DetailOrderProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={(value) => setIsOpen(value)}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-w-3xl max-h-[650px] overflow-scroll">
         <DialogHeader className="flex flex-row items-center gap-2">
           <Button
             variant="ghost"
@@ -461,13 +462,18 @@ export default function OrderDetailModal(props: DetailOrderProps) {
                   <h4 className="text-sm font-medium text-muted-foreground">
                     Payment proof attachment
                   </h4>
-                  <a
-                    target="_blank"
-                    href={detail?.data.payment.manualPaid?.attachment?.url}
-                    className="text-blue-500 mt-1"
-                  >
-                    {detail?.data.payment.manualPaid?.attachment?.name ?? "-"}
-                  </a>
+                  {detail?.data.payment.manualPaid?.attachment &&
+                  detail?.data.payment.manualPaid?.attachment?.name !== "" ? (
+                    <a
+                      target="_blank"
+                      href={detail?.data.payment.manualPaid?.attachment?.url}
+                      className="text-blue-500 mt-1"
+                    >
+                      {detail?.data.payment.manualPaid.attachment.name}
+                    </a>
+                  ) : (
+                    <span className="text-gray-400 mt-1">No attachment</span>
+                  )}
                 </div>
 
                 <div>

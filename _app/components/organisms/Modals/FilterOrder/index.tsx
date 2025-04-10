@@ -103,13 +103,12 @@ export default function FilterOrder({
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="date-created">Date Created</SelectItem>
-                <SelectItem value="last-modified">Last Modified</SelectItem>
-                <SelectItem value="priority">Priority</SelectItem>
+                <SelectItem value="createdAt">Date Created</SelectItem>
+                <SelectItem value="updatedAt">Last Modified</SelectItem>
               </SelectContent>
             </Select>
           </div>
-          <div>
+          {/* <div>
             <Select
               value={filters.plan}
               onValueChange={(value) =>
@@ -125,7 +124,7 @@ export default function FilterOrder({
                 <SelectItem value="enterprise">Enterprise</SelectItem>
               </SelectContent>
             </Select>
-          </div>
+          </div> */}
 
           <div className="flex flex-wrap justify-around gap-2 pt-4">
             {[

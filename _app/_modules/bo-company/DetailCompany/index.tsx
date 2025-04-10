@@ -27,7 +27,7 @@ const DetailCompany = ({ params }: { params: Params }) => {
         </Link>
         <p className="font-semibold">{data?.data.name}</p>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 max-h-[500px]">
         <CompanyItem data={data?.data} isLoading={isFetching} />
         <ChartTicket companyId={companyId} />
         <ChartTime companyId={companyId} />

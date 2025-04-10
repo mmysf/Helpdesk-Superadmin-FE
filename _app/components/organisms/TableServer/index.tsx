@@ -18,6 +18,7 @@ import {
 } from "@/ui/table";
 import { EllipsisVertical, Filter, Search } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { format } from "date-fns";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,7 +32,7 @@ import PaginationWithoutLinks from "../PaginationWithoutLinks";
 
 export default function OrdersTable() {
   const [selectedStatus, setSelectedStatus] = useState("");
-  const [selectedSort, setSelectedSort] = useState("");
+  const [selectedSort, setSelectedSort] = useState("createdAt");
   const [selectedPlan, setSelectedPlan] = useState("");
   const [currentLimit, setCurrentLimit] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -45,6 +46,8 @@ export default function OrdersTable() {
     limit: currentLimit,
     q: searchTerm,
     types: "SERVER",
+    dir: "desc",
+    sort: selectedSort,
   });
   useEffect(() => {
     setParams((prev) => ({
@@ -54,7 +57,7 @@ export default function OrdersTable() {
       q: searchTerm,
       types: "SERVER",
       status: selectedStatus,
-      sortBy: selectedSort,
+      sort: selectedSort,
       plan: selectedPlan,
     }));
   }, [
@@ -100,10 +103,10 @@ export default function OrdersTable() {
     return (
       <div
         aria-label="status"
-        className={`uppercase ${color} flex items-center justify-center text-white px-2 py-1 rounded-3xl`}
+        className={`uppercase ${color} flex items-center justify-center px-2 py-1 rounded-3xl`}
         role="button"
       >
-        {status.replace("_", " ")}
+        <p className="text-xs text-white">{status.replace("_", " ")}</p>
       </div>
     );
   }, []);
@@ -125,7 +128,7 @@ export default function OrdersTable() {
       page: 1,
       types: "SERVER",
       q: searchTerm,
-      sortBy: sortByValue,
+      sort: sortByValue,
       plan: planValue,
       status: statusValue,
     }));
@@ -189,11 +192,7 @@ export default function OrdersTable() {
                       <TableCell>{server.customer.name}</TableCell>
                       <TableCell>{server.customer.email}</TableCell>
                       <TableCell>
-                        {new Date(server.createdAt).toLocaleString("en-US", {
-                          year: "numeric",
-                          month: "numeric",
-                          day: "numeric",
-                        })}
+                        {format(new Date(server.createdAt), "dd MMM yyyy")}
                       </TableCell>
                       <TableCell>{server.serverPackage?.name}</TableCell>
                       <TableCell>{server.serverPackage?.validity}</TableCell>

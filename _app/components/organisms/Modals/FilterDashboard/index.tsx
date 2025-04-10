@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 import {
   Dialog,
@@ -64,7 +65,6 @@ export default function FilterModal({
       setCompanies((prev) => [...prev, ...data.data.list]);
     }
 
-    // Ensure "hasMore" is true as long as the fetched companies are less than the total
     setHasMore(
       companies.length + (data?.data?.list?.length ?? 0) <
         (data?.data?.total ?? 0),
@@ -74,10 +74,6 @@ export default function FilterModal({
   const handleFilterChange = (key: string, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
-
-  useEffect(() => {
-    console.log("Updated filters:", filters);
-  }, [filters]);
 
   const applyFilters = () => {
     onApplyFilters(filters);

@@ -166,7 +166,7 @@ export default function CreditHourModal(props: CreateProductProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden">
+      <DialogContent className="sm:max-w-[500px] max-h-[600px] p-0 overflow-y-scroll">
         <div className="flex flex-col h-full">
           <DialogHeader className="px-6 py-4 border-b flex flex-row items-center space-y-0 gap-2">
             <DialogTitle className="text-lg font-medium">

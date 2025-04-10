@@ -60,11 +60,13 @@ export default function AddCompanyForm({ params }: Props) {
         }
       }),
   });
+
   const {
     register,
     handleSubmit,
     watch,
     setValue,
+    clearErrors,
     formState: { errors },
   } = useForm({
     mode: "all",
@@ -118,7 +120,8 @@ export default function AddCompanyForm({ params }: Props) {
     uploadLogo(formData, {
       onSuccess: (res) => {
         setValue("logoAttachId", res.data.id);
-        toastSuccess("Sukses upload logo");
+        clearErrors("logoAttachId");
+        toastSuccess("Upload logo successfully");
       },
       onError: (err) => {
         toastError(err.data.message);
@@ -316,7 +319,13 @@ export default function AddCompanyForm({ params }: Props) {
           </div>
 
           <div className="flex justify-start space-x-4">
-            <Button type="button" variant="outline">
+            <Button
+              onClick={() => {
+                router.back();
+              }}
+              type="button"
+              variant="outline"
+            >
               Cancel
             </Button>
             <Button type="submit">{isEdit ? "Save" : "Add"}</Button>

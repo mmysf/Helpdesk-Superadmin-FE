@@ -19,6 +19,7 @@ import {
 import { EllipsisVertical, Filter, Search } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Spinner } from "@nextui-org/react";
+import { format } from "date-fns";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,7 +33,7 @@ import PaginationWithoutLinks from "../PaginationWithoutLinks";
 
 export default function OrdersTable() {
   const [selectedStatus, setSelectedStatus] = useState("");
-  const [selectedSort, setSelectedSort] = useState("");
+  const [selectedSort, setSelectedSort] = useState("createdAt");
   const [selectedPlan, setSelectedPlan] = useState("");
   const [currentLimit, setCurrentLimit] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -46,6 +47,8 @@ export default function OrdersTable() {
     limit: currentLimit,
     q: searchTerm,
     types: "HOUR",
+    sort: selectedSort,
+    dir: "desc",
   });
   useEffect(() => {
     setParams((prev) => ({
@@ -55,7 +58,7 @@ export default function OrdersTable() {
       q: searchTerm,
       types: "HOUR",
       status: selectedStatus,
-      sortBy: selectedSort,
+      sort: selectedSort,
       plan: selectedPlan,
     }));
   }, [
@@ -99,10 +102,10 @@ export default function OrdersTable() {
     return (
       <div
         aria-label="status"
-        className={`uppercase ${color} flex items-center justify-center text-white px-2 py-1 rounded-3xl`}
+        className={`uppercase ${color} flex items-center justify-center px-2 py-1 rounded-3xl`}
         role="button"
       >
-        {status.replace("_", " ")}
+        <p className="text-xs text-white">{status.replace("_", " ")}</p>
       </div>
     );
   }, []);
@@ -124,7 +127,7 @@ export default function OrdersTable() {
       page: 1,
       types: "HOUR",
       q: searchTerm,
-      sortBy: sortByValue,
+      sort: sortByValue,
       plan: planValue,
       status: statusValue,
     }));
@@ -195,9 +198,7 @@ export default function OrdersTable() {
                         <TableCell>{order.customer.name}</TableCell>
                         <TableCell>{order.customer.email}</TableCell>
                         <TableCell>
-                          {new Date(order.createdAt).toLocaleDateString(
-                            "en-US",
-                          )}
+                          {format(new Date(order.createdAt), "dd MMM yyyy")}
                         </TableCell>
                         <TableCell>{order.hourPackage?.name}</TableCell>
                         <TableCell>{order.hourPackage?.hours}</TableCell>
