@@ -195,7 +195,9 @@ export default function OrdersTable() {
                         {format(new Date(server.createdAt), "dd MMM yyyy")}
                       </TableCell>
                       <TableCell>{server.serverPackage?.name}</TableCell>
-                      <TableCell>{server.serverPackage?.validity}</TableCell>
+                      <TableCell>
+                        {(server.serverPackage?.validity ?? 0) * server.amount}
+                      </TableCell>
                       <TableCell>{server.grandTotal}</TableCell>
                       <TableCell>{renderStatus(server.status)}</TableCell>
                       <TableCell className="text-center">
