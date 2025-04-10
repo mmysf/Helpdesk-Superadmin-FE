@@ -71,6 +71,7 @@ export default function NewTicket({
   }, [currentPage, currentLimit, debouncedSearch]);
 
   const handleApplyFilters = (filters: any) => {
+    console.log(filters);
     setParams({
       ...(companyID !== undefined ? { companyID } : {}),
       page: 1,

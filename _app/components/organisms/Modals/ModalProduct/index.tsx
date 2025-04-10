@@ -132,8 +132,13 @@ export default function CreditHourModal(props: CreateProductProps) {
   const onSubmit = async (data: ProductCreatePayload) => {
     const newData = { ...data };
     newData.benefit = benefits.filter((benefit) => benefit.trim() !== "");
+    if (newData.benefit.length === 0) {
+      toastError("Please add at least one benefit");
+      return;
+    }
     const payload = {
       ...data,
+      benefit: newData.benefit,
       price: Number(data.price),
       durationHours: Number(data.durationHours),
       validity: Number(data.validity),

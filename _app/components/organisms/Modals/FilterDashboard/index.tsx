@@ -43,7 +43,7 @@ export default function FilterModal({
   const [hasMore, setHasMore] = useState(true);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [filters, setFilters] = useState({
-    sort: "",
+    sort: "createdAt",
     code: "",
     companyID: "",
   });
@@ -81,11 +81,11 @@ export default function FilterModal({
 
   const handleReset = () => {
     setFilters({
-      sort: "",
+      sort: "createdAt",
       code: "",
       companyID: "",
     });
-    applyFilters();
+    onApplyFilters({ sort: "createdAt", code: "", companyID: "" });
   };
 
   return (

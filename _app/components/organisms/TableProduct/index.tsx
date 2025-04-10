@@ -91,12 +91,12 @@ export default function ProductsTable(props: TableProductProps) {
 
   const { data: products, refetch: productRefetch } = useProductList({
     query: { queryKey: ["product-list", params] },
-    axios: { params },
+    axios: { params: { ...params, sort: "createdAt", dir: "desc" } },
   });
 
   const { data: servers, refetch: serverRefetch } = useServerList({
     query: { queryKey: ["server-list", params] },
-    axios: { params },
+    axios: { params: { ...params, sort: "createdAt", dir: "desc" } },
   });
 
   const tableData = useMemo(() => {
