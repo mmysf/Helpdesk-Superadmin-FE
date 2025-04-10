@@ -60,11 +60,13 @@ export default function AddCompanyForm({ params }: Props) {
         }
       }),
   });
+
   const {
     register,
     handleSubmit,
     watch,
     setValue,
+    clearErrors,
     formState: { errors },
   } = useForm({
     mode: "all",
@@ -118,7 +120,8 @@ export default function AddCompanyForm({ params }: Props) {
     uploadLogo(formData, {
       onSuccess: (res) => {
         setValue("logoAttachId", res.data.id);
-        toastSuccess("Sukses upload logo");
+        clearErrors("logoAttachId");
+        toastSuccess("Upload logo successfully");
       },
       onError: (err) => {
         toastError(err.data.message);

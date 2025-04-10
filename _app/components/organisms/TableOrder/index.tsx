@@ -19,6 +19,7 @@ import {
 import { EllipsisVertical, Filter, Search } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Spinner } from "@nextui-org/react";
+import { format } from "date-fns";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -197,9 +198,7 @@ export default function OrdersTable() {
                         <TableCell>{order.customer.name}</TableCell>
                         <TableCell>{order.customer.email}</TableCell>
                         <TableCell>
-                          {new Date(order.createdAt).toLocaleDateString(
-                            "en-US",
-                          )}
+                          {format(new Date(order.createdAt), "dd MMM yyyy")}
                         </TableCell>
                         <TableCell>{order.hourPackage?.name}</TableCell>
                         <TableCell>{order.hourPackage?.hours}</TableCell>

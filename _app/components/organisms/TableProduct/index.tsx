@@ -298,10 +298,10 @@ export default function ProductsTable(props: TableProductProps) {
             </div>
             <div className="flex justify-center items-center mt-2">
               <PaginationWithoutLinks
-                totalData={products?.data.total}
+                totalData={isHour ? products?.data.total : servers?.data.total}
                 currentPage={currentPage}
                 setCurrentPage={setCurrentPage}
-                perPage={10}
+                perPage={currentLimit}
                 setCurrentLimit={setCurrentLimit}
               />
             </div>

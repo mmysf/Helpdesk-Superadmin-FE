@@ -18,6 +18,7 @@ import {
 } from "@/ui/table";
 import { EllipsisVertical, Filter, Search } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { format } from "date-fns";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -191,11 +192,7 @@ export default function OrdersTable() {
                       <TableCell>{server.customer.name}</TableCell>
                       <TableCell>{server.customer.email}</TableCell>
                       <TableCell>
-                        {new Date(server.createdAt).toLocaleString("en-US", {
-                          year: "numeric",
-                          month: "numeric",
-                          day: "numeric",
-                        })}
+                        {format(new Date(server.createdAt), "dd MMM yyyy")}
                       </TableCell>
                       <TableCell>{server.serverPackage?.name}</TableCell>
                       <TableCell>{server.serverPackage?.validity}</TableCell>

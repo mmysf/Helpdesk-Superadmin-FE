@@ -108,7 +108,7 @@ export default function FilterOrder({
               </SelectContent>
             </Select>
           </div>
-          <div>
+          {/* <div>
             <Select
               value={filters.plan}
               onValueChange={(value) =>
@@ -124,7 +124,7 @@ export default function FilterOrder({
                 <SelectItem value="enterprise">Enterprise</SelectItem>
               </SelectContent>
             </Select>
-          </div>
+          </div> */}
 
           <div className="flex flex-wrap justify-around gap-2 pt-4">
             {[

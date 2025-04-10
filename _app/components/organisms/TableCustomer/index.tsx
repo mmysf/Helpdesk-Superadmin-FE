@@ -26,6 +26,7 @@ import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
 import { EllipsisVertical, Plus, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { format } from "date-fns";
 import PaginationWithoutLinks from "../PaginationWithoutLinks";
 import ConfirmDeleteModal from "../Modals/ModalDelete";
 
@@ -169,7 +170,14 @@ export default function CustomerTable() {
                           </div>
                         </TableCell>
                         <TableCell>-</TableCell>
-                        <TableCell>{item.lastActivityAt}</TableCell>
+                        <TableCell>
+                          {item.lastActivityAt !== null
+                            ? format(
+                                new Date(item.lastActivityAt),
+                                "dd MMM yyyy, HH:mm",
+                              )
+                            : "-"}
+                        </TableCell>
                         <TableCell>-</TableCell>
                         <TableCell>
                           <DropdownMenu>

@@ -47,10 +47,10 @@ export default function Page() {
   const onSubmit = handleSubmit((payload) => {
     mutate(payload, {
       onSuccess: ({ data }) => {
+        toastSuccess("Login successfull!");
         Cookie.set(AUTH_KEY, data.token);
         Cookie.set(USER, JSON.stringify(data.user));
         router.push("/bo/dashboard");
-        toastSuccess("Login successfull!");
       },
       onError: (error) => {
         toastError(error.data.message || "Something went wrong!");
