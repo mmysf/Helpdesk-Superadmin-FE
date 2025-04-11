@@ -1,3 +1,5 @@
+/* eslint-disable react/no-array-index-key */
+
 "use client";
 
 import Show from "@/atoms/show";
@@ -15,9 +17,12 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
+import { usePathname } from "next/navigation";
+import { cn } from "@nextui-org/react";
 
 const Sidebar: React.FC = () => {
   const t = useTranslations();
+  const pathname = usePathname();
 
   return (
     <div className="hidden border-r bg-muted/40 md:block">
@@ -39,14 +44,24 @@ const Sidebar: React.FC = () => {
           <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
             {menuSidebar.map((item, index) => {
               const IconComponent = item.icon;
+              const isActive = pathname.startsWith(item.link.toString()); // or use pathname.startsWith(item.link) for partial match
 
               return (
-                // eslint-disable-next-line react/no-array-index-key
-                <div key={`menu-sidebar-${index}`}>
-                  {/* Menu item */}
+                <div
+                  key={`menu-sidebar-${index}`}
+                  className={cn(
+                    "rounded-lg",
+                    isActive
+                      ? "bg-primary text-white"
+                      : "text-muted-foreground",
+                  )}
+                >
                   <Link
                     href={item.link}
-                    className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+                    className={cn(
+                      "flex items-center gap-3 rounded-lg px-3 py-2 transition-all",
+                      !isActive && " hover:text-primary",
+                    )}
                   >
                     <IconComponent className="h-4 w-4" />
                     {trUc({ t, key: item.name })}
