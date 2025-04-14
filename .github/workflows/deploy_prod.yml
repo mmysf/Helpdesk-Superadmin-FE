@@ -1,24 +1,20 @@
-name: Github Actions Workflows
+name: Github Actions Production
 
 on:
-  push:
-    branches:
-    - dev
+  release:
+    types:
+      - published
   workflow_dispatch:
 
 env:
-  IMAGE_NAME: "ghcr.io/${{ github.repository }}:dev-${{ github.sha }}"
-  APP_NAME: "${{ github.event.repository.name }}"
-  
+  IMAGE_NAME: "ghcr.io/${{ github.repository }}:${{ github.ref_name }}"
+
 jobs:
-  build-dev:
-    name: Build Development
+  build-prod:
+    name: Build
     runs-on: ubuntu-24.04
-    if: contains( github.ref, 'dev' )
-    timeout-minutes: 30
     env:
-      NEXT_PUBLIC_ACCESS_KEY: ${{ secrets.DEV_NEXT_PUBLIC_ACCESS_KEY }}
-      NEXT_PUBLIC_BASE_URL: ${{ vars.APP_API_URL }}
+      NEXT_PUBLIC_BASE_URL: ${{ vars.PROD_NEXT_PUBLIC_BASE_URL }}
     permissions:
       contents: read
       packages: write
@@ -51,33 +47,32 @@ jobs:
         cache-to: type=gha,mode=max
         build-args: |
           NEXT_PUBLIC_BASE_URL=${{ env.NEXT_PUBLIC_BASE_URL }}
-          NEXT_PUBLIC_ACCESS_KEY=${{ env.NEXT_PUBLIC_ACCESS_KEY }}
 
-  deploy-dev:
-    name: Deploy Development
+  deploy-prod:
+    name: Deploy
     runs-on: ubuntu-24.04
-    needs: build-dev
+    needs: build-prod
     permissions:
       contents: read 
     env:
-      DOKPLOY_API_URL: ${{ secrets.DOKPLOY_API_URL }}
-      DOKPLOY_TOKEN: ${{ secrets.DOKPLOY_TOKEN }}
-      DOKPLOY_SERVICE_APP_NAME: ${{ vars.APP_NAME }}
+      DOKPLOY_API_URL: ${{ vars.PROD_DOKPLOY_API_URL }}
+      DOKPLOY_TOKEN: ${{ secrets.PROD_DOKPLOY_TOKEN }}
+      DOKPLOY_SERVICE_APP_NAME: ${{ vars.PROD_DOKPLOY_APP_NAME }}
 
     steps:
       - name: Lowercase Repository Name
         run: |
           echo "IMAGE_NAME=$(echo ${{ env.IMAGE_NAME }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
-
+    
       - name: Get data from Dokploy
         id: dokployProjects
         uses: fjogeleit/http-request-action@v1
         with:
           url: "${{ env.DOKPLOY_API_URL }}/project.all"
-          method: "GET"
-          customHeaders: '{"x-api-key": "${{ env.DOKPLOY_TOKEN }}"}'
-          responseFile: "./res.json"
-
+          method: 'GET'
+          bearerToken: ${{ env.DOKPLOY_TOKEN }}
+          responseFile: './res.json'
+      
       - name: Retrieve Application ID and Registry Credentials
         id: parsingResult
         run: |
@@ -85,25 +80,25 @@ jobs:
           echo "application_id=$(echo $application | jq -r '.applicationId')" >> $GITHUB_OUTPUT
           echo "cr_username=$(echo $application | jq -r '.username')" >> $GITHUB_OUTPUT
           echo "cr_password=$(echo $application | jq -r '.password')" >> $GITHUB_OUTPUT
-
+      
       - name: Update Application on Dokploy
         uses: fjogeleit/http-request-action@v1
         with:
           url: "${{ env.DOKPLOY_API_URL }}/application.saveDockerProvider"
-          method: "POST"
-          customHeaders: '{"x-api-key": "${{ env.DOKPLOY_TOKEN }}"}'
+          method: 'POST'
+          bearerToken: ${{ env.DOKPLOY_TOKEN }}
           data: '{
-            "registryUrl": "ghcr.io",
-            "dockerImage": "${{ env.IMAGE_NAME }}",
-            "applicationId": "${{ steps.parsingResult.outputs.application_id }}",
-            "username": "${{ steps.parsingResult.outputs.cr_username }}",
-            "password": "${{ steps.parsingResult.outputs.cr_password }}"
+              "registryUrl": "ghcr.io",
+              "dockerImage": "${{ env.IMAGE_NAME }}",
+              "applicationId": "${{ steps.parsingResult.outputs.application_id }}",
+              "username": "${{ steps.parsingResult.outputs.cr_username }}",
+              "password": "${{ steps.parsingResult.outputs.cr_password }}"
             }'
-
+        
       - name: Deploy Application
         uses: fjogeleit/http-request-action@v1
         with:
           url: "${{ env.DOKPLOY_API_URL }}/application.deploy"
-          method: "POST"
-          customHeaders: '{"x-api-key": "${{ env.DOKPLOY_TOKEN }}"}'
+          method: 'POST'
+          bearerToken: ${{ env.DOKPLOY_TOKEN }}
           data: '{"applicationId": "${{ steps.parsingResult.outputs.application_id }}"}'
