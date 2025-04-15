@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/cognitive-complexity */
 /* eslint-disable no-unused-vars */
 /* eslint-disable sonarjs/no-duplicate-string */
 
@@ -307,7 +308,8 @@ export default function OrderDetailModal(props: DetailOrderProps) {
               </h3>
               <p className="font-medium">
                 {isServer
-                  ? detail?.data?.serverPackage?.validity
+                  ? (detail?.data?.serverPackage?.validity ?? 0) *
+                    (detail?.data?.amount ?? 1)
                   : detail?.data?.hourPackage?.hours}
               </p>
             </div>
