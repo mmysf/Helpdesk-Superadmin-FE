@@ -55,7 +55,7 @@ jobs:
     permissions:
       contents: read 
     env:
-      DOKPLOY_API_URL: ${{ vars.PROD_DOKPLOY_API_URL }}
+      DOKPLOY_API_URL: ${{ secrets.PROD_DOKPLOY_API_URL }}
       DOKPLOY_TOKEN: ${{ secrets.PROD_DOKPLOY_TOKEN }}
       DOKPLOY_SERVICE_APP_NAME: ${{ vars.PROD_DOKPLOY_APP_NAME }}
 
