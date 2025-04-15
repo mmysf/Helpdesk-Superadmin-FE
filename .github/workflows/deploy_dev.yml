@@ -1,4 +1,4 @@
-name: Github Actions Workflows
+name: Github Actions Development
 
 on:
   push:
