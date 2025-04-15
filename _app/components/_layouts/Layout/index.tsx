@@ -23,7 +23,7 @@ const Layout: React.FC<any> = async ({ children }) => {
   return (
     <html lang={locale}>
       <head>
-        <title>{process.env.NEXT_PUBLIC_APP_NAME ?? "My App"}</title>
+        <title>{process.env.NEXT_PUBLIC_APP_NAME ?? "Super Admin"}</title>
       </head>
       <body suppressHydrationWarning className={fonts.className}>
         <Providers>
