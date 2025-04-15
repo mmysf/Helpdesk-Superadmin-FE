@@ -1,17 +1,66 @@
 "use client";
 
-import { Button } from "@/ui/button";
-import { Input } from "@/ui/input";
-import { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { useForm, Controller } from "react-hook-form";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { AUTH_KEY, USER } from "@/constants/auth";
+import Cookie from "js-cookie";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { HiOutlineEye, HiOutlineEyeOff } from "react-icons/hi";
 import Image from "next/image";
+import {
+  AuthLoginPayload,
+  useAuthLogin,
+} from "@/services_remote/repository/auth/index.service";
+import useToastError from "@/hooks/useToastError";
+import useToastSuccess from "@/hooks/useToastSuccess";
 
 export default function Page() {
-  const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
+
+  const { mutate, isPending } = useAuthLogin();
+
+  const { control, handleSubmit, setValue } = useForm<AuthLoginPayload>({
+    mode: "all",
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const [isVisiblePass, setIsVisiblePass] = useState<boolean>(false);
+
+  const toggleVisibilityPass = () => {
+    setIsVisiblePass(!isVisiblePass);
+  };
+
+  const toastError = useToastError();
+  const toastSuccess = useToastSuccess();
+
+  useEffect(() => {
+    setValue("email", "");
+    setValue("password", "");
+  }, [setValue]);
+
+  const onSubmit = handleSubmit((payload) => {
+    mutate(payload, {
+      onSuccess: ({ data }) => {
+        toastSuccess("Login successfull!");
+        Cookie.set(AUTH_KEY, data.token);
+        Cookie.set(USER, JSON.stringify(data.user));
+        router.push("/bo/dashboard");
+      },
+      onError: (error) => {
+        toastError(error.data.message || "Something went wrong!");
+      },
+    });
+  });
 
   return (
-    <div className="min-h-screen bg-[#f8f5f5] flex flex-col items-center justify-between py-24">
-      <div className="flex flex-col items-center mb-6">
+    <div className="min-h-screen bg-[#f8f5f5] flex flex-col items-center justify-center py-24">
+      <div className="mb-6">
         <Image
           src="/logo-solutionlabs.png"
           width={200}
@@ -19,38 +68,61 @@ export default function Page() {
           alt="SolutionLabs Logo"
         />
       </div>
-      <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8">
-        <div className="flex flex-col items-center">
-          <h1 className="text-xl font-bold text-gray-900">Login as Admin</h1>
-        </div>
-        <div className="space-y-5 mt-5">
-          <Input placeholder="Email" />
-          <div className="relative">
-            <Input
-              placeholder="Password"
-              type={showPassword ? "text" : "password"}
-              className="pr-12"
-            />
-            <Button
-              variant="ghost"
-              className="absolute top-1/2 transform -translate-y-1/2 right-2"
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {!showPassword ? (
-                <Eye className="w-5 h-5 text-gray-500" />
-              ) : (
-                <EyeOff className="w-5 h-5 text-gray-500" />
-              )}
+      <Card className="max-w-md w-full">
+        <CardHeader>
+          <CardTitle className="text-center">Login as Admin</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={onSubmit} className="space-y-5" autoComplete="off">
+            <div className="space-y-5">
+              <Controller
+                name="email"
+                rules={{
+                  required: "Email is required",
+                  pattern: {
+                    value: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+                    message: "Invalid email",
+                  },
+                }}
+                control={control}
+                render={({ field }) => (
+                  <Input type="email" placeholder="Email" {...field} />
+                )}
+              />
+              <Controller
+                name="password"
+                rules={{
+                  required: "Password is required",
+                  minLength: {
+                    value: 6,
+                    message: "Password must be at least 6 characters",
+                  },
+                }}
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    type={isVisiblePass ? "text" : "password"}
+                    placeholder="Password"
+                    endContent={
+                      <button
+                        type="button"
+                        className="focus:outline-none mr-1"
+                        onClick={toggleVisibilityPass}
+                      >
+                        {isVisiblePass ? <HiOutlineEyeOff /> : <HiOutlineEye />}
+                      </button>
+                    }
+                    {...field}
+                  />
+                )}
+              />
+            </div>
+            <Button type="submit" disabled={isPending} className="w-full">
+              Login
             </Button>
-          </div>
-          <Button
-            className="w-full rounded-md bg-primary text-white"
-            type="button"
-          >
-            Sign In
-          </Button>
-        </div>
-      </div>
+          </form>
+        </CardContent>
+      </Card>
       <footer className="text-center mt-10 text-xs text-gray-500">
         © 2024 SolutionLab
       </footer>

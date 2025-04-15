@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState } from "react";
 import {
   Table,
@@ -16,24 +18,33 @@ import {
   PaginationLink,
 } from "@/ui/pagination";
 import { Plus, Filter, ChevronLeft, ChevronRight } from "lucide-react";
-
-const AGENTS = Array.from({ length: 50 }, (_, i) => ({
-  name: `Agent Name`,
-  email: `customer${i + 1}@example.com`,
-  totalTicket: 7,
-  resolveTicket: 3,
-  avgTime: "1h 10m",
-}));
+import {
+  AgentListParams,
+  useAgentList,
+} from "@/services_remote/repository/agent/index.service";
 
 export default function AgentTable() {
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const [currentLimit, setCurrentLimit] = useState(1);
+  const [params, setParams] = useState<AgentListParams>({
+    page: currentPage,
+    limit: currentLimit,
+  });
 
-  // Tidak ada logika filter karena search telah dihapus
-  const currentData = AGENTS.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage,
-  );
+  const { isFetching, data } = useAgentList({
+    query: { queryKey: ["agent-list", params] },
+    axios: { params },
+  });
+
+  const tableData = useMemo(() => data?.data.list || [], [data]);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setParams((v) => ({ ...v, page: currentPage, limit: currentLimit }));
+    }, 3e2);
+
+    return () => clearTimeout(timeout);
+  }, [currentPage, currentLimit]);
 
   return (
     <div className="p-6 bg-white min-h-screen shadow-lg rounded-md">
@@ -66,31 +77,39 @@ export default function AgentTable() {
                   <TableColumn>Action</TableColumn>
                 </TableHeader>
                 <TableBody>
-                  {currentData.map((agent) => (
-                    <TableRow key={agent.email}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <span className="bg-green-100 text-green-600 p-2 rounded-full">
-                            S
-                          </span>
-                          <div>
-                            <p className="font-medium">{agent.name}</p>
-                            <p className="text-sm text-gray-600">
-                              {agent.email}
-                            </p>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{agent.totalTicket} Ticket</TableCell>
-                      <TableCell>{agent.resolveTicket} Ticket</TableCell>
-                      <TableCell>{agent.avgTime}</TableCell>
-                      <TableCell>
-                        <Button className="text-gray-600 bg-transparent hover:bg-transparent focus:bg-transparent border-none shadow-none">
-                          ...
-                        </Button>
+                  {isFetching ? (
+                    <TableRow>
+                      <TableCell className="text-center" colSpan={5}>
+                        Memuat...
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ) : (
+                    tableData.map((agent) => (
+                      <TableRow key={agent.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <span className="bg-green-100 text-green-600 p-2 rounded-full">
+                              {agent.name[0]}
+                            </span>
+                            <div>
+                              <p className="font-medium">{agent.name}</p>
+                              <p className="text-sm text-gray-600">
+                                {agent.email}
+                              </p>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>- Ticket</TableCell>
+                        <TableCell>- Ticket</TableCell>
+                        <TableCell>-</TableCell>
+                        <TableCell>
+                          <Button className="text-gray-600 bg-transparent hover:bg-transparent focus:bg-transparent border-none shadow-none">
+                            ...
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </div>
@@ -107,7 +126,7 @@ export default function AgentTable() {
           <Pagination>
             <PaginationContent>
               {Array.from(
-                { length: Math.ceil(AGENTS.length / itemsPerPage) },
+                { length: Math.ceil((data?.data.total || 0) / currentLimit) },
                 (_, i) => (
                   <PaginationItem key={i}>
                     <PaginationLink
@@ -123,10 +142,15 @@ export default function AgentTable() {
           </Pagination>
           <Button
             size="sm"
-            disabled={currentPage === Math.ceil(AGENTS.length / itemsPerPage)}
+            disabled={
+              currentPage === Math.ceil((data?.data.total || 0) / currentLimit)
+            }
             onClick={() =>
               setCurrentPage((prev) =>
-                Math.min(prev + 1, Math.ceil(AGENTS.length / itemsPerPage)),
+                Math.min(
+                  prev + 1,
+                  Math.ceil((data?.data.total || 0) / currentLimit),
+                ),
               )
             }
           >

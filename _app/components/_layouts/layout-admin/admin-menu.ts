@@ -23,18 +23,9 @@ export const menuSidebar = [
     link: Routes.BO_TICKET,
   },
   {
-    name: "agent",
-    icon: User,
-    link: Routes.BO_AGENT,
-  },
-  {
     name: "product",
     icon: Package,
     link: Routes.BO_PRODUCT,
-    children: [
-      { name: "duration", link: "/product/duration" },
-      { name: "subscription", link: "/product/subscription" },
-    ],
   },
   {
     name: "order",

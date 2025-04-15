@@ -1,20 +1,11 @@
+/* eslint-disable react/no-array-index-key */
+
 "use client";
 
-/* eslint-disable react/no-array-index-key */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable no-unused-vars */
-/* eslint-disable react/jsx-key */
-/* eslint-disable jsx-a11y/anchor-is-valid */
-
-import React from "react";
-import Link from "next/link";
 import Show from "@/atoms/show";
 import { trUc } from "@/helpers/trans";
 import { menuSidebar } from "@/layout/layout-admin/admin-menu";
 import { Button } from "@/ui/button";
-import { ChevronDown } from "lucide-react";
-import { useTranslations } from "next-intl";
 import {
   Card,
   CardContent,
@@ -22,11 +13,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/ui/card";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
+import Link from "next/link";
+import React from "react";
+import { usePathname } from "next/navigation";
+import { cn } from "@nextui-org/react";
 
 const Sidebar: React.FC = () => {
   const t = useTranslations();
-  const [dropdown, setDropdown] = React.useState<string | null>(null);
+  const pathname = usePathname();
 
   return (
     <div className="hidden border-r bg-muted/40 md:block">
@@ -48,47 +44,28 @@ const Sidebar: React.FC = () => {
           <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
             {menuSidebar.map((item, index) => {
               const IconComponent = item.icon;
+              const isActive = pathname.startsWith(item.link.toString()); // or use pathname.startsWith(item.link) for partial match
 
               return (
-                <div key={`menu-sidebar-${index}`}>
-                  {/* Menu utama */}
-                  <Link
-                    href={item.children ? "#" : item.link}
-                    onClick={(e) => {
-                      if (item.children) e.preventDefault();
-                      setDropdown(dropdown === item.name ? null : item.name); // Toggle dropdown
-                    }}
-                    className={`flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary ${
-                      dropdown === item.name ? "bg-muted/80 text-primary" : ""
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <IconComponent className="h-4 w-4" />
-                      {trUc({ t, key: item.name })}
-                    </div>
-                    {item.children && (
-                      <ChevronDown
-                        className={`h-4 w-4 transition-transform ${
-                          dropdown === item.name ? "rotate-180" : ""
-                        }`}
-                      />
-                    )}
-                  </Link>
-
-                  {/* Sub-menu */}
-                  {item.children && dropdown === item.name && (
-                    <div className="ml-6 mt-2 space-y-1">
-                      {item.children.map((child, childIndex) => (
-                        <Link
-                          key={`submenu-${index}-${childIndex}`}
-                          href={child.link}
-                          className="block rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-                        >
-                          {trUc({ t, key: child.name })}
-                        </Link>
-                      ))}
-                    </div>
+                <div
+                  key={`menu-sidebar-${index}`}
+                  className={cn(
+                    "rounded-lg",
+                    isActive
+                      ? "bg-primary text-white"
+                      : "text-muted-foreground",
                   )}
+                >
+                  <Link
+                    href={item.link}
+                    className={cn(
+                      "flex items-center gap-3 rounded-lg px-3 py-2 transition-all",
+                      !isActive && " hover:text-primary",
+                    )}
+                  >
+                    <IconComponent className="h-4 w-4" />
+                    {trUc({ t, key: item.name })}
+                  </Link>
                 </div>
               );
             })}

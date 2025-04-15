@@ -1,5 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 "use client";
-import type { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
+
+import type {
+  AxiosError,
+  AxiosRequestConfig,
+  AxiosResponse,
+  InternalAxiosRequestConfig,
+} from "axios";
 import {
   type UseQueryOptions,
   type UseMutationOptions,
@@ -9,17 +17,20 @@ import {
 } from "@tanstack/react-query";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { AUTH_KEY } from "../constants/auth";
 
 export const http = axios.create({
   baseURL: process.env.NEXT_PUBLIC_BASE_URL,
 });
 
 http.interceptors.request.use((config) => {
-  const token = Cookies.get("accessToken");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
+  const token = Cookies.get(AUTH_KEY);
+  return token
+    ? ({
+        ...config,
+        headers: { Authorization: `Bearer ${token}` },
+      } as InternalAxiosRequestConfig)
+    : config;
 });
 
 http.interceptors.response.use(
@@ -27,30 +38,28 @@ http.interceptors.response.use(
     return response;
   },
   async (error) => {
-    // If the error is not 401, just reject as-is & check if the error response and add notification
-    if (error?.response?.status !== 403) {
-      // window.message.error(message)
-      return Promise.reject(error);
-    } else {
-      Cookies.remove("accessToken");
-
-      setTimeout(() => {
-        window.location.href = "/auth/sign-in";
+    if (error?.response?.status === 401) {
+      Cookies.remove(AUTH_KEY);
+      return setTimeout(() => {
+        window.location.href = "/";
       }, 200);
     }
+
+    return Promise.reject(error);
   },
 );
 
-type Config<TData = any, TError = DefaultError> = {
+export type DefaultError = {
+  message: string;
+  validation: unknown;
+};
+
+type Config<TData = unknown, TError = DefaultError> = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   keys?: any[];
   params?: Record<string, any>;
   httpOptions?: AxiosRequestConfig;
   queryOptions?: UseQueryOptions<TData, TError>;
-};
-
-type DefaultError = {
-  message: string;
-  validation: {};
 };
 
 /**
@@ -83,7 +92,7 @@ export function useHttp<TData = any, TError = any>(
         if (options?.params) {
           Object.assign(defaultConfig, { params: options.params });
         }
-        const { data } = await http.get<TData>(url, defaultConfig);
+        const { data } = await http.get<TData>(url, options?.httpOptions);
         return data ?? null;
       } catch (e: any) {
         Promise.reject(e?.response ?? e);
@@ -134,15 +143,15 @@ type HttpMutationOptions<
  */
 export function useHttpMutation<
   TData = any,
-  TError = AxiosResponse<DefaultError>,
   TVariables = any,
+  TError = AxiosResponse<DefaultError>,
 >(url: string, options: HttpMutationOptions<TData, TError>) {
   return useMutation({
     mutationFn: (value: TVariables) => {
       return new Promise<TData>((resolve, reject) => {
         return http
           .request<TData>({
-            url: url,
+            url,
             method: options.method,
             ...options.httpOptions,
             data: value,

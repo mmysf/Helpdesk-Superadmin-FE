@@ -6,9 +6,7 @@
 export {}
 declare global {
   const createRef: typeof import('react')['createRef']
-  const formatCurrency: (typeof import("./_core/helpers/currency"))["formatCurrency"]
   const forwardRef: typeof import('react')['forwardRef']
-  const http: (typeof import("./_core/hooks/http"))["http"]
   const lazy: typeof import('react')['lazy']
   const memo: typeof import('react')['memo']
   const navigate: typeof import('next/navigation')['navigate']
@@ -18,8 +16,6 @@ declare global {
   const useDebugValue: typeof import('react')['useDebugValue']
   const useDeferredValue: typeof import('react')['useDeferredValue']
   const useEffect: typeof import('react')['useEffect']
-  const useHttp: (typeof import("./_core/hooks/http"))["useHttp"]
-  const useHttpMutation: (typeof import("./_core/hooks/http"))["useHttpMutation"]
   const useId: typeof import('react')['useId']
   const useImperativeHandle: typeof import('react')['useImperativeHandle']
   const useInsertionEffect: typeof import('react')['useInsertionEffect']

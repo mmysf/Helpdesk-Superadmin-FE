@@ -1,3 +1,5 @@
+"use client";
+
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React from "react";
@@ -32,8 +34,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/ui/dropdown-menu";
+import Cookie from "js-cookie";
+import { useRouter } from "next/navigation";
+import { Routes } from "@/root/_app/config/routes";
+import { AUTH_KEY, USER } from "@/root/_app/constants/auth";
 
 const Navbar: React.FC = () => {
+  const router = useRouter();
   return (
     <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
       <Sheet>
@@ -134,6 +141,17 @@ const Navbar: React.FC = () => {
               <DropdownMenuSeparator key={index} />
             ) : item.name === "my_account" ? (
               <DropdownMenuLabel key={index}>My Account</DropdownMenuLabel>
+            ) : item.name === "logout" ? (
+              <DropdownMenuItem
+                key={index}
+                onClick={() => {
+                  Cookie.remove(AUTH_KEY);
+                  Cookie.remove(USER);
+                  router.push(Routes.AUTH_SIGNIN);
+                }}
+              >
+                Logout
+              </DropdownMenuItem>
             ) : (
               <DropdownMenuItem key={index}>
                 {(item.name ?? "").charAt(0).toUpperCase() +

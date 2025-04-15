@@ -15,5 +15,10 @@
   "login": "login",
   "account": "account",
   "dashboard": "dashboard",
+  "company": "company",
+  "customer": "customer",
+  "ticket": "ticket",
+  "product": "product",
+  "order": "order",
   "component": "component"
 }
