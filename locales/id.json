@@ -17,6 +17,7 @@
   "dashboard": "dashboard",
   "company": "company",
   "customer": "customer",
+  "customer_b2c": "customer B2C",
   "ticket": "ticket",
   "product": "product",
   "order": "order",

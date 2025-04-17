@@ -25,7 +25,7 @@ export const menuSidebar = [
     link: Routes.BO_CUSTOMER,
   },
   {
-    name: "customer B2C",
+    name: "customer_b2c",
     icon: User,
     link: Routes.BO_CUSTOMER_B2C,
   },
