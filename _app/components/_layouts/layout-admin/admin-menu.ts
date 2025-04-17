@@ -1,5 +1,12 @@
 import { Routes } from "@/config/routes";
-import { Home, Package, ShoppingBag, Ticket, User } from "lucide-react";
+import {
+  Home,
+  Package,
+  ShoppingBag,
+  Ticket,
+  User,
+  Building2,
+} from "lucide-react";
 
 export const menuSidebar = [
   {
@@ -9,13 +16,18 @@ export const menuSidebar = [
   },
   {
     name: "company",
-    icon: User,
+    icon: Building2,
     link: Routes.BO_COMPANY,
   },
   {
     name: "customer",
     icon: User,
     link: Routes.BO_CUSTOMER,
+  },
+  {
+    name: "customer_b2c",
+    icon: User,
+    link: Routes.BO_CUSTOMER_B2C,
   },
   {
     name: "ticket",
