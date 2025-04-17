@@ -1,3 +1,4 @@
+/* eslint-disable no-use-before-define */
 import {
   DataAttachment,
   DefaultListParams,
@@ -54,7 +55,53 @@ export type CustomerLogo = {
   updatedAt: string;
 };
 
+export interface CustomerB2c {
+  id: string;
+  company: Company;
+  companyProduct: Company;
+  name: string;
+  email: string;
+  isNeedBalance: boolean;
+  subscription: Subscription | null;
+  profilePicture: ProfilePicture;
+  jobTitle: string;
+  bio: string;
+  role: string;
+  isVerified: boolean;
+  lastActivityAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Subscription {
+  status: string;
+  hourPackage: null;
+  balance: null;
+  startAt: Date;
+  endAt: Date;
+}
+
+export interface Company {
+  id: string;
+  name: string;
+  image: string;
+  type?: string;
+  code?: string;
+}
+
+export interface ProfilePicture {
+  id: string;
+  name: string;
+  size: number;
+  url: string;
+  type: string;
+  category: string;
+  isPrivate: boolean;
+  providerKey: string;
+}
+
 export type CustomerListResponse = DefaultListResponse<Customer>;
+export type CustomerB2CListResponse = DefaultListResponse<CustomerB2c>;
 export type CustomerDetailResponse = DefaultResponse<Customer>;
 export type CustomerCreateResponse = DefaultResponse;
 export type CustomerUpdateResponse = DefaultResponse;

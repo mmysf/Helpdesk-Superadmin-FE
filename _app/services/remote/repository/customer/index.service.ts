@@ -1,7 +1,8 @@
 import { useHttp, useHttpMutation } from "@/root/_app/hooks/http";
 import { ServiceConfig, ServiceMutationConfig } from "../types";
-import { CUSTOMER } from "..";
+import { CUSTOMER, CUSTOMER_B2C } from "..";
 import {
+  CustomerB2CListResponse,
   CustomerCreatePayload,
   CustomerCreateResponse,
   CustomerDeleteResponse,
@@ -19,6 +20,15 @@ export const useCustomerList = (
   config?: ServiceConfig<CustomerListResponse>,
 ) => {
   return useHttp(CUSTOMER.LIST, {
+    httpOptions: config?.axios,
+    queryOptions: config?.query,
+  });
+};
+
+export const useCustomerB2cList = (
+  config?: ServiceConfig<CustomerB2CListResponse>,
+) => {
+  return useHttp(CUSTOMER_B2C.LIST, {
     httpOptions: config?.axios,
     queryOptions: config?.query,
   });
@@ -66,6 +76,17 @@ export const useCustomerDelete = (
   config?: ServiceMutationConfig<CustomerDeleteResponse>,
 ) => {
   return useHttpMutation(CUSTOMER.DELETE(id), {
+    method: "DELETE",
+    httpOptions: config?.axios,
+    queryOptions: config?.query,
+  });
+};
+
+export const useCustomerB2cDelete = (
+  id: string,
+  config?: ServiceMutationConfig<CustomerDeleteResponse>,
+) => {
+  return useHttpMutation(CUSTOMER_B2C.DELETE(id), {
     method: "DELETE",
     httpOptions: config?.axios,
     queryOptions: config?.query,
