@@ -1,3 +1,5 @@
+/* eslint-disable sonarjs/no-duplicate-string */
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -48,16 +50,23 @@ export default function CreditHourModal(props: CreateProductProps) {
     handleSubmit,
     setValue,
     reset,
+    getValues,
+    watch,
+    trigger,
     formState: { errors },
   } = useForm<ProductCreatePayload>({
     defaultValues: {
       name: "",
-      price: 0,
+      priceIdr: 0,
+      priceUsd: 0,
       durationHours: 0,
       validity: 0,
       benefit: [],
       categoryId: id,
       customizable: false,
+      isIndonesia: false,
+      isInternational: false,
+      marketType: [],
     },
   });
   const { isPending: isCreatingHour, mutateAsync: createHour } =
@@ -77,25 +86,34 @@ export default function CreditHourModal(props: CreateProductProps) {
 
   useEffect(() => {
     if (!modeCreate && initialData) {
+      console.log(initialData);
+      const isIndonesia = initialData.marketType.includes("INDONESIAN");
+      const isInternational = initialData.marketType.includes("INTERNATIONAL");
       reset({
         name: initialData.name,
-        price: initialData.price,
+        priceIdr: initialData.price.idr,
+        priceUsd: initialData.price.usd,
         durationHours: initialData.duration?.hours,
         validity: initialData.validity,
         benefit: initialData.benefit,
         categoryId: id,
         customizable: initialData.customizable,
+        isIndonesia,
+        isInternational,
+        marketType: initialData.marketType,
       });
       setBenefits(initialData.benefit);
     } else {
       reset({
         name: "",
-        price: 0,
+        priceIdr: 0,
+        priceUsd: 0,
         durationHours: 0,
         validity: 0,
         benefit: [],
         categoryId: id,
         customizable: false,
+        marketType: [],
       });
       setBenefits([]);
     }
@@ -132,17 +150,30 @@ export default function CreditHourModal(props: CreateProductProps) {
   const onSubmit = async (data: ProductCreatePayload) => {
     const newData = { ...data };
     newData.benefit = benefits.filter((benefit) => benefit.trim() !== "");
+    const marketType = [];
     if (newData.benefit.length === 0) {
       toastError("Please add at least one benefit");
       return;
     }
+    if (data.isIndonesia) {
+      marketType.push("INDONESIAN");
+    }
+    if (data.isInternational) {
+      marketType.push("INTERNATIONAL");
+    }
     const payload = {
       ...data,
       benefit: newData.benefit,
-      price: Number(data.price),
+      marketType,
+      price: {
+        idr: Number(data.priceIdr),
+        usd: Number(data.priceUsd),
+      },
       durationHours: Number(data.durationHours),
       validity: Number(data.validity),
     };
+
+    console.log(payload);
     try {
       if (modeCreate) {
         if (isHour) {
@@ -206,98 +237,235 @@ export default function CreditHourModal(props: CreateProductProps) {
                   </p>
                 )}
               </div>
-
-              <div className="space-y-2">
-                <Label
-                  htmlFor={isHour ? "durationHours" : "price"}
-                  className="text-sm font-medium"
-                >
-                  {isHour ? "Credit Hour" : "Price"}
+              {!isHour && (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="customizable"
+                    className="h-4 w-4 rounded border-gray-300"
+                    {...register("customizable")}
+                  />
+                  <Label htmlFor="customizable" className="text-sm font-medium">
+                    Make it customizable &quot;Contact Us&quot;
+                  </Label>
+                </div>
+              )}
+              <div className="flex flex-col space-y-2">
+                <Label htmlFor="name" className="text-sm font-medium">
+                  Market Type
                 </Label>
-                <div className="flex flex-row gap-2">
+
+                {/* Indonesia Checkbox */}
+                <div className="flex flex-row items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="isIndonesia"
+                    className="h-4 w-4 rounded border-gray-300"
+                    {...register("isIndonesia")}
+                    onChange={(e) => {
+                      setValue("isIndonesia", e.target.checked);
+                      trigger("marketType"); // validate the group
+                    }}
+                  />
+                  <Label htmlFor="isIndonesia" className="text-sm font-medium">
+                    Indonesia
+                  </Label>
+                </div>
+
+                {/* Price IDR - shown and required only if checked */}
+                {watch("isIndonesia") && !watch("customizable") && (
+                  <div className="space-y-2">
+                    <Label htmlFor="priceIdr" className="text-sm font-medium">
+                      Price IDR
+                    </Label>
+                    <div className="flex flex-row gap-2">
+                      <div className="flex items-center">
+                        <Input
+                          id="priceIdr"
+                          type="number"
+                          placeholder="0"
+                          className={`rounded-r-none ${
+                            errors.priceIdr ? "border-red-500" : ""
+                          }`}
+                          {...register("priceIdr", {
+                            validate: (value) => {
+                              const isIndo = getValues("isIndonesia");
+                              const isCustom = getValues("customizable");
+                              if (
+                                isIndo &&
+                                !isCustom &&
+                                (!value || Number(value) <= 0)
+                              ) {
+                                return "Price IDR is required and must be positive";
+                              }
+                              return true;
+                            },
+                          })}
+                        />
+                        <div className="bg-muted h-10 px-3 flex items-center border border-l-0 rounded-r-md text-muted-foreground">
+                          IDR
+                        </div>
+                      </div>
+                    </div>
+                    {errors.priceIdr && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {errors.priceIdr.message}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* International Checkbox */}
+                <div className="flex flex-row items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="isInternational"
+                    className="h-4 w-4 rounded border-gray-300"
+                    {...register("isInternational")}
+                    onChange={(e) => {
+                      setValue("isInternational", e.target.checked);
+                      trigger("marketType"); // validate the group
+                    }}
+                  />
+                  <Label
+                    htmlFor="isInternational"
+                    className="text-sm font-medium"
+                  >
+                    International
+                  </Label>
+                </div>
+
+                {/* Price USD - shown and required only if checked */}
+                {watch("isInternational") && !watch("customizable") && (
+                  <div className="space-y-2">
+                    <Label htmlFor="priceUsd" className="text-sm font-medium">
+                      Price USD
+                    </Label>
+                    <div className="flex flex-row gap-2">
+                      <div className="flex items-center">
+                        <Input
+                          id="priceUsd"
+                          type="number"
+                          placeholder="0"
+                          className={`rounded-r-none ${
+                            errors.priceUsd ? "border-red-500" : ""
+                          }`}
+                          {...register("priceUsd", {
+                            validate: (value) => {
+                              const isIntl = getValues("isInternational");
+                              const isCustom = getValues("customizable");
+                              if (
+                                isIntl &&
+                                !isCustom &&
+                                (!value || Number(value) <= 0)
+                              ) {
+                                return "Price USD is required and must be positive";
+                              }
+                              return true;
+                            },
+                          })}
+                        />
+                        <div className="bg-muted h-10 px-3 flex items-center border border-l-0 rounded-r-md text-muted-foreground">
+                          USD
+                        </div>
+                      </div>
+                    </div>
+                    {errors.priceUsd && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {errors.priceUsd.message}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <input
+                type="hidden"
+                {...register("marketType", {
+                  validate: () => {
+                    return getValues("isIndonesia") ||
+                      getValues("isInternational")
+                      ? true
+                      : "At least one market type must be selected";
+                  },
+                })}
+              />
+
+              {errors.marketType && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.marketType.message}
+                </p>
+              )}
+
+              {isHour && (
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="durationHours"
+                    className="text-sm font-medium"
+                  >
+                    Credit Hour
+                  </Label>
+                  <div className="flex flex-row gap-2">
+                    <div className="flex items-center">
+                      <Input
+                        id="durationHours"
+                        type="number"
+                        placeholder="0"
+                        className={`rounded-r-none ${
+                          errors.durationHours ? "border-red-500" : ""
+                        }`}
+                        {...register("durationHours", {
+                          required: `Credit hour is required`,
+                          min: { value: 0, message: "Value must be positive" },
+                        })}
+                      />
+                      <div className="bg-muted h-10 px-3 flex items-center border border-l-0 rounded-r-md text-muted-foreground">
+                        Hour
+                      </div>
+                    </div>
+
+                    {/* Checkbox for "Make it Contact Us" */}
+                  </div>
+                  {isHour && errors.durationHours && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.durationHours.message}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {!isHour && !watch("customizable") && (
+                <div className="space-y-2">
+                  <Label htmlFor="validity" className="text-sm font-medium">
+                    Validity
+                  </Label>
                   <div className="flex items-center">
                     <Input
-                      id={isHour ? "durationHours" : "price"}
+                      id="validity"
                       type="number"
                       placeholder="0"
-                      className={`rounded-r-none ${
-                        (isHour ? errors.durationHours : errors.price)
-                          ? "border-red-500"
-                          : ""
-                      }`}
-                      {...register(isHour ? "durationHours" : "price", {
-                        required: `${isHour ? "Credit hour" : "Price"} is required`,
-                        min: { value: 0, message: "Value must be positive" },
+                      className={`rounded-l-none ${errors.validity ? "border-red-500" : ""}`}
+                      {...register("validity", {
+                        validate: (value) => {
+                          const isCustom = getValues("customizable");
+                          if (!isCustom && (!value || Number(value) <= 0)) {
+                            return "Validity is required and must be positive";
+                          }
+                          return true;
+                        },
                       })}
                     />
                     <div className="bg-muted h-10 px-3 flex items-center border border-l-0 rounded-r-md text-muted-foreground">
-                      {isHour ? "Hour" : "$"}
+                      Days
                     </div>
                   </div>
-
-                  {/* Checkbox for "Make it Contact Us" */}
-                  {!isHour && modeCreate && (
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        id="customizable"
-                        className="h-4 w-4 rounded border-gray-300"
-                        {...register("customizable")}
-                      />
-                      <Label
-                        htmlFor="customizable"
-                        className="text-sm font-medium"
-                      >
-                        Make it &quot;Contact Us&quot;
-                      </Label>
-                    </div>
+                  {!isHour && errors.validity && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.validity.message}
+                    </p>
                   )}
                 </div>
-                {isHour && errors.durationHours && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors.durationHours.message}
-                  </p>
-                )}
-                {!isHour && errors.price && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors.price.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label
-                  htmlFor={isHour ? "price" : "validity"}
-                  className="text-sm font-medium"
-                >
-                  {isHour ? "Price" : "Validity"}
-                </Label>
-                <div className="flex items-center">
-                  <Input
-                    id={isHour ? "price" : "validity"}
-                    type="number"
-                    placeholder="0"
-                    className={`rounded-l-none ${(isHour ? errors.price : errors.validity) ? "border-red-500" : ""}`}
-                    {...register(isHour ? "price" : "validity", {
-                      required: `${isHour ? "Price" : "Validity"} is required`,
-                      min: { value: 0, message: "Value must be positive" },
-                    })}
-                  />
-                  <div className="bg-muted h-10 px-3 flex items-center border border-r-0 rounded-l-md text-muted-foreground">
-                    {isHour ? "$" : "Days"}
-                  </div>
-                </div>
-                {isHour && errors.price && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors.price.message}
-                  </p>
-                )}
-                {!isHour && errors.validity && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors.validity.message}
-                  </p>
-                )}
-              </div>
+              )}
 
               <div className="space-y-2">
                 <Label className="text-sm font-medium">

@@ -25,6 +25,7 @@ export interface Customer {
   id: string;
   name: string;
   email: string;
+  marketType: string;
 }
 
 export interface Invoice {
