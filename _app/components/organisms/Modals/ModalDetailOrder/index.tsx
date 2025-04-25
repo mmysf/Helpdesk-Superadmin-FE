@@ -18,6 +18,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as zod from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { formatCurrency } from "@/root/_app/helpers/currency";
 import { Button } from "../../../ui/button";
 import { Dialog, DialogContent, DialogHeader } from "../../../ui/dialog";
 import ModalPayment from "../ModalPayment";
@@ -290,6 +291,12 @@ export default function OrderDetailModal(props: DetailOrderProps) {
               </h3>
               <p className="font-medium">{detail?.data.customer.email}</p>
             </div>
+            <div>
+              <h3 className="text-sm font-medium text-muted-foreground">
+                Market Type
+              </h3>
+              <p className="font-medium">{detail?.data.customer.marketType}</p>
+            </div>
 
             <div>
               <h3 className="text-sm font-medium text-muted-foreground">
@@ -311,6 +318,17 @@ export default function OrderDetailModal(props: DetailOrderProps) {
                   ? (detail?.data?.serverPackage?.validity ?? 0) *
                     (detail?.data?.amount ?? 1)
                   : detail?.data?.hourPackage?.hours}
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-sm font-medium text-muted-foreground">
+                Amount Paid
+              </h3>
+              <p className="font-medium">
+                {detail?.data.customer.marketType === "INDONESIAN"
+                  ? formatCurrency(detail?.data.grandTotal)
+                  : `$${detail?.data.grandTotal}`}
               </p>
             </div>
 
