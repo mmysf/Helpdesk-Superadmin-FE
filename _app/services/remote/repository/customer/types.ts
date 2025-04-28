@@ -71,14 +71,46 @@ export interface CustomerB2c {
   lastActivityAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
+  marketType: string;
 }
 
 export interface Subscription {
   status: string;
-  hourPackage: null;
-  balance: null;
+  hourPackage: HourPackage | null;
+  balance: Balance | null;
   startAt: Date;
   endAt: Date;
+}
+
+export interface Balance {
+  time: Time;
+  ticket: Ticket;
+}
+
+export interface Ticket {
+  remaining: number;
+  used: number;
+}
+
+export interface Time {
+  total: number;
+  remaining: Remaining;
+  used: number;
+}
+
+export interface Remaining {
+  total: number;
+  hour: number;
+  minute: number;
+  second: number;
+}
+
+export interface HourPackage {
+  id: string;
+  name: string;
+  hours: number;
+  price: number;
+  benefit: string[];
 }
 
 export interface Company {

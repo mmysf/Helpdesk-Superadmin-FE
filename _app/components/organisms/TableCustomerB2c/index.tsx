@@ -54,7 +54,7 @@ export default function CustomerTable() {
       {},
       {
         onSuccess: () => {
-          toastSuccess("Data customer berhasil dihapus");
+          toastSuccess("Customer deleted successfully");
           setIsOpen(false);
           refetch();
         },
@@ -112,6 +112,7 @@ export default function CustomerTable() {
                     <TableHead>Name</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Subscription</TableHead>
+                    <TableHead>Market Type</TableHead>
                     <TableHead>Last Activity</TableHead>
                     <TableHead>Action</TableHead>
                   </TableRow>
@@ -169,6 +170,7 @@ export default function CustomerTable() {
                             )}
                           </div>
                         </TableCell>
+                        <TableCell>{item.marketType}</TableCell>
                         <TableCell>
                           {item.lastActivityAt !== null
                             ? format(
