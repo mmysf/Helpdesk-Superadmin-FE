@@ -46,6 +46,8 @@ export const CUSTOMER_B2C = {
   LIST: `superadmin/customer/list?type=B2C`,
   DETAIL: (id: string) => `superadmin/customer/detail/${id}`,
   DELETE: (id: string) => `superadmin/customer/delete/${id}`,
+  SUBS_SERVER: (id: string) =>
+    `superadmin/customer-subscription/list?orderType=SERVER&status=active&customerID=${id}`,
 };
 
 export const PRODUCT = {

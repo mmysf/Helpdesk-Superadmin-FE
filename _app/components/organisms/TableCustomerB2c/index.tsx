@@ -28,6 +28,7 @@ import { EllipsisVertical, Search } from "lucide-react";
 import { format } from "date-fns";
 import PaginationWithoutLinks from "../PaginationWithoutLinks";
 import ConfirmDeleteModal from "../Modals/ModalDelete";
+import ModalDetailCustomerB2c from "../Modals/ModalDetailCustomerB2c";
 
 export default function CustomerTable() {
   const toastSuccess = useToastSuccess();
@@ -35,6 +36,7 @@ export default function CustomerTable() {
 
   const [selectedId, setSelectedId] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [isDetailOpen, setDetailOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [currentLimit, setCurrentLimit] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
@@ -111,9 +113,9 @@ export default function CustomerTable() {
                   <TableRow>
                     <TableHead>Name</TableHead>
                     <TableHead>Email</TableHead>
-                    <TableHead>Subscription</TableHead>
                     <TableHead>Market Type</TableHead>
                     <TableHead>Last Activity</TableHead>
+                    <TableHead>Subscription</TableHead>
                     <TableHead>Action</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -149,7 +151,21 @@ export default function CustomerTable() {
                           </div>
                         </TableCell>
                         <TableCell>{item.email}</TableCell>
+                        <TableCell>{item.marketType}</TableCell>
                         <TableCell>
+                          {item.lastActivityAt !== null
+                            ? format(
+                                new Date(item.lastActivityAt),
+                                "dd MMM yyyy, HH:mm",
+                              )
+                            : "-"}
+                        </TableCell>
+                        <TableCell
+                          onClick={() => {
+                            setSelectedId(item.id);
+                            setDetailOpen(true);
+                          }}
+                        >
                           <div>
                             {item.subscription != null ? (
                               <>
@@ -170,15 +186,6 @@ export default function CustomerTable() {
                             )}
                           </div>
                         </TableCell>
-                        <TableCell>{item.marketType}</TableCell>
-                        <TableCell>
-                          {item.lastActivityAt !== null
-                            ? format(
-                                new Date(item.lastActivityAt),
-                                "dd MMM yyyy, HH:mm",
-                              )
-                            : "-"}
-                        </TableCell>
                         <TableCell>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -187,6 +194,15 @@ export default function CustomerTable() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" sideOffset={4}>
+                              <DropdownMenuItem
+                                className="text-default hover:text-white hover:bg-gray-500"
+                                onClick={() => {
+                                  setSelectedId(item.id);
+                                  setDetailOpen(true);
+                                }}
+                              >
+                                Detail
+                              </DropdownMenuItem>
                               <DropdownMenuItem
                                 className="text-red-500 hover:text-red-500 hover:bg-red-100"
                                 onClick={() => {
@@ -222,6 +238,14 @@ export default function CustomerTable() {
             subtitle="Are you sure want to delete this Customer"
             onConfirm={handleDelete}
           />
+          {selectedId && isDetailOpen && (
+            <ModalDetailCustomerB2c
+              isOpen={isDetailOpen}
+              setIsOpen={setDetailOpen}
+              title="Detail Subs"
+              id={selectedId}
+            />
+          )}
         </div>
       </CardContent>
     </Card>
