@@ -132,9 +132,48 @@ export interface ProfilePicture {
   providerKey: string;
 }
 
+// Subscription
+
+export interface CustomerB2CSubscription {
+  id: string;
+  customer: Customer;
+  hourPackage: null;
+  serverPackage: ServerPackage;
+  order: Order;
+  status: string;
+  expiredAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface CustomerSubs {
+  id: string;
+  name: string;
+  email: string;
+  marketType: string;
+}
+
+export interface Order {
+  id: string;
+  orderNumber: string;
+  type: string;
+}
+
+export interface ServerPackage {
+  id: string;
+  name: string;
+  price: number;
+  customizable: boolean;
+  validity: number;
+  benefit: string[];
+}
+
 export type CustomerListResponse = DefaultListResponse<Customer>;
 export type CustomerB2CListResponse = DefaultListResponse<CustomerB2c>;
+export type CustomerB2CSubscriptionListResponse =
+  DefaultListResponse<CustomerB2CSubscription>;
 export type CustomerDetailResponse = DefaultResponse<Customer>;
+export type CustomerB2CDetailResponse = DefaultResponse<CustomerB2c>;
 export type CustomerCreateResponse = DefaultResponse;
 export type CustomerUpdateResponse = DefaultResponse;
 export type CustomerDeleteResponse = DefaultResponse;
