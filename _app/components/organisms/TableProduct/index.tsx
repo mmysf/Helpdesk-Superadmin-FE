@@ -1,3 +1,5 @@
+/* eslint-disable sonarjs/no-identical-functions */
+
 "use client";
 
 import useToastError from "@/root/_app/hooks/useToastError";
@@ -28,6 +30,7 @@ import {
 import { EllipsisVertical, Search } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { GoDotFill } from "react-icons/go";
+import { formatCurrency } from "@/root/_app/helpers/currency";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -117,7 +120,7 @@ export default function ProductsTable(props: TableProductProps) {
     return (
       <div
         aria-label="status"
-        className={`capitalize ${color} text-white px-2 py-1 rounded-3xl`}
+        className={`capitalize ${color} text-white px-2 py-1 rounded-3xl flex items-center justify-center w-fit`}
         role="button"
       >
         {status.replace("_", " ")}
@@ -232,6 +235,7 @@ export default function ProductsTable(props: TableProductProps) {
                     <TableHead>Product Name</TableHead>
                     <TableHead>{isHour ? "Credit Hour" : "Price"}</TableHead>
                     <TableHead>{isHour ? "Price" : "Validity"}</TableHead>
+                    <TableHead>Market Type</TableHead>
                     <TableHead>Benefit</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead />
@@ -242,14 +246,54 @@ export default function ProductsTable(props: TableProductProps) {
                     <TableRow key={product.id}>
                       <TableCell>{product.name}</TableCell>
                       <TableCell>
-                        {isHour
-                          ? `${product.duration?.hours} hour`
-                          : `$ ${product.price}`}
+                        {isHour ? (
+                          `${product.duration?.hours} hour`
+                        ) : (
+                          <>
+                            {product.customizable ? (
+                              <p>Custom</p>
+                            ) : (
+                              <div className="flex flex-col">
+                                {product.marketType.includes("INDONESIAN") && (
+                                  <p>{formatCurrency(product.price.idr)}</p>
+                                )}
+                                {product.marketType.includes(
+                                  "INTERNATIONAL",
+                                ) && <p>${product.price.usd}</p>}
+                              </div>
+                            )}
+                          </>
+                        )}
                       </TableCell>
                       <TableCell>
-                        {isHour
-                          ? `$ ${product.price}`
-                          : `${product.validity} days`}
+                        <>
+                          {isHour ? (
+                            <div className="flex flex-col">
+                              {product.marketType.includes("INDONESIAN") && (
+                                <p>{formatCurrency(product.price.idr)}</p>
+                              )}
+                              {product.marketType.includes("INTERNATIONAL") && (
+                                <p>${product.price.usd}</p>
+                              )}
+                            </div>
+                          ) : (
+                            <>
+                              {product.customizable ? (
+                                <p>Custom</p>
+                              ) : (
+                                `${product.validity} days`
+                              )}
+                            </>
+                          )}
+                        </>
+                      </TableCell>
+                      <TableCell>
+                        {product.marketType.map((item) => (
+                          <div className="flex items-center gap-1" key={item}>
+                            <GoDotFill />
+                            <p className="text-sm">{item}</p>
+                          </div>
+                        ))}
                       </TableCell>
                       <TableCell>
                         {product.benefit?.map((item) => (

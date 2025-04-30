@@ -1,3 +1,4 @@
+/* eslint-disable no-use-before-define */
 import { DefaultListParams, DefaultListResponse } from "../types";
 
 export interface Duration {
@@ -13,7 +14,7 @@ export interface List {
   name: string;
   description: string;
   benefit: string[];
-  price: number;
+  price: Price;
   duration: Duration;
   additional: Additional;
   status: string;
@@ -21,15 +22,26 @@ export interface List {
   updatedAt: string;
   customizable: boolean;
   validity: number;
+  marketType: string[];
 }
+
+export interface Price {
+  idr?: number;
+  usd?: number;
+}
+
 export interface ProductCreatePayload {
   benefit: string[];
   categoryId: string;
   durationHours: number;
   name: string;
   validity: number;
-  price: number;
+  priceIdr: number;
+  priceUsd: number;
   customizable: boolean;
+  isIndonesia: boolean;
+  isInternational: boolean;
+  marketType: string[];
 }
 
 export type ProductUpdatePayload = ProductCreatePayload;

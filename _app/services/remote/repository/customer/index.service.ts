@@ -1,7 +1,10 @@
 import { useHttp, useHttpMutation } from "@/root/_app/hooks/http";
 import { ServiceConfig, ServiceMutationConfig } from "../types";
-import { CUSTOMER } from "..";
+import { CUSTOMER, CUSTOMER_B2C } from "..";
 import {
+  CustomerB2CDetailResponse,
+  CustomerB2CListResponse,
+  CustomerB2CSubscriptionListResponse,
   CustomerCreatePayload,
   CustomerCreateResponse,
   CustomerDeleteResponse,
@@ -86,4 +89,46 @@ export const useCustomerUploadLogo = (
       queryOptions: config?.query,
     },
   );
+};
+
+// B2C
+
+export const useCustomerB2cList = (
+  config?: ServiceConfig<CustomerB2CListResponse>,
+) => {
+  return useHttp(CUSTOMER_B2C.LIST, {
+    httpOptions: config?.axios,
+    queryOptions: config?.query,
+  });
+};
+
+export const useCustomerB2cSubscriptionList = (
+  id: string,
+  config?: ServiceConfig<CustomerB2CSubscriptionListResponse>,
+) => {
+  return useHttp(CUSTOMER_B2C.SUBS_SERVER(id), {
+    httpOptions: config?.axios,
+    queryOptions: config?.query,
+  });
+};
+
+export const useCustomerB2cDetail = (
+  id: string,
+  config?: ServiceConfig<CustomerB2CDetailResponse>,
+) => {
+  return useHttp(CUSTOMER_B2C.DETAIL(id), {
+    httpOptions: config?.axios,
+    queryOptions: config?.query,
+  });
+};
+
+export const useCustomerB2cDelete = (
+  id: string,
+  config?: ServiceMutationConfig<CustomerDeleteResponse>,
+) => {
+  return useHttpMutation(CUSTOMER_B2C.DELETE(id), {
+    method: "DELETE",
+    httpOptions: config?.axios,
+    queryOptions: config?.query,
+  });
 };

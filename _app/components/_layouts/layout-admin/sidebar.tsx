@@ -1,3 +1,5 @@
+/* eslint-disable security/detect-non-literal-regexp */
+/* eslint-disable sonarjs/no-duplicated-branches */
 /* eslint-disable react/no-array-index-key */
 
 "use client";
@@ -44,7 +46,9 @@ const Sidebar: React.FC = () => {
           <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
             {menuSidebar.map((item, index) => {
               const IconComponent = item.icon;
-              const isActive = pathname.startsWith(item.link.toString()); // or use pathname.startsWith(item.link) for partial match
+              const link = item.link.toString().replace(/\/$/, ""); // remove trailing slash
+              const regex = new RegExp(`^${link}(/|$)`);
+              const isActive = regex.test(pathname);
 
               return (
                 <div

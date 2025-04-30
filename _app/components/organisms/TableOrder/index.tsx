@@ -20,6 +20,7 @@ import { EllipsisVertical, Filter, Search } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Spinner } from "@nextui-org/react";
 import { format } from "date-fns";
+import { formatCurrency } from "@/root/_app/helpers/currency";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -102,10 +103,10 @@ export default function OrdersTable() {
     return (
       <div
         aria-label="status"
-        className={`uppercase ${color} flex items-center justify-center px-2 py-1 rounded-3xl`}
+        className={`uppercase ${color} flex items-center justify-center px-2 py-1 rounded-3xl w-fit`}
         role="button"
       >
-        <p className="text-xs text-white">{status.replace("_", " ")}</p>
+        <p className="text-[10px] text-white">{status.replace("_", " ")}</p>
       </div>
     );
   }, []);
@@ -202,7 +203,11 @@ export default function OrdersTable() {
                         </TableCell>
                         <TableCell>{order.hourPackage?.name}</TableCell>
                         <TableCell>{order.hourPackage?.hours}</TableCell>
-                        <TableCell>{order.grandTotal}</TableCell>
+                        <TableCell>
+                          {order.customer.marketType === "INDONESIAN"
+                            ? formatCurrency(order.grandTotal)
+                            : `$${order.grandTotal}`}
+                        </TableCell>
                         <TableCell>{renderStatus(order.status)}</TableCell>
                         <TableCell className="text-center">
                           <DropdownMenu>
