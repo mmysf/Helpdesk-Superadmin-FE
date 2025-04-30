@@ -86,7 +86,6 @@ export default function CreditHourModal(props: CreateProductProps) {
 
   useEffect(() => {
     if (!modeCreate && initialData) {
-      console.log(initialData);
       const isIndonesia = initialData.marketType.includes("INDONESIAN");
       const isInternational = initialData.marketType.includes("INTERNATIONAL");
       reset({
@@ -173,7 +172,6 @@ export default function CreditHourModal(props: CreateProductProps) {
       validity: Number(data.validity),
     };
 
-    console.log(payload);
     try {
       if (modeCreate) {
         if (isHour) {

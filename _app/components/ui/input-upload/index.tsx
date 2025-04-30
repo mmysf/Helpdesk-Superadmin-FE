@@ -50,7 +50,6 @@ export const InputUpload = (props: UploaderProps) => {
   useEffect(() => {
     if (selectedFileName) {
       onResetInputRef();
-      console.log(selectedFileName);
     }
   }, [selectedFileName]);
 
