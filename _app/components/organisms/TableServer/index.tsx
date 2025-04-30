@@ -19,6 +19,7 @@ import {
 import { EllipsisVertical, Filter, Search } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
+import { formatCurrency } from "@/root/_app/helpers/currency";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -198,7 +199,11 @@ export default function OrdersTable() {
                       <TableCell>
                         {(server.serverPackage?.validity ?? 0) * server.amount}
                       </TableCell>
-                      <TableCell>{server.grandTotal}</TableCell>
+                      <TableCell>
+                        {server.customer.marketType === "INDONESIAN"
+                          ? formatCurrency(server.grandTotal)
+                          : `$${server.grandTotal}`}
+                      </TableCell>
                       <TableCell>{renderStatus(server.status)}</TableCell>
                       <TableCell className="text-center">
                         <DropdownMenu>
