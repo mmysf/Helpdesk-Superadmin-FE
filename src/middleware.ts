@@ -26,6 +26,11 @@ export const config = {
 const middleware = (request: NextRequest) => {
   const isLoggedIn = request.cookies.get(AUTH_KEY);
 
+  if (request.nextUrl.pathname === "/") {
+    const target = isLoggedIn?.value ? Routes.BO_DASHBOARD : Routes.AUTH_SIGNIN;
+    return Response.redirect(new URL(target, request.url));
+  }
+
   if (
     isLoggedIn?.value &&
     noAuth.some((route) => request.nextUrl.pathname.includes(route))

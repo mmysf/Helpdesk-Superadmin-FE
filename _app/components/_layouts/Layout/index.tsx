@@ -27,7 +27,7 @@ const Layout: React.FC<any> = async ({ children }) => {
       </head>
       <body suppressHydrationWarning className={fonts.className}>
         <Providers>
-          <Toaster richColors closeButton/>
+          <Toaster position="top-center" richColors closeButton/>
           <NextIntlClientProvider messages={messages}>
             {children}
           </NextIntlClientProvider>
