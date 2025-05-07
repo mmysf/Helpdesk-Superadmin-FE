@@ -15,7 +15,8 @@ import {
   useAuthLogin,
 } from "@/services_remote/repository/auth/index.service";
 import useToastError from "@/hooks/useToastError";
-import useToastSuccess from "@/hooks/useToastSuccess";
+// import useToastSuccess from "@/hooks/useToastSuccess";
+import { toast } from "sonner";
 
 export default function Page() {
   const router = useRouter();
@@ -37,7 +38,7 @@ export default function Page() {
   };
 
   const toastError = useToastError();
-  const toastSuccess = useToastSuccess();
+  // const toastSuccess = useToastSuccess();
 
   useEffect(() => {
     setValue("email", "");
@@ -47,7 +48,8 @@ export default function Page() {
   const onSubmit = handleSubmit((payload) => {
     mutate(payload, {
       onSuccess: ({ data }) => {
-        toastSuccess("Login successfull!");
+        // toastSuccess("Login successfull!");
+        toast.success("Login successfull!");
         Cookie.set(AUTH_KEY, data.token);
         Cookie.set(USER, JSON.stringify(data.user));
         router.push("/bo/dashboard");
@@ -117,7 +119,12 @@ export default function Page() {
                 )}
               />
             </div>
-            <Button type="submit" disabled={isPending} className="w-full">
+            <Button
+              type="submit"
+              // loading={isPending}
+              disabled={isPending}
+              className="w-full"
+            >
               Login
             </Button>
           </form>
