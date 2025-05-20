@@ -26,10 +26,9 @@ import { useCompanyList } from "@/root/_app/services/remote/repository/company/i
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Routes } from "@/root/_app/config/routes";
-import useToastSuccess from "@/root/_app/hooks/useToastSuccess";
 import { z } from "zod";
 import * as zod from "@hookform/resolvers/zod";
-import useToastError from "@/root/_app/hooks/useToastError";
+import { toast } from "sonner";
 
 interface Props {
   params?: { [key: string]: string };
@@ -38,8 +37,6 @@ interface Props {
 
 export default function AddCustomer({ params }: Props) {
   const router = useRouter();
-  const toastSuccess = useToastSuccess();
-  const toastError = useToastError();
   const agentId = useMemo(() => params?.id, [params]);
   const isEdit = useMemo(() => agentId !== undefined, [agentId]);
   const [imgUrl, setImgUrl] = useState("");
@@ -110,12 +107,12 @@ export default function AddCustomer({ params }: Props) {
     const { target } = evt;
     const file = target.files && target.files[0];
     if (file == null) {
-      toastError("File is empty");
+      toast.error("File is empty");
       return;
     }
 
     if (file.size > MAX_FILE_SIZE) {
-      toastError(`File ${file.name} is too large. Maximum size is 1 MB`);
+      toast.error(`File ${file.name} is too large. Maximum size is 1 MB`);
       return;
     }
 
@@ -126,10 +123,10 @@ export default function AddCustomer({ params }: Props) {
       onSuccess: (res) => {
         setValue("logoAttachId", res.data.id);
         clearErrors("logoAttachId");
-        toastSuccess("Upload logo successfully");
+        toast.success("Upload logo successfully");
       },
       onError: (err) => {
-        toastError(err.data.message);
+        toast.error(err.data.message);
       },
     });
   };
@@ -144,30 +141,23 @@ export default function AddCustomer({ params }: Props) {
     if (isEdit)
       handleUpdate(updatePayload, {
         onSuccess: () => {
-          toastSuccess("Berhasil mengedit customer");
+          toast.success("Customer updated successfully");
           router.push(Routes.BO_CUSTOMER);
         },
         onError: (err) => {
-          toastError(err.data.message);
+          toast.error(err.data.message);
         },
       });
     else
       handleCreate(payload, {
         onSuccess: () => {
-          toastSuccess("Berhasil menambahkan customer");
+          toast.success("Customer created successfully");
           router.push(Routes.BO_CUSTOMER);
         },
         onError: (err) => {
-          toastError(err.data.message);
+          toast.error(err.data.message);
         },
       });
-
-    // const action = isEdit ? handleUpdate(updatePayload) : handleCreate(payload);
-    // await action;
-    // toastSuccess(
-    //   isEdit ? "Data berhasil disimpan" : "Data berhasil ditambahkan",
-    // );
-    // handleBack();
   };
 
   useEffect(() => {

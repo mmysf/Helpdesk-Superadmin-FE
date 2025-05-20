@@ -8,7 +8,12 @@ import {
 } from "@/root/_app/services/remote/repository/customer/index.service";
 import { format } from "date-fns";
 import { DefaultListParams } from "@/root/_app/services/remote/repository";
-import { Dialog, DialogContent, DialogHeader } from "../../../ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "../../../ui/dialog";
 import PaginationWithoutLinks from "../../PaginationWithoutLinks";
 
 interface ModalDetailCustomerB2cProps {
@@ -57,6 +62,7 @@ export default function ModalDetailCustomerB2c(
   return (
     <Dialog open={isOpen} onOpenChange={(value) => setIsOpen(value)}>
       <DialogContent className="max-w-3xl max-h-[650px] overflow-scroll">
+        <DialogTitle className="hidden">Edit profile</DialogTitle>
         <DialogHeader className="flex flex-row items-center gap-2">
           <h2 className="text-lg font-bold">{title}</h2>
         </DialogHeader>

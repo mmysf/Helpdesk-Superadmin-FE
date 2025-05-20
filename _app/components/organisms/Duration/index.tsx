@@ -4,8 +4,6 @@ import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
 
 import { EllipsisVertical, Plus, Search } from "lucide-react";
-import useToastSuccess from "@/root/_app/hooks/useToastSuccess";
-import useToastError from "@/root/_app/hooks/useToastError";
 import {
   ProductDuration,
   ProductDurationListParams,
@@ -13,6 +11,7 @@ import {
   useProductDurationList,
   useProductDurationUpdateStatus,
 } from "@/services_remote/repository/product-duration/index.service";
+import { toast } from "sonner";
 import { Card, CardContent } from "../../ui/card";
 import {
   Table,
@@ -35,8 +34,6 @@ import ModalToggleDuration from "../Modals/ModalToggleDuration";
 import ModalDuration from "../Modals/ModalDuration";
 
 export default function DurationTable() {
-  const toastSuccess = useToastSuccess();
-  const toastError = useToastError();
   const [currentPage, setCurrentPage] = useState(1);
   const [currentLimit, setCurrentLimit] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
@@ -93,18 +90,18 @@ export default function DurationTable() {
     await hanldeUpdateStatusProduct({
       status: item?.status !== "active" ? "active" : "inactive",
     }).catch((err) => {
-      toastError(err.data?.message || err.message);
+      toast.error(err.data?.message || err.message);
       throw err;
     });
-    toastSuccess("Data berhasil diubah");
+    toast.success("Status updated successfully");
     handleOnCallback();
   };
 
   const handleConfirmDelete = async () => {
     await handleDeleteProduct({}).catch((err) => {
-      toastError(err.data?.message || err.message);
+      toast.error(err.data?.message || err.message);
     });
-    toastSuccess("Data berhasil dihapus");
+    toast.success("Duration deleted successfully");
     handleOnCallback();
   };
 

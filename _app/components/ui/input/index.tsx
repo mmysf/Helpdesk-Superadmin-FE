@@ -1,23 +1,32 @@
-import * as React from "react";
-
-import { cn } from "@/helpers/utils";
+import { cn } from "@nextui-org/react";
+import React from "react";
 
 export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
   endContent?: React.ReactNode;
   startContent?: React.ReactNode;
   wrapperClass?: string;
+  error?: boolean; // 👈 add this
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   (
-    { className, type, endContent, startContent, wrapperClass, ...props },
+    {
+      className,
+      type,
+      endContent,
+      startContent,
+      wrapperClass,
+      error, // 👈 destructure it
+      ...props
+    },
     ref,
   ) => {
     return (
       <div
         className={cn(
-          "flex h-10 items-center rounded-md border border-input bg-white text-sm ring-offset-background focus-within:ring-1 focus-within:ring-ring focus-within:ring-offset-2",
+          "flex h-10 items-center rounded-md border bg-white text-sm ring-offset-background focus-within:ring-1 focus-within:ring-ring focus-within:ring-offset-2",
+          error ? "border-red-500 focus-within:ring-red-500" : "border-input",
           wrapperClass,
         )}
       >

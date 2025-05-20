@@ -10,6 +10,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { DialogTitle } from "@radix-ui/react-dialog";
 
 interface ModalToggleDurationProps {
   isOpen: boolean;
@@ -30,7 +31,7 @@ export default function ModalToggleDuration(props: ModalToggleDurationProps) {
     <Dialog open={isOpen} onOpenChange={(value) => setIsOpen(value)}>
       <DialogContent>
         <DialogHeader>
-          <h2 className="text-lg font-bold">ATTENTION</h2>
+          <DialogTitle className="text-lg font-bold">ATTENTION</DialogTitle>
         </DialogHeader>
         <p className="text-gray-600 text-sm">
           Are you sure you want to{" "}

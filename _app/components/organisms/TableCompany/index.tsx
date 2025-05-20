@@ -20,21 +20,18 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import useToastSuccess from "@/hooks/useToastSuccess";
-import useToastError from "@/hooks/useToastError";
 import { Input } from "@/ui/input";
-import { EllipsisVertical, Plus, Search } from "lucide-react";
+import { EllipsisVertical, Loader, Plus, Search } from "lucide-react";
 import YecLogo from "@/assets/logo/yec-logo.png";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import PaginationWithoutLinks from "../PaginationWithoutLinks";
 import { CardContent, Card } from "../../ui/card";
 import ConfirmDeleteModal from "../Modals/ModalDelete";
 
 const CompanyTable = () => {
   const [params, setParams] = useState<Partial<CompanyListParams>>({});
-  const toastSuccess = useToastSuccess();
-  const toastError = useToastError();
 
   const router = useRouter();
   const selectedId = useRef("");
@@ -60,11 +57,11 @@ const CompanyTable = () => {
       {
         onSuccess: () => {
           refetch();
-          toastSuccess("Data company berhasil dihapus");
+          toast.success("Company deleted successfully");
           setOpenDelete(false);
         },
         onError: (err) => {
-          toastError(err.data.message);
+          toast.error(err.data.message);
         },
       },
     );
@@ -123,13 +120,24 @@ const CompanyTable = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {isFetching ? (
+                  {isFetching && (
                     <TableRow>
                       <TableCell colSpan={4} className="text-center">
-                        Memuat...
+                        <div className="flex items-center justify-center">
+                          <Loader className="mr-2 h-4 w-4 animate-spin" />
+                          <p>Loading...</p>
+                        </div>
                       </TableCell>
                     </TableRow>
-                  ) : (
+                  )}
+                  {!isFetching && data?.data?.list.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center">
+                        No data found
+                      </TableCell>
+                    </TableRow>
+                  )}
+                  {!isFetching &&
                     data?.data?.list.map((company) => (
                       <TableRow key={company.id}>
                         <TableCell>
@@ -189,20 +197,21 @@ const CompanyTable = () => {
                           </DropdownMenu>
                         </TableCell>
                       </TableRow>
-                    ))
-                  )}
+                    ))}
                 </TableBody>
               </Table>
             </div>
 
             <div className="flex justify-center items-center mt-2">
-              <PaginationWithoutLinks
-                totalData={data?.data?.total}
-                currentPage={currentPage}
-                perPage={currentLimit}
-                setCurrentPage={setCurrentPage}
-                setCurrentLimit={setCurrentLimit}
-              />
+              {!isFetching && (data?.data?.list.length || 0) > 0 && (
+                <PaginationWithoutLinks
+                  totalData={data?.data?.total}
+                  currentPage={currentPage}
+                  perPage={currentLimit}
+                  setCurrentPage={setCurrentPage}
+                  setCurrentLimit={setCurrentLimit}
+                />
+              )}
             </div>
           </div>
           <ConfirmDeleteModal

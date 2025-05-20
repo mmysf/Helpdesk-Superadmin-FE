@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { DialogTitle } from "@radix-ui/react-dialog";
 import { useEffect, useState } from "react";
 
 interface SubmitData {
@@ -81,6 +82,7 @@ export default function FilterOrder({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="rounded-lg p-6 transition-transform duration-300 ease-out">
+        <DialogTitle className="hidden">Filter</DialogTitle>
         <DialogHeader className="text-center pb-4">
           <h2 className="text-lg font-semibold">Filter</h2>
         </DialogHeader>
