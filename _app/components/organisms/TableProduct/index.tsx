@@ -1,9 +1,8 @@
+/* eslint-disable sonarjs/cognitive-complexity */
 /* eslint-disable sonarjs/no-identical-functions */
 
 "use client";
 
-import useToastError from "@/root/_app/hooks/useToastError";
-import useToastSuccess from "@/root/_app/hooks/useToastSuccess";
 import {
   useProductHourDelete,
   useProductHourUpdateStatus,
@@ -27,10 +26,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/ui/table";
-import { EllipsisVertical, Search } from "lucide-react";
+import { EllipsisVertical, Loader, Search } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { GoDotFill } from "react-icons/go";
 import { formatCurrency } from "@/root/_app/helpers/currency";
+import { toast } from "sonner";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -55,8 +55,6 @@ export default function ProductsTable(props: TableProductProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const toastSuccess = useToastSuccess();
-  const toastError = useToastError();
 
   const [selectedProduct, setSelectedProduct] = useState<List | null>(null);
   // change status
@@ -92,12 +90,20 @@ export default function ProductsTable(props: TableProductProps) {
     }));
   }, [currentPage, currentLimit, searchTerm]);
 
-  const { data: products, refetch: productRefetch } = useProductList({
+  const {
+    data: products,
+    refetch: productRefetch,
+    isLoading,
+  } = useProductList({
     query: { queryKey: ["product-list", params] },
     axios: { params: { ...params, sort: "createdAt", dir: "desc" } },
   });
 
-  const { data: servers, refetch: serverRefetch } = useServerList({
+  const {
+    data: servers,
+    refetch: serverRefetch,
+    isLoading: isLoadingServer,
+  } = useServerList({
     query: { queryKey: ["server-list", params] },
     axios: { params: { ...params, sort: "createdAt", dir: "desc" } },
   });
@@ -162,7 +168,7 @@ export default function ProductsTable(props: TableProductProps) {
       } else {
         await handleUpdateServerStatus({ status: newStatus });
       }
-      toastSuccess(
+      toast.success(
         `Product ${newStatus === "active" ? "activated" : "deactivated"} successfully`,
       );
       setIsStatusModalOpen(false);
@@ -172,7 +178,7 @@ export default function ProductsTable(props: TableProductProps) {
         serverRefetch();
       }
     } catch (err: unknown) {
-      toastError(err as string);
+      toast.error(err as string);
     }
   };
   const handleConfirmDelete = async () => {
@@ -184,7 +190,7 @@ export default function ProductsTable(props: TableProductProps) {
       } else {
         await handleDeleteServer(selectedProduct.id);
       }
-      toastSuccess("Product deleted successfully");
+      toast.success("Product deleted successfully");
       setIsStatusModalOpen(false);
       if (isHour) {
         productRefetch();
@@ -192,7 +198,7 @@ export default function ProductsTable(props: TableProductProps) {
         serverRefetch();
       }
     } catch (err: unknown) {
-      toastError(err as string);
+      toast.error(err as string);
     }
   };
 
@@ -242,17 +248,56 @@ export default function ProductsTable(props: TableProductProps) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {tableData.map((product) => (
-                    <TableRow key={product.id}>
-                      <TableCell>{product.name}</TableCell>
-                      <TableCell>
-                        {isHour ? (
-                          `${product.duration?.hours} hour`
-                        ) : (
+                  {isLoading ||
+                    (isLoadingServer && (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center">
+                          <div className="flex items-center justify-center">
+                            <Loader className="mr-2 h-4 w-4 animate-spin" />
+                            <p>Loading...</p>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+
+                  {!isLoading && !isLoadingServer && tableData.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center">
+                        <p>No data found</p>
+                      </TableCell>
+                    </TableRow>
+                  )}
+
+                  {!isLoading &&
+                    !isLoadingServer &&
+                    tableData.map((product) => (
+                      <TableRow key={product.id}>
+                        <TableCell>{product.name}</TableCell>
+                        <TableCell>
+                          {isHour ? (
+                            `${product.duration?.hours} hour`
+                          ) : (
+                            <>
+                              {product.customizable ? (
+                                <p>Custom</p>
+                              ) : (
+                                <div className="flex flex-col">
+                                  {product.marketType.includes(
+                                    "INDONESIAN",
+                                  ) && (
+                                    <p>{formatCurrency(product.price.idr)}</p>
+                                  )}
+                                  {product.marketType.includes(
+                                    "INTERNATIONAL",
+                                  ) && <p>${product.price.usd}</p>}
+                                </div>
+                              )}
+                            </>
+                          )}
+                        </TableCell>
+                        <TableCell>
                           <>
-                            {product.customizable ? (
-                              <p>Custom</p>
-                            ) : (
+                            {isHour ? (
                               <div className="flex flex-col">
                                 {product.marketType.includes("INDONESIAN") && (
                                   <p>{formatCurrency(product.price.idr)}</p>
@@ -261,93 +306,82 @@ export default function ProductsTable(props: TableProductProps) {
                                   "INTERNATIONAL",
                                 ) && <p>${product.price.usd}</p>}
                               </div>
+                            ) : (
+                              <>
+                                {product.customizable ? (
+                                  <p>Custom</p>
+                                ) : (
+                                  `${product.validity} days`
+                                )}
+                              </>
                             )}
                           </>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <>
-                          {isHour ? (
-                            <div className="flex flex-col">
-                              {product.marketType.includes("INDONESIAN") && (
-                                <p>{formatCurrency(product.price.idr)}</p>
-                              )}
-                              {product.marketType.includes("INTERNATIONAL") && (
-                                <p>${product.price.usd}</p>
-                              )}
+                        </TableCell>
+                        <TableCell>
+                          {product.marketType.map((item) => (
+                            <div className="flex items-center gap-1" key={item}>
+                              <GoDotFill />
+                              <p className="text-sm">{item}</p>
                             </div>
-                          ) : (
-                            <>
-                              {product.customizable ? (
-                                <p>Custom</p>
-                              ) : (
-                                `${product.validity} days`
-                              )}
-                            </>
-                          )}
-                        </>
-                      </TableCell>
-                      <TableCell>
-                        {product.marketType.map((item) => (
-                          <div className="flex items-center gap-1" key={item}>
-                            <GoDotFill />
-                            <p className="text-sm">{item}</p>
-                          </div>
-                        ))}
-                      </TableCell>
-                      <TableCell>
-                        {product.benefit?.map((item) => (
-                          <div className="flex items-center gap-1" key={item}>
-                            <GoDotFill />
-                            <p className="text-sm font-semibold">{item}</p>
-                          </div>
-                        ))}
-                      </TableCell>
-                      <TableCell>{renderStatus(product.status)}</TableCell>
-                      <TableCell className="text-center">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <EllipsisVertical className="w-5 h-5 mt-4 cursor-pointer" />
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent className="w-[138px]">
-                            <DropdownMenuGroup>
-                              <DropdownMenuItem
-                                className="cursor-pointer"
-                                onClick={() => handleEditProduct(product)}
-                              >
-                                Edit
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                className="cursor-pointer"
-                                onClick={() => handleStatusChange(product)}
-                              >
-                                {product.status === "active"
-                                  ? "Deactivate"
-                                  : "Activate"}
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                className="cursor-pointer"
-                                onClick={() => handleDelete(product)}
-                              >
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuGroup>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                          ))}
+                        </TableCell>
+                        <TableCell>
+                          {product.benefit?.map((item) => (
+                            <div className="flex items-center gap-1" key={item}>
+                              <GoDotFill />
+                              <p className="text-sm font-semibold">{item}</p>
+                            </div>
+                          ))}
+                        </TableCell>
+                        <TableCell>{renderStatus(product.status)}</TableCell>
+                        <TableCell className="text-center">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <EllipsisVertical className="w-5 h-5 cursor-pointer" />
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-[138px]">
+                              <DropdownMenuGroup>
+                                <DropdownMenuItem
+                                  className="cursor-pointer"
+                                  onClick={() => handleEditProduct(product)}
+                                >
+                                  Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  className="cursor-pointer"
+                                  onClick={() => handleStatusChange(product)}
+                                >
+                                  {product.status === "active"
+                                    ? "Deactivate"
+                                    : "Activate"}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  className="cursor-pointer"
+                                  onClick={() => handleDelete(product)}
+                                >
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuGroup>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
                 </TableBody>
               </Table>
             </div>
             <div className="flex justify-center items-center mt-2">
-              <PaginationWithoutLinks
-                totalData={isHour ? products?.data.total : servers?.data.total}
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
-                perPage={currentLimit}
-                setCurrentLimit={setCurrentLimit}
-              />
+              {!isLoading && !isLoadingServer && tableData.length === 0 && (
+                <PaginationWithoutLinks
+                  totalData={
+                    isHour ? products?.data.total : servers?.data.total
+                  }
+                  currentPage={currentPage}
+                  setCurrentPage={setCurrentPage}
+                  perPage={currentLimit}
+                  setCurrentLimit={setCurrentLimit}
+                />
+              )}
             </div>
           </div>
         </div>

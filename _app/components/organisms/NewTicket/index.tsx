@@ -16,7 +16,7 @@ import {
 import { Card, CardContent } from "@/ui/card";
 import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
-import { Search, Filter, Dot } from "lucide-react";
+import { Search, Filter, Dot, Loader } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { Agent } from "@/root/_app/services/remote/repository/agent/types";
@@ -184,27 +184,24 @@ export default function NewTicket({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {isFetching ? (
+                {isFetching && (
                   <TableRow>
                     <TableCell colSpan={9} className="text-center">
-                      {" "}
-                      Memuat...
+                      <div className="flex items-center justify-center">
+                        <Loader className="mr-2 h-4 w-4 animate-spin" />
+                        <p>Loading...</p>
+                      </div>
                     </TableCell>
                   </TableRow>
-                ) : (
-                  <>
-                    {(data?.data.list || []).length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={9} className="text-center">
-                          {" "}
-                          No data found
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      data?.data.list.map(renderTableRow)
-                    )}
-                  </>
                 )}
+                {!isFetching && data?.data.total === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={9} className="text-center">
+                      No data found
+                    </TableCell>
+                  </TableRow>
+                )}
+                {!isFetching && data?.data.list.map(renderTableRow)}
               </TableBody>
             </Table>
           </div>

@@ -9,6 +9,7 @@ import {
   DialogFooter,
   DialogHeader,
 } from "@/components/ui/dialog";
+import { DialogTitle } from "@radix-ui/react-dialog";
 
 interface ConfirmStatusModalProps {
   isOpen: boolean;
@@ -29,7 +30,7 @@ export default function ConfirmStatusModal(props: ConfirmStatusModalProps) {
     <Dialog open={isOpen} onOpenChange={(value) => setIsOpen(value)}>
       <DialogContent>
         <DialogHeader>
-          <h2 className="text-lg font-bold">{title}</h2>
+          <DialogTitle className="text-lg font-bold">{title}</DialogTitle>
         </DialogHeader>
         <p className="text-gray-600 text-sm">{subtitle}</p>
         <DialogFooter className="flex justify-between mt-6">

@@ -11,8 +11,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import useToastError from "@/root/_app/hooks/useToastError";
-import useToastSuccess from "@/root/_app/hooks/useToastSuccess";
 import {
   List,
   ProductCreatePayload,
@@ -26,6 +24,7 @@ import {
 import { Plus, X } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 interface CreateProductProps {
   isOpen: boolean;
@@ -41,8 +40,6 @@ interface CreateProductProps {
 export default function CreditHourModal(props: CreateProductProps) {
   const { isOpen, setIsOpen, onClose, id, isHour, modeCreate, initialData } =
     props;
-  const toastError = useToastError();
-  const toastSuccess = useToastSuccess();
   const [benefits, setBenefits] = useState<string[]>([]);
 
   const {
@@ -151,7 +148,7 @@ export default function CreditHourModal(props: CreateProductProps) {
     newData.benefit = benefits.filter((benefit) => benefit.trim() !== "");
     const marketType = [];
     if (newData.benefit.length === 0) {
-      toastError("Please add at least one benefit");
+      toast.error("Please add at least one benefit");
       return;
     }
     if (data.isIndonesia) {
@@ -176,24 +173,24 @@ export default function CreditHourModal(props: CreateProductProps) {
       if (modeCreate) {
         if (isHour) {
           await createHour(payload);
-          toastSuccess("Credit hour product created successfully");
+          toast.success("Credit hour product created successfully");
         } else {
           await createServer(payload);
-          toastSuccess("Server product created successfully");
+          toast.success("Server product created successfully");
         }
       } else if (isHour) {
         await updateHour(payload as ProductCreatePayload);
-        toastSuccess("Credit hour product updated successfully");
+        toast.success("Credit hour product updated successfully");
       } else {
         await updateServer(payload as ProductCreatePayload);
-        toastSuccess("Server product updated successfully");
+        toast.success("Server product updated successfully");
       }
       handleClose();
     } catch (error: unknown) {
       if (error instanceof Error) {
-        toastError(error.message);
+        toast.error(error.message);
       } else {
-        toastError("Failed to process product");
+        toast.error("Failed to process product");
       }
     }
   };
