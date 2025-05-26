@@ -27,6 +27,15 @@ export const useCustomerList = (
   });
 };
 
+export const useCustomerCompanyList = (
+  config?: ServiceConfig<CustomerB2CListResponse>,
+) => {
+  return useHttp(CUSTOMER.CUSTOMER_LIST, {
+    httpOptions: config?.axios,
+    queryOptions: config?.query,
+  });
+};
+
 export const useCustomerDetail = (
   id: string,
   config?: ServiceConfig<CustomerDetailResponse>,

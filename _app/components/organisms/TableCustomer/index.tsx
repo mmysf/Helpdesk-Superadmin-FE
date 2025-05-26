@@ -24,7 +24,6 @@ import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
 import { EllipsisVertical, Loader, Plus, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { format } from "date-fns";
 import { toast } from "sonner";
 import PaginationWithoutLinks from "../PaginationWithoutLinks";
 import ConfirmDeleteModal from "../Modals/ModalDelete";
@@ -118,9 +117,6 @@ export default function CustomerTable() {
                   <TableRow>
                     <TableHead>Name</TableHead>
                     <TableHead>Company</TableHead>
-                    <TableHead>Subscription</TableHead>
-                    <TableHead>Last Activity</TableHead>
-                    <TableHead>Time Remaining</TableHead>
                     <TableHead>Action</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -178,16 +174,6 @@ export default function CustomerTable() {
                           <p className="font-medium">{item.company.name}</p>
                         </div>
                       </TableCell>
-                      <TableCell>-</TableCell>
-                      <TableCell>
-                        {item.lastActivityAt !== null
-                          ? format(
-                              new Date(item.lastActivityAt),
-                              "dd MMM yyyy, HH:mm",
-                            )
-                          : "-"}
-                      </TableCell>
-                      <TableCell>-</TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -196,6 +182,13 @@ export default function CustomerTable() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" sideOffset={4}>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                router.push(`/bo/customer/${item.id}`);
+                              }}
+                            >
+                              Detail
+                            </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => {
                                 router.push(
