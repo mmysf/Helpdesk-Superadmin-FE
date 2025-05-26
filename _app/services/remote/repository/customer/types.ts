@@ -11,6 +11,8 @@ export interface CustomerListParams extends DefaultListParams {
   q?: string;
   sort?: string;
   dir?: string;
+  companyProductID?: string;
+  type?: string;
 }
 
 export interface CustomerCreatePayload {

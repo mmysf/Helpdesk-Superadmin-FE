@@ -35,6 +35,7 @@ export const TICKET_COMMENT = {
 // di postman ditulis company product - customer
 export const CUSTOMER = {
   LIST: `superadmin/company-product/list`,
+  CUSTOMER_LIST: `superadmin/customer/list`,
   DETAIL: (id: string) => `superadmin/company-product/detail/${id}`,
   CREATE: `superadmin/company-product/create`,
   UPDATE: (id: string) => `superadmin/company-product/update/${id}`,
