@@ -42,7 +42,6 @@ export default function DetailCustomer({ params }: Props) {
     limit: 10,
     sort: "createdAt",
     dir: "desc",
-    type: "B2B",
     companyProductID: agentId,
   });
 
@@ -60,7 +59,6 @@ export default function DetailCustomer({ params }: Props) {
         limit: currentLimit,
         sort: "createdAt",
         dir: "desc",
-        type: "B2B",
         companyProductID: agentId,
       });
     }, 3e2);
@@ -84,13 +82,15 @@ export default function DetailCustomer({ params }: Props) {
         <CardContent>
           <div className="grid grid-cols-2 gap-4">
             <div className="flex items-center">
-              <Image
-                className="flex-none w-10 h-10 rounded-full object-cover"
-                src={data?.data.logo.url || ""}
-                width={40}
-                height={40}
-                alt="avatar"
-              />
+              {!isPending && data?.data.logo.url && (
+                <Image
+                  className="flex-none w-10 h-10 rounded-full object-cover"
+                  src={data?.data.logo.url || ""}
+                  width={40}
+                  height={40}
+                  alt="avatar"
+                />
+              )}
               <div className="ml-4">
                 <p className="text-sm font-medium leading-none">
                   {data?.data.name}
@@ -110,8 +110,6 @@ export default function DetailCustomer({ params }: Props) {
               <TableHead>Name</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Last Activity</TableHead>
-              {/* <TableHead>Subscription</TableHead> */}
-              {/* <TableHead>Action</TableHead> */}
             </TableRow>
           </TableHeader>
           <TableBody>
