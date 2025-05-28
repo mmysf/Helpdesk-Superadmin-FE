@@ -48,9 +48,6 @@ export const menuSidebar = [
 
 export const menuAccount = [
   {
-    separator: true,
-  },
-  {
     name: "logout",
   },
 ];
