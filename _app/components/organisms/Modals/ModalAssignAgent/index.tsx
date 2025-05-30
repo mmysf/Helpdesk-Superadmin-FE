@@ -7,15 +7,15 @@ import {
   DialogContent,
   DialogHeader,
   DialogFooter,
+  DialogTitle,
 } from "@/components/ui/dialog";
-import useToastError from "@/hooks/useToastError";
-import useToastSuccess from "@/hooks/useToastSuccess";
 import { useAgentList } from "@/services_remote/repository/agent/index.service";
 import { useTicketAssignTo } from "@/services_remote/repository/ticket/index.service";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { Search } from "lucide-react";
 import { IdName } from "@/root/_app/services/remote/repository";
+import { toast } from "sonner";
 import { Input } from "../../../ui/input";
 import { Checkbox } from "../../../ui/checkbox";
 import { Card, CardContent } from "../../../ui/card";
@@ -41,9 +41,6 @@ export default function ModalAssignAgent({
   setIsOpen,
   onCallback,
 }: ModalAssignAgentProps) {
-  const toastSuccess = useToastSuccess();
-  const toastError = useToastError();
-
   const [searchAgent, setSearchAgent] = useState("");
 
   const { data, refetch } = useAgentList({
@@ -81,10 +78,10 @@ export default function ModalAssignAgent({
 
   const hansleOnSubmit = async (payload: FormData) => {
     await handleAssignTo(payload).catch((err) => {
-      toastError(err.data?.message || err.message);
+      toast.error(err.data?.message || err.message);
       throw err;
     });
-    toastSuccess("Tiket berhasil di-assign ke agent");
+    toast.success("Ticket assigned to agent successfully");
     if (onCallback) onCallback();
   };
 
@@ -92,7 +89,9 @@ export default function ModalAssignAgent({
     <Dialog open={isOpen} onOpenChange={(value) => setIsOpen(value)}>
       <DialogContent>
         <DialogHeader>
-          <h2 className="text-lg font-bold">Assign to Agent</h2>
+          <DialogTitle className="text-lg font-bold">
+            Assign to Agent
+          </DialogTitle>
         </DialogHeader>
 
         <div>

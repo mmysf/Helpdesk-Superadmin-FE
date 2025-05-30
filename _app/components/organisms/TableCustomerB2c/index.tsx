@@ -19,21 +19,17 @@ import {
   useCustomerB2cDelete,
   useCustomerB2cList,
 } from "@/services_remote/repository/customer/index.service";
-import useToastSuccess from "@/hooks/useToastSuccess";
-import useToastError from "@/hooks/useToastError";
 import { Card, CardContent } from "@/ui/card";
 import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
-import { EllipsisVertical, Search } from "lucide-react";
+import { EllipsisVertical, Loader, Search } from "lucide-react";
 import { format } from "date-fns";
+import { toast } from "sonner";
 import PaginationWithoutLinks from "../PaginationWithoutLinks";
 import ConfirmDeleteModal from "../Modals/ModalDelete";
 import ModalDetailCustomerB2c from "../Modals/ModalDetailCustomerB2c";
 
 export default function CustomerTable() {
-  const toastSuccess = useToastSuccess();
-  const toastError = useToastError();
-
   const [selectedId, setSelectedId] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [isDetailOpen, setDetailOpen] = useState(false);
@@ -56,12 +52,12 @@ export default function CustomerTable() {
       {},
       {
         onSuccess: () => {
-          toastSuccess("Customer deleted successfully");
+          toast.success("Customer deleted successfully");
           setIsOpen(false);
           refetch();
         },
         onError: (err) => {
-          toastError(err.data.message);
+          toast.error(err.data.message);
         },
       },
     );
@@ -120,13 +116,26 @@ export default function CustomerTable() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {isPending ? (
+                  {isPending && (
                     <TableRow>
                       <TableCell className="text-center" colSpan={6}>
-                        Memuat...
+                        <div className="flex items-center justify-center">
+                          <Loader className="mr-2 h-4 w-4 animate-spin" />
+                          <p>Loading...</p>
+                        </div>
                       </TableCell>
                     </TableRow>
-                  ) : (
+                  )}
+
+                  {!isPending && (tableData || []).length === 0 && (
+                    <TableRow>
+                      <TableCell className="text-center" colSpan={6}>
+                        No data found
+                      </TableCell>
+                    </TableRow>
+                  )}
+
+                  {!isPending &&
                     (tableData || []).map((item) => (
                       <TableRow key={item.id}>
                         <TableCell>
@@ -166,7 +175,7 @@ export default function CustomerTable() {
                             setDetailOpen(true);
                           }}
                         >
-                          <div>
+                          <div className="cursor-pointer">
                             {item.subscription != null ? (
                               <>
                                 {item.subscription.status === "active" ? (
@@ -216,19 +225,20 @@ export default function CustomerTable() {
                           </DropdownMenu>
                         </TableCell>
                       </TableRow>
-                    ))
-                  )}
+                    ))}
                 </TableBody>
               </Table>
             </div>
             <div className="flex justify-center items-center mt-2">
-              <PaginationWithoutLinks
-                totalData={data?.data.total || 1}
-                currentPage={currentPage}
-                perPage={currentLimit}
-                setCurrentPage={setCurrentPage}
-                setCurrentLimit={setCurrentLimit}
-              />
+              {!isPending && (tableData || []).length > 0 && (
+                <PaginationWithoutLinks
+                  totalData={data?.data.total || 1}
+                  currentPage={currentPage}
+                  perPage={currentLimit}
+                  setCurrentPage={setCurrentPage}
+                  setCurrentLimit={setCurrentLimit}
+                />
+              )}
             </div>
           </div>
           <ConfirmDeleteModal

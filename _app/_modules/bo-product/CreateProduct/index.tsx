@@ -21,10 +21,9 @@ import {
   useProductSubscriptionUpdate,
 } from "@/services_remote/repository/product-subscription/index.service";
 import { useProductDurationList } from "@/root/_app/services/remote/repository/product-duration/index.service";
-import useToastError from "@/root/_app/hooks/useToastError";
-import useToastSuccess from "@/root/_app/hooks/useToastSuccess";
 import { useRouter } from "next/navigation";
 import { Routes } from "@/root/_app/config/routes";
+import { toast } from "sonner";
 
 interface Props {
   params?: { [key: string]: string };
@@ -33,8 +32,6 @@ interface Props {
 
 export default function CreateProduct({ params }: Props) {
   const router = useRouter();
-  const toastError = useToastError();
-  const toastSuccess = useToastSuccess();
 
   const subscriptionId = useMemo(() => params?.id || "", [params]);
 
@@ -88,11 +85,11 @@ export default function CreateProduct({ params }: Props) {
       : handleCreateSubscription(payloadFix);
 
     await action.catch((err) => {
-      toastError(err.data?.message || err.message);
+      toast.error(err.data?.message || err.message);
       throw err;
     });
-    toastSuccess(
-      `Data berhasil ${subscriptionId ? "disimpan" : "ditambahkan"}`,
+    toast.success(
+      `Product ${subscriptionId ? "updated" : "created"} successfully`,
     );
     router.push(Routes.BO_SUBSCRIPTION);
   };

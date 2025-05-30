@@ -4,8 +4,6 @@
 
 "use client";
 
-import useToastError from "@/root/_app/hooks/useToastError";
-import useToastSuccess from "@/root/_app/hooks/useToastSuccess";
 import {
   useOrderDetail,
   useOrderStatusPayment,
@@ -19,6 +17,7 @@ import { toast } from "sonner";
 import * as zod from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { formatCurrency } from "@/root/_app/helpers/currency";
+import { DialogTitle } from "@radix-ui/react-dialog";
 import { Button } from "../../../ui/button";
 import { Dialog, DialogContent, DialogHeader } from "../../../ui/dialog";
 import ModalPayment from "../ModalPayment";
@@ -44,14 +43,6 @@ interface DetailOrderProps {
   isServer?: boolean;
 }
 
-// type FormApprove = {
-//   accountName: string;
-//   accountNumber: string;
-//   bankName: string;
-//   note: string;
-//   attachmentId: string;
-// };
-
 type FileList = {
   url: string;
   size: number;
@@ -67,10 +58,7 @@ export default function OrderDetailModal(props: DetailOrderProps) {
   const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
   const [isOpenForm, setIsOpenForm] = useState(false);
   const [fileData, setFileData] = useState<FileList | null>(null);
-
-  const toastSuccess = useToastSuccess();
   const { mutateAsync: handleUpdateStatusPayment } = useOrderStatusPayment(id);
-  const toastError = useToastError();
   const { mutate: uploadAttachment, isPending: isLoading } =
     useUploadAttachmentProof();
 
@@ -145,10 +133,10 @@ export default function OrderDetailModal(props: DetailOrderProps) {
         status: "reject",
         note: "reject",
       });
-      toastSuccess("Order rejected successfully");
+      toast.success("Order rejected successfully");
       onClose(true);
     } catch (err: unknown) {
-      toastError(err as string);
+      toast.error(err as string);
     }
   };
   const handleApprove = () => {
@@ -179,17 +167,17 @@ export default function OrderDetailModal(props: DetailOrderProps) {
     try {
       await handleUpdateStatusPayment(data, {
         onSuccess: () => {
-          toastSuccess("Order approved successfully");
+          toast.success("Order approved successfully");
           setIsApproveModalOpen(false);
           onClose();
           onSuccessSubmit();
         },
         onError: (e) => {
-          toastError(e.data.message);
+          toast.error(e.data.message);
         },
       });
     } catch (err: unknown) {
-      toastError(err as string);
+      toast.error(err as string);
     }
   };
 
@@ -230,6 +218,7 @@ export default function OrderDetailModal(props: DetailOrderProps) {
   return (
     <Dialog open={isOpen} onOpenChange={(value) => setIsOpen(value)}>
       <DialogContent className="max-w-3xl max-h-[650px] overflow-scroll">
+        <DialogTitle className="hidden">Detail Order</DialogTitle>
         <DialogHeader className="flex flex-row items-center gap-2">
           <Button
             variant="ghost"

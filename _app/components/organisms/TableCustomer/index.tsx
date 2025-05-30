@@ -19,21 +19,17 @@ import {
   useCustomerDelete,
   useCustomerList,
 } from "@/services_remote/repository/customer/index.service";
-import useToastSuccess from "@/hooks/useToastSuccess";
-import useToastError from "@/hooks/useToastError";
 import { Card, CardContent } from "@/ui/card";
 import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
-import { EllipsisVertical, Plus, Search } from "lucide-react";
+import { EllipsisVertical, Loader, Plus, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { format } from "date-fns";
+import { toast } from "sonner";
 import PaginationWithoutLinks from "../PaginationWithoutLinks";
 import ConfirmDeleteModal from "../Modals/ModalDelete";
 
 export default function CustomerTable() {
   const router = useRouter();
-  const toastSuccess = useToastSuccess();
-  const toastError = useToastError();
 
   const [selectedId, setSelectedId] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -56,12 +52,12 @@ export default function CustomerTable() {
       {},
       {
         onSuccess: () => {
-          toastSuccess("Data customer berhasil dihapus");
+          toast.success("Customer deleted successfully");
           setIsOpen(false);
           refetch();
         },
         onError: (err) => {
-          toastError(err.data.message);
+          toast.error(err.data.message);
         },
       },
     );
@@ -121,107 +117,114 @@ export default function CustomerTable() {
                   <TableRow>
                     <TableHead>Name</TableHead>
                     <TableHead>Company</TableHead>
-                    <TableHead>Subscription</TableHead>
-                    <TableHead>Last Activity</TableHead>
-                    <TableHead>Time Remaining</TableHead>
                     <TableHead>Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {isPending ? (
+                  {isPending && (
                     <TableRow>
                       <TableCell className="text-center" colSpan={6}>
-                        Memuat...
+                        <div className="flex items-center justify-center">
+                          <Loader className="mr-2 h-4 w-4 animate-spin" />
+                          <p>Loading...</p>
+                        </div>
                       </TableCell>
                     </TableRow>
-                  ) : (
-                    (tableData || []).map((item) => (
-                      <TableRow key={item.id}>
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            {item.logo.url !== "" ? (
-                              <Image
-                                className="flex-none w-10 h-10 rounded-full object-cover"
-                                src={item.logo.url}
-                                alt="company logo"
-                                width={50}
-                                height={50}
-                              />
-                            ) : (
-                              <span className="flex flex-none justify-center items-center bg-green-100 text-primary w-10 h-10 rounded-full text-xl font-bold">
-                                {item.name[0]}
-                              </span>
-                            )}
-
-                            <div>
-                              <p className="font-medium">{item.name}</p>
-                              <p className="text-sm text-gray-600">
-                                {/* {item.email} */}
-                              </p>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <span className="flex-none flex justify-center items-center bg-blue-100 text-blue-600 w-10 h-10 rounded-full text-xl font-bold">
-                              {item.company.name[0]}
-                            </span>
-                            <p className="font-medium">{item.company.name}</p>
-                          </div>
-                        </TableCell>
-                        <TableCell>-</TableCell>
-                        <TableCell>
-                          {item.lastActivityAt !== null
-                            ? format(
-                                new Date(item.lastActivityAt),
-                                "dd MMM yyyy, HH:mm",
-                              )
-                            : "-"}
-                        </TableCell>
-                        <TableCell>-</TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" className="h-6 w-6 p-0">
-                                <EllipsisVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" sideOffset={4}>
-                              <DropdownMenuItem
-                                onClick={() => {
-                                  router.push(
-                                    `/bo/customer/update-customer/${item.id}`,
-                                  );
-                                }}
-                              >
-                                Edit
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                className="text-red-500 hover:text-red-500 hover:bg-red-100"
-                                onClick={() => {
-                                  setSelectedId(item.id);
-                                  setIsOpen(true);
-                                }}
-                              >
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))
                   )}
+
+                  {tableData?.length === 0 && (
+                    <TableRow>
+                      <TableCell className="text-center" colSpan={6}>
+                        No data found
+                      </TableCell>
+                    </TableRow>
+                  )}
+
+                  {(tableData || []).map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          {item.logo.url !== "" ? (
+                            <Image
+                              className="flex-none w-10 h-10 rounded-full object-cover"
+                              src={item.logo.url}
+                              alt="company logo"
+                              width={50}
+                              height={50}
+                            />
+                          ) : (
+                            <span className="flex flex-none justify-center items-center bg-green-100 text-primary w-10 h-10 rounded-full text-xl font-bold">
+                              {item.name[0]}
+                            </span>
+                          )}
+
+                          <div>
+                            <p className="font-medium">{item.name}</p>
+                            <p className="text-sm text-gray-600">
+                              {/* {item.email} */}
+                            </p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <span className="flex-none flex justify-center items-center bg-blue-100 text-blue-600 w-10 h-10 rounded-full text-xl font-bold">
+                            {item.company.name[0]}
+                          </span>
+                          <p className="font-medium">{item.company.name}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-6 w-6 p-0">
+                              <EllipsisVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" sideOffset={4}>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                router.push(`/bo/customer/${item.id}`);
+                              }}
+                            >
+                              Detail
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                router.push(
+                                  `/bo/customer/update-customer/${item.id}`,
+                                );
+                              }}
+                            >
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="text-red-500 hover:text-red-500 hover:bg-red-100"
+                              onClick={() => {
+                                setSelectedId(item.id);
+                                setIsOpen(true);
+                              }}
+                            >
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </div>
             <div className="flex justify-center items-center mt-2">
-              <PaginationWithoutLinks
-                totalData={data?.data.total || 1}
-                currentPage={currentPage}
-                perPage={currentLimit}
-                setCurrentPage={setCurrentPage}
-                setCurrentLimit={setCurrentLimit}
-              />
+              {!isPending && (tableData?.length || 0) > 0 && (
+                <PaginationWithoutLinks
+                  totalData={data?.data.total || 1}
+                  currentPage={currentPage}
+                  perPage={currentLimit}
+                  setCurrentPage={setCurrentPage}
+                  setCurrentLimit={setCurrentLimit}
+                />
+              )}
             </div>
           </div>
           <ConfirmDeleteModal

@@ -1,31 +1,14 @@
 "use client";
 
+/* eslint-disable security/detect-non-literal-regexp */
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React from "react";
 import Link from "next/link";
-import { Badge } from "@/ui/badge";
 import { Button } from "@/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/ui/sheet";
-import { menuAccount } from "@/layout/layout-admin/admin-menu";
-import {
-  // Bell,
-  CircleUser,
-  Home,
-  LineChart,
-  Menu,
-  Package,
-  Package2,
-  ShoppingCart,
-  Users,
-} from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/ui/card";
+import { menuAccount, menuSidebar } from "@/layout/layout-admin/admin-menu";
+import { CircleUser, Menu } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,9 +21,15 @@ import Cookie from "js-cookie";
 import { useRouter } from "next/navigation";
 import { Routes } from "@/root/_app/config/routes";
 import { AUTH_KEY, USER } from "@/root/_app/constants/auth";
+import { trUc } from "@/root/_app/helpers/trans";
+import { cn } from "@/root/_app/helpers/utils";
+import { useTranslations } from "next-intl";
 
 const Navbar: React.FC = () => {
   const router = useRouter();
+  const pathname = usePathname();
+  const t = useTranslations();
+
   return (
     <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
       <Sheet>
@@ -52,53 +41,37 @@ const Navbar: React.FC = () => {
         </SheetTrigger>
         <SheetContent side="left" className="flex flex-col">
           <nav className="grid gap-2 text-lg font-medium">
-            <Link
-              href="#"
-              className="flex items-center gap-2 text-lg font-semibold"
-            >
-              <Package2 className="h-6 w-6" />
-              <span>{process.env.NEXT_PUBLIC_APP_NAME ?? "Template"}</span>
-            </Link>
-            <Link
-              href="#"
-              className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-            >
-              <Home className="h-5 w-5" />
-              Dashboard
-            </Link>
-            <Link
-              href="#"
-              className="mx-[-0.65rem] flex items-center gap-4 rounded-xl bg-muted px-3 py-2 text-foreground hover:text-foreground"
-            >
-              <ShoppingCart className="h-5 w-5" />
-              Orders
-              <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
-                6
-              </Badge>
-            </Link>
-            <Link
-              href="#"
-              className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-            >
-              <Package className="h-5 w-5" />
-              Products
-            </Link>
-            <Link
-              href="#"
-              className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-            >
-              <Users className="h-5 w-5" />
-              Customers
-            </Link>
-            <Link
-              href="#"
-              className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-            >
-              <LineChart className="h-5 w-5" />
-              Analytics
-            </Link>
+            {menuSidebar.map((item, index) => {
+              const IconComponent = item.icon;
+              const link = item.link.toString().replace(/\/$/, ""); // remove trailing slash
+              const regex = new RegExp(`^${link}(/|$)`);
+              const isActive = regex.test(pathname);
+
+              return (
+                <div
+                  key={`menu-sidebar-${index}`}
+                  className={cn(
+                    "rounded-lg",
+                    isActive
+                      ? "bg-primary text-white"
+                      : "text-muted-foreground",
+                  )}
+                >
+                  <Link
+                    href={item.link}
+                    className={cn(
+                      "flex items-center gap-3 rounded-lg px-3 py-2 transition-all",
+                      !isActive && " hover:text-primary",
+                    )}
+                  >
+                    <IconComponent className="h-4 w-4" />
+                    {trUc({ t, key: item.name })}
+                  </Link>
+                </div>
+              );
+            })}
           </nav>
-          <div className="mt-auto">
+          {/* <div className="mt-auto">
             <Card>
               <CardHeader>
                 <CardTitle>Upgrade to Pro</CardTitle>
@@ -113,7 +86,7 @@ const Navbar: React.FC = () => {
                 </Button>
               </CardContent>
             </Card>
-          </div>
+          </div> */}
         </SheetContent>
       </Sheet>
       <div className="w-full flex-1">
@@ -136,29 +109,46 @@ const Navbar: React.FC = () => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          {menuAccount.map((item, index) =>
-            item.separator ? (
-              <DropdownMenuSeparator key={index} />
-            ) : item.name === "my_account" ? (
-              <DropdownMenuLabel key={index}>My Account</DropdownMenuLabel>
-            ) : item.name === "logout" ? (
-              <DropdownMenuItem
-                key={index}
-                onClick={() => {
-                  Cookie.remove(AUTH_KEY);
-                  Cookie.remove(USER);
-                  router.push(Routes.AUTH_SIGNIN);
-                }}
-              >
-                Logout
-              </DropdownMenuItem>
-            ) : (
-              <DropdownMenuItem key={index}>
-                {(item.name ?? "").charAt(0).toUpperCase() +
-                  (item.name ?? "").slice(1)}
-              </DropdownMenuItem>
-            ),
-          )}
+          {menuAccount.map((item, index) => {
+            if (!item) return null; // defensive check
+
+            if ("separator" in item && item.separator) {
+              return <DropdownMenuSeparator key={index} />;
+            }
+
+            if ("name" in item) {
+              if (item.name === "my_account") {
+                return (
+                  <DropdownMenuLabel key={index}>My Account</DropdownMenuLabel>
+                );
+              }
+
+              if (item.name === "logout") {
+                return (
+                  <DropdownMenuItem
+                    key={index}
+                    onClick={() => {
+                      Cookie.remove(AUTH_KEY);
+                      Cookie.remove(USER);
+                      router.push(Routes.AUTH_SIGNIN);
+                    }}
+                  >
+                    Logout
+                  </DropdownMenuItem>
+                );
+              }
+
+              const displayName = item?.name
+                ? item.name.charAt(0).toUpperCase() + item.name.slice(1)
+                : "";
+
+              return (
+                <DropdownMenuItem key={index}>{displayName}</DropdownMenuItem>
+              );
+            }
+
+            return null;
+          })}
         </DropdownMenuContent>
       </DropdownMenu>
     </header>

@@ -1,6 +1,4 @@
 import React, { useState } from "react";
-import useToastError from "@/root/_app/hooks/useToastError";
-import useToastSuccess from "@/root/_app/hooks/useToastSuccess";
 import {
   ProductSubscription,
   ProductSubscriptionListParams,
@@ -11,7 +9,7 @@ import {
 import { useProductDurationList } from "@/services_remote/repository/product-duration/index.service";
 import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
-import { EllipsisVertical, Plus, Search } from "lucide-react";
+import { EllipsisVertical, Loader, Plus, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
   DropdownMenu,
@@ -30,16 +28,13 @@ import {
 } from "@/ui/table";
 import { SelectItem, SelectTrigger, SelectContent, Select } from "@/ui/select";
 import { Card, CardContent } from "@/ui/card";
+import { toast } from "sonner";
 import ConfirmDeleteModal from "../Modals/ModalDelete";
 import ModalToggleDuration from "../Modals/ModalToggleDuration";
 import PaginationWithoutLinks from "../PaginationWithoutLinks";
 
 export default function Subscription() {
   const router = useRouter();
-
-  const toastError = useToastError();
-  const toastSuccess = useToastSuccess();
-
   const { data: dataDuration } = useProductDurationList({
     axios: { params: { limit: 1e3 } },
   });
@@ -97,19 +92,19 @@ export default function Subscription() {
     await handleUpdateStatusProduct({
       status: selected?.status !== "active" ? "active" : "inactive",
     }).catch((err) => {
-      toastError(err.data?.message || err.message);
+      toast.error(err.data?.message || err.message);
       throw err;
     });
-    toastSuccess("Status berhasil diubah");
+    toast.success("Status updated successfully");
     reset();
   };
 
   const handleConfirmDelete = async () => {
     await handleDeleteProduct({}).catch((err) => {
-      toastError(err.data?.message || err.message);
+      toast.error(err.data?.message || err.message);
       throw err;
     });
-    toastSuccess("Data berhasil dihapus");
+    toast.success("Data deleted successfully");
     reset();
   };
 
@@ -183,13 +178,24 @@ export default function Subscription() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {isFetching ? (
+                {isFetching && (
                   <TableRow>
                     <TableCell className="text-center" colSpan={6}>
-                      Memuat...
+                      <div className="flex items-center justify-center">
+                        <Loader className="mr-2 h-4 w-4 animate-spin" />
+                        <p>Loading...</p>
+                      </div>
                     </TableCell>
                   </TableRow>
-                ) : (
+                )}
+                {!isFetching && tableData?.length === 0 && (
+                  <TableRow>
+                    <TableCell className="text-center" colSpan={6}>
+                      Data tidak ditemukan
+                    </TableCell>
+                  </TableRow>
+                )}
+                {!isFetching &&
                   tableData?.map((item) => (
                     <TableRow key={item.id}>
                       <TableCell>{item.name}</TableCell>
@@ -253,19 +259,20 @@ export default function Subscription() {
                         </DropdownMenu>
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
+                  ))}
               </TableBody>
             </Table>
           </div>
           <div className="flex justify-center items-center mt-2">
-            <PaginationWithoutLinks
-              totalData={data?.data.total}
-              currentPage={currentPage}
-              perPage={currentLimit}
-              setCurrentPage={setCurrentPage}
-              setCurrentLimit={setCurrentLimit}
-            />
+            {!isFetching && (tableData?.length || 0) > 0 && (
+              <PaginationWithoutLinks
+                totalData={data?.data.total}
+                currentPage={currentPage}
+                perPage={currentLimit}
+                setCurrentPage={setCurrentPage}
+                setCurrentLimit={setCurrentLimit}
+              />
+            )}
           </div>
           <ConfirmDeleteModal
             isOpen={openDelete}

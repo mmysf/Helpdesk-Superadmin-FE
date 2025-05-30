@@ -44,12 +44,16 @@ export default function CompanyDashboard() {
         <>
           <h1 className="text-2xl font-semibold ml-5">Our Company Partner</h1>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-2">
-            {data?.data.list.map((item, index) => (
-              <CompanyItem data={item} key={index} isLoading={isFetching} />
-            ))}
+            {!isFetching && data?.data.list.length === 0 && (
+              <p className="text-center col-span-full">No Data</p>
+            )}
+            {!isFetching &&
+              data?.data.list.map((item, index) => (
+                <CompanyItem data={item} key={index} isLoading={isFetching} />
+              ))}
           </div>
           <div className="flex justify-center mt-2">
-            {!isFetching && (
+            {!isFetching && (data?.data.list.length || 0) > 0 && (
               <PaginationWithoutLinks
                 totalData={data?.data.total || 0}
                 currentPage={currentPage}

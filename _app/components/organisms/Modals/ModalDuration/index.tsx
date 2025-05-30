@@ -8,6 +8,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogFooter,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import {
   useProductDurationCreate,
@@ -15,8 +16,7 @@ import {
 } from "@/services_remote/repository/product-duration/index.service";
 import { Button } from "@/components/ui/button";
 import { ChevronUp, ChevronDown } from "lucide-react";
-import useToastSuccess from "@/root/_app/hooks/useToastSuccess";
-import useToastError from "@/root/_app/hooks/useToastError";
+import { toast } from "sonner";
 import { Input } from "../../../ui/input";
 
 interface ModalDurationProps {
@@ -34,8 +34,6 @@ export default function ModalDuration({
   setIsOpen,
   onCallback,
 }: ModalDurationProps) {
-  const toastSuccess = useToastSuccess();
-  const toastError = useToastError();
   const [isLoading, setIsLoading] = useState(false);
   const [duration, setDuration] = useState("");
 
@@ -52,11 +50,11 @@ export default function ModalDuration({
     const action = isEdit ? handleUpdate(payload) : handleCreate(payload);
     await action
       .catch((err) => {
-        toastError(err?.data?.message || err.message);
+        toast.error(err?.data?.message || err.message);
         throw err;
       })
       .finally(() => setIsLoading(false));
-    toastSuccess("Data berhasil disimpan");
+    toast.success("Data saved successfully");
     if (onCallback) onCallback();
     setIsOpen(false);
   };
@@ -78,9 +76,9 @@ export default function ModalDuration({
     <Dialog open={isOpen} onOpenChange={(value) => setIsOpen(value)}>
       <DialogContent>
         <DialogHeader>
-          <h2 className="text-lg font-bold">
+          <DialogTitle className="text-lg font-bold">
             {isEdit ? "Update" : "Create New"} Duration
-          </h2>
+          </DialogTitle>
         </DialogHeader>
         <div className="flex items-center justify-center gap-2">
           <p>

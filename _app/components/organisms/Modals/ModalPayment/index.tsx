@@ -1,10 +1,17 @@
+/* eslint-disable no-unused-vars */
+
 "use client";
 
 import { useForm } from "react-hook-form";
 import * as zod from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "../../../ui/button";
-import { Dialog, DialogContent, DialogHeader } from "../../../ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "../../../ui/dialog";
 import {
   Form,
   FormControl,
@@ -41,7 +48,6 @@ export default function ConfirmApproveModal(props: ConfirmApproveModalProps) {
   });
 
   const handleApprove = async (data: { note: string }) => {
-    console.log(data);
     await onApprove(data.note);
   };
 
@@ -49,7 +55,7 @@ export default function ConfirmApproveModal(props: ConfirmApproveModalProps) {
     <Dialog open={isOpen} onOpenChange={(value) => setIsOpen(value)}>
       <DialogContent>
         <DialogHeader>
-          <h2 className="text-lg font-bold">{title}</h2>
+          <DialogTitle className="text-lg font-bold">{title}</DialogTitle>
         </DialogHeader>
         <p className="text-gray-600 text-sm">{subtitle}</p>
         <Form {...form}>

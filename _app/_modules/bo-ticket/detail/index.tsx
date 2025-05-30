@@ -5,61 +5,15 @@
 import { useTicketDetail } from "@/services_remote/repository/ticket/index.service";
 import ModalAssignAgent from "@/root/_app/components/organisms/Modals/ModalAssignAgent";
 import { Button } from "@/root/_app/components/ui/button";
-import { ArrowLeftCircle, Search } from "lucide-react";
+import { ArrowLeftCircle, User2 } from "lucide-react";
 import { useTicketCommentList } from "@/root/_app/services/remote/repository/ticket-comment/index.service";
 import { formatDate } from "date-fns";
 import { useRouter } from "next/navigation";
 import clsx from "clsx";
 
-// interface RenderTimerProps {
-//   logTime?: TicketLogTime;
-// }
-
 interface Props {
   params?: { [key: string]: string };
-  // searchParams?: { [key: string]: string };
 }
-
-// const format = (str: string, ...values: (string | number)[]) =>
-//   str.replace(/%s/g, () => String(values.shift()));
-
-// const RenderTimer: React.FC<RenderTimerProps> = ({ logTime }) => {
-//   const interval = useRef<NodeJS.Timeout>();
-//   const [seconds, setSeconds] = useState<number>(
-//     logTime?.totalDurationInSeconds || 0,
-//   );
-
-//   const total = useMemo(() => {
-//     let h = 0;
-//     let m = 0;
-//     let s = 0;
-
-//     if (seconds && seconds > 0) {
-//       h = Math.floor(seconds / 3600);
-//       m = Math.floor((seconds % 3600) / 60);
-//       s = seconds % 60;
-//     }
-
-//     return format(
-//       "%s:%s:%s",
-//       h.toString().padStart(2, "0"),
-//       m.toString().padStart(2, "0"),
-//       s.toString().padStart(2, "0"),
-//     );
-//   }, [seconds]);
-
-//   useEffect(() => {
-//     if (logTime?.status === "running") {
-//       interval.current = setInterval(() => {
-//         setSeconds((v) => (v || 0) + 1);
-//       }, 1e3);
-//     }
-
-//     return () => clearInterval(interval.current);
-//   }, [logTime]);
-
-//   return <p className="text-slate-600 font-light">{total}</p>;
-// };
 
 const AdminTicketDetail = ({ params }: Props) => {
   const router = useRouter();
@@ -98,13 +52,10 @@ const AdminTicketDetail = ({ params }: Props) => {
             <div className="flex items-center justify-between m-2">
               <div className="flex items-center space-x-2">
                 <div className="w-10 h-10 rounded-full bg-slate-300 overflow-hidden flex items-center justify-center">
-                  {/* <LogoBrand /> */}
+                  <User2 className="w-7 h-7 text-slate-700" />
                 </div>
                 <p>{detail?.customer.name}</p>
               </div>
-              <Button className="bg-transparent">
-                <Search className="text-slate-400" />
-              </Button>
             </div>
             <div className="bg-[#2C4251] relative rounded-md h-full min-h-64 max-h-[560px] overflow-auto">
               {ticketComments.length === 0 && (
@@ -187,22 +138,6 @@ const AdminTicketDetail = ({ params }: Props) => {
             <p className="text-xs text-slate-400">Priority</p>
             <p>{detail?.priority}</p>
           </div>
-          {/* <div className="mt-5 bg-slate-300 rounded-md flex gap-2 justify-between items-center p-3">
-            <div className="flex items-center gap-2">
-              <Timer />
-              <RenderTimer logTime={detail?.logTime} />
-            </div>
-            <div className="flex gap-2">
-              <Button className="bg-white text-slate-900">
-                <Play className="text-slate-600" />
-                Resume
-              </Button>
-              <Button className="bg-white text-slate-900">
-                <History className="text-slate-600" />
-                Time Logs History
-              </Button>
-            </div>
-          </div> */}
           {detail?.company.type && detail.company.type === "B2C" && (
             <div className="flex justify-center w-full mt-5">
               <Button onClick={() => setIsOpen(true)}>Assign To</Button>

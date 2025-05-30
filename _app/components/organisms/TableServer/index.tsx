@@ -16,7 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/ui/table";
-import { EllipsisVertical, Filter, Search } from "lucide-react";
+import { EllipsisVertical, Filter, Loader, Search } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
 import { formatCurrency } from "@/root/_app/helpers/currency";
@@ -38,6 +38,7 @@ export default function OrdersTable() {
   const [currentLimit, setCurrentLimit] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearchTerm] = useState("");
   const [isActionOpen, setIsActionOpen] = useState(false);
   const [selectedServer, setSelectedServer] = useState<List | null>();
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
@@ -45,17 +46,25 @@ export default function OrdersTable() {
   const [params, setParams] = useState<OrderListParams>({
     page: currentPage,
     limit: currentLimit,
-    q: searchTerm,
+    q: debouncedSearch,
     types: "SERVER",
     dir: "desc",
     sort: selectedSort,
   });
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500);
+    return () => clearTimeout(timeout);
+  }, [searchTerm]);
+
   useEffect(() => {
     setParams((prev) => ({
       ...prev,
       page: currentPage,
       limit: currentLimit,
-      q: searchTerm,
+      q: debouncedSearch,
       types: "SERVER",
       status: selectedStatus,
       sort: selectedSort,
@@ -64,12 +73,16 @@ export default function OrdersTable() {
   }, [
     currentPage,
     currentLimit,
-    searchTerm,
+    debouncedSearch,
     selectedStatus,
     selectedSort,
     selectedPlan,
   ]);
-  const { data: servers, refetch } = useOrderList({
+  const {
+    data: servers,
+    isLoading,
+    refetch,
+  } = useOrderList({
     query: { queryKey: ["order-list", params] },
     axios: { params },
   });
@@ -128,7 +141,7 @@ export default function OrdersTable() {
       ...prev,
       page: 1,
       types: "SERVER",
-      q: searchTerm,
+      q: debouncedSearch,
       sort: sortByValue,
       plan: planValue,
       status: statusValue,
@@ -141,6 +154,17 @@ export default function OrdersTable() {
     setSelectedStatus("");
     setSelectedSort("");
     setSelectedPlan("");
+    setDebouncedSearchTerm("");
+    setSearchTerm("");
+    setParams((prev) => ({
+      ...prev,
+      page: 1,
+      types: "SERVER",
+      q: debouncedSearch,
+      sort: "",
+      plan: "",
+      status: "",
+    }));
   };
 
   return (
@@ -186,58 +210,81 @@ export default function OrdersTable() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {tableData?.map((server) => (
-                    <TableRow key={server.id}>
-                      {" "}
-                      <TableCell>{server.orderNumber}</TableCell>
-                      <TableCell>{server.customer.name}</TableCell>
-                      <TableCell>{server.customer.email}</TableCell>
-                      <TableCell>
-                        {format(new Date(server.createdAt), "dd MMM yyyy")}
-                      </TableCell>
-                      <TableCell>{server.serverPackage?.name}</TableCell>
-                      <TableCell>
-                        {(server.serverPackage?.validity ?? 0) * server.amount}
-                      </TableCell>
-                      <TableCell>
-                        {server.customer.marketType === "INDONESIAN"
-                          ? formatCurrency(server.grandTotal)
-                          : `$${server.grandTotal}`}
-                      </TableCell>
-                      <TableCell>{renderStatus(server.status)}</TableCell>
-                      <TableCell className="text-center">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <EllipsisVertical className="w-5 h-5 mt-4 cursor-pointer" />
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent className="w-[138px]">
-                            <DropdownMenuGroup>
-                              <DropdownMenuItem
-                                className="cursor-pointer"
-                                onClick={() => {
-                                  setSelectedServer(server);
-                                  setIsActionOpen(true);
-                                }}
-                              >
-                                Detail
-                              </DropdownMenuItem>
-                            </DropdownMenuGroup>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                  {isLoading && (
+                    <TableRow>
+                      <TableCell colSpan={9} className="text-center">
+                        <div className="flex items-center justify-center">
+                          <Loader className="mr-2 h-4 w-4 animate-spin" />
+                          <p>Loading...</p>
+                        </div>
                       </TableCell>
                     </TableRow>
-                  ))}
+                  )}
+
+                  {!isLoading && tableData?.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={9} className="text-center">
+                        <p>No data found</p>
+                      </TableCell>
+                    </TableRow>
+                  )}
+
+                  {!isLoading &&
+                    (tableData?.length ?? 0) > 0 &&
+                    tableData?.map((server) => (
+                      <TableRow key={server.id}>
+                        <TableCell>{server.orderNumber}</TableCell>
+                        <TableCell>{server.customer.name}</TableCell>
+                        <TableCell>{server.customer.email}</TableCell>
+                        <TableCell>
+                          {format(new Date(server.createdAt), "dd MMM yyyy")}
+                        </TableCell>
+                        <TableCell>{server.serverPackage?.name}</TableCell>
+                        <TableCell>
+                          {(server.serverPackage?.validity ?? 0) *
+                            server.amount}
+                        </TableCell>
+                        <TableCell>
+                          {server.customer.marketType === "INDONESIAN"
+                            ? formatCurrency(server.grandTotal)
+                            : `$${server.grandTotal}`}
+                        </TableCell>
+                        <TableCell>{renderStatus(server.status)}</TableCell>
+                        <TableCell className="text-center">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <EllipsisVertical className="w-5 h-5 cursor-pointer" />
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-[138px]">
+                              <DropdownMenuGroup>
+                                <DropdownMenuItem
+                                  className="cursor-pointer"
+                                  onClick={() => {
+                                    setSelectedServer(server);
+                                    setIsActionOpen(true);
+                                  }}
+                                >
+                                  Detail
+                                </DropdownMenuItem>
+                              </DropdownMenuGroup>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
                 </TableBody>
               </Table>
             </div>
             <div className="flex justify-center items-center mt-2">
-              <PaginationWithoutLinks
-                totalData={servers?.data.total}
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
-                perPage={10}
-                setCurrentLimit={setCurrentLimit}
-              />
+              {!isLoading && (servers?.data.total ?? 0) > 0 && (
+                <PaginationWithoutLinks
+                  totalData={servers?.data.total}
+                  currentPage={currentPage}
+                  setCurrentPage={setCurrentPage}
+                  perPage={10}
+                  setCurrentLimit={setCurrentLimit}
+                />
+              )}
             </div>
           </div>
           <FilterOrder

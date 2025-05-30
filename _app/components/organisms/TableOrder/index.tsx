@@ -16,9 +16,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/ui/table";
-import { EllipsisVertical, Filter, Search } from "lucide-react";
+import { EllipsisVertical, Filter, Loader, Search } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Spinner } from "@nextui-org/react";
 import { format } from "date-fns";
 import { formatCurrency } from "@/root/_app/helpers/currency";
 import {
@@ -39,6 +38,7 @@ export default function OrdersTable() {
   const [currentLimit, setCurrentLimit] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearchTerm] = useState("");
   const [isActionOpen, setIsActionOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<List | null>(null);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
@@ -46,17 +46,25 @@ export default function OrdersTable() {
   const [params, setParams] = useState<OrderListParams>({
     page: currentPage,
     limit: currentLimit,
-    q: searchTerm,
+    q: debouncedSearch,
     types: "HOUR",
     sort: selectedSort,
     dir: "desc",
   });
+
+  useEffect(() => {
+    const debounce = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500);
+    return () => clearTimeout(debounce);
+  }, [searchTerm]);
+
   useEffect(() => {
     setParams((prev) => ({
       ...prev,
       page: currentPage,
       limit: currentLimit,
-      q: searchTerm,
+      q: debouncedSearch,
       types: "HOUR",
       status: selectedStatus,
       sort: selectedSort,
@@ -65,7 +73,7 @@ export default function OrdersTable() {
   }, [
     currentPage,
     currentLimit,
-    searchTerm,
+    debouncedSearch,
     selectedStatus,
     selectedSort,
     selectedPlan,
@@ -127,7 +135,7 @@ export default function OrdersTable() {
       ...prev,
       page: 1,
       types: "HOUR",
-      q: searchTerm,
+      q: debouncedSearch,
       sort: sortByValue,
       plan: planValue,
       status: statusValue,
@@ -140,6 +148,8 @@ export default function OrdersTable() {
     setSelectedStatus("");
     setSelectedSort("");
     setSelectedPlan("");
+    setDebouncedSearchTerm("");
+    setSearchTerm("");
   };
 
   return (
@@ -188,7 +198,10 @@ export default function OrdersTable() {
                   {isLoading && (
                     <TableRow>
                       <TableCell colSpan={9} className="text-center">
-                        <Spinner />
+                        <div className="flex items-center justify-center">
+                          <Loader className="mr-2 h-4 w-4 animate-spin" />
+                          <p>Loading...</p>
+                        </div>
                       </TableCell>
                     </TableRow>
                   )}
@@ -212,7 +225,7 @@ export default function OrdersTable() {
                         <TableCell className="text-center">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <EllipsisVertical className="w-5 h-5 mt-4 cursor-pointer" />
+                              <EllipsisVertical className="w-5 h-5 cursor-pointer" />
                             </DropdownMenuTrigger>
                             <DropdownMenuContent className="w-[138px]">
                               <DropdownMenuGroup>

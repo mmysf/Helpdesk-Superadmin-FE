@@ -14,15 +14,19 @@ import {
   AuthLoginPayload,
   useAuthLogin,
 } from "@/services_remote/repository/auth/index.service";
-import useToastError from "@/hooks/useToastError";
-import useToastSuccess from "@/hooks/useToastSuccess";
+import { toast } from "sonner";
 
 export default function Page() {
   const router = useRouter();
 
   const { mutate, isPending } = useAuthLogin();
 
-  const { control, handleSubmit, setValue } = useForm<AuthLoginPayload>({
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<AuthLoginPayload>({
     mode: "all",
     defaultValues: {
       email: "",
@@ -36,9 +40,6 @@ export default function Page() {
     setIsVisiblePass(!isVisiblePass);
   };
 
-  const toastError = useToastError();
-  const toastSuccess = useToastSuccess();
-
   useEffect(() => {
     setValue("email", "");
     setValue("password", "");
@@ -47,13 +48,13 @@ export default function Page() {
   const onSubmit = handleSubmit((payload) => {
     mutate(payload, {
       onSuccess: ({ data }) => {
-        toastSuccess("Login successfull!");
+        toast.success("Login successfull!");
         Cookie.set(AUTH_KEY, data.token);
         Cookie.set(USER, JSON.stringify(data.user));
         router.push("/bo/dashboard");
       },
       onError: (error) => {
-        toastError(error.data.message || "Something went wrong!");
+        toast.error(error.data.message || "Something went wrong!");
       },
     });
   });
@@ -86,7 +87,19 @@ export default function Page() {
                 }}
                 control={control}
                 render={({ field }) => (
-                  <Input type="email" placeholder="Email" {...field} />
+                  <div>
+                    <Input
+                      type="email"
+                      placeholder="Email"
+                      error={!!errors.email}
+                      {...field}
+                    />
+                    {errors.email && (
+                      <p className="text-sm text-red-500 mt-1">
+                        {errors.email.message}
+                      </p>
+                    )}
+                  </div>
                 )}
               />
               <Controller
@@ -100,24 +113,41 @@ export default function Page() {
                 }}
                 control={control}
                 render={({ field }) => (
-                  <Input
-                    type={isVisiblePass ? "text" : "password"}
-                    placeholder="Password"
-                    endContent={
-                      <button
-                        type="button"
-                        className="focus:outline-none mr-1"
-                        onClick={toggleVisibilityPass}
-                      >
-                        {isVisiblePass ? <HiOutlineEyeOff /> : <HiOutlineEye />}
-                      </button>
-                    }
-                    {...field}
-                  />
+                  <div>
+                    <Input
+                      type={isVisiblePass ? "text" : "password"}
+                      placeholder="Password"
+                      error={!!errors.password}
+                      endContent={
+                        <button
+                          type="button"
+                          className="focus:outline-none mr-1"
+                          onClick={toggleVisibilityPass}
+                        >
+                          {isVisiblePass ? (
+                            <HiOutlineEyeOff />
+                          ) : (
+                            <HiOutlineEye />
+                          )}
+                        </button>
+                      }
+                      {...field}
+                    />
+                    {errors.password && (
+                      <p className="text-sm text-red-500 mt-1">
+                        {errors.password.message}
+                      </p>
+                    )}
+                  </div>
                 )}
               />
             </div>
-            <Button type="submit" disabled={isPending} className="w-full">
+            <Button
+              type="submit"
+              // loading={isPending}
+              disabled={isPending}
+              className="w-full"
+            >
               Login
             </Button>
           </form>

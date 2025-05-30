@@ -14,8 +14,6 @@ import {
   useCompanyUpdate,
   useCompanyUploadLogo,
 } from "@/root/_app/services/remote/repository/company/index.service";
-import useToastError from "@/root/_app/hooks/useToastError";
-import useToastSuccess from "@/root/_app/hooks/useToastSuccess";
 import { useRouter } from "next/navigation";
 import { Routes } from "@/root/_app/config/routes";
 import { Switch } from "@/components/ui/switch";
@@ -23,6 +21,7 @@ import Image from "next/image";
 import * as zod from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ArrowLeftCircle } from "lucide-react";
+import { toast } from "sonner";
 
 interface Props {
   params?: { id: string };
@@ -97,20 +96,17 @@ export default function AddCompanyForm({ params }: Props) {
   const { mutate: createCompany } = useCompanyCreate();
   const { mutate: updateCompany } = useCompanyUpdate(params?.id as string);
 
-  const toastSuccess = useToastSuccess();
-  const toastError = useToastError();
-
   const handleFileChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
     const MAX_FILE_SIZE = 1 * 1024 * 1024;
     const { target } = evt;
     const file = target.files && target.files[0];
     if (file == null) {
-      toastError("File is empty");
+      toast.error("File is empty");
       return;
     }
 
     if (file.size > MAX_FILE_SIZE) {
-      toastError(`File ${file.name} is too large. Maximum size is 1 MB`);
+      toast.error(`File ${file.name} is too large. Maximum size is 1 MB`);
       return;
     }
 
@@ -121,10 +117,10 @@ export default function AddCompanyForm({ params }: Props) {
       onSuccess: (res) => {
         setValue("logoAttachId", res.data.id);
         clearErrors("logoAttachId");
-        toastSuccess("Upload logo successfully");
+        toast.success("Logo uploaded successfully");
       },
       onError: (err) => {
-        toastError(err.data.message);
+        toast.error(err.data.message);
       },
     });
   };
@@ -133,21 +129,21 @@ export default function AddCompanyForm({ params }: Props) {
     if (isEdit)
       updateCompany(payload, {
         onSuccess: () => {
-          toastSuccess("Berhasil mengedit company");
+          toast.success("Company updated successfully");
           router.push(Routes.BO_COMPANY);
         },
         onError: (err) => {
-          toastError(err.data.message);
+          toast.error(err.data.message);
         },
       });
     else
       createCompany(payload, {
         onSuccess: () => {
-          toastSuccess("Berhasil menambahkan company");
+          toast.success("Company created successfully");
           router.push(Routes.BO_COMPANY);
         },
         onError: (err) => {
-          toastError(err.data.message);
+          toast.error(err.data.message);
         },
       });
   };
