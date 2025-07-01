@@ -1,19 +1,13 @@
 "use client";
 
-import {
-  ShoppingBag,
-  UserRound,
-  Ticket,
-  UserRoundCog,
-  ShoppingCart,
-} from "lucide-react";
+import { ShoppingBag, UserRound, Ticket, UserRoundCog } from "lucide-react";
 import StatsItem from "../molecules/StatsItem";
 import { useDashboardStats } from "../../services/remote/repository/dashboard/index.service";
 
 export default function Stats() {
   const { data, isFetching } = useDashboardStats();
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-5 gap-5">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
       {!isFetching && (
         <>
           <StatsItem
@@ -36,11 +30,11 @@ export default function Stats() {
             value={`${data?.data.totalAgent} Agents`}
             icon={<UserRoundCog className="w-5 h-5 text-gray-600" />}
           />
-          <StatsItem
+          {/* <StatsItem
             title="Total Order"
             value={`${data?.data.totalOrder} Orders`}
             icon={<ShoppingCart className="w-5 h-5 text-gray-600" />}
-          />
+          /> */}
         </>
       )}
     </div>

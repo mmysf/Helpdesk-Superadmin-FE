@@ -83,5 +83,11 @@ module.exports = {
     ],
     "no-nested-ternary": "off",
     "import/prefer-default-export": "off",
+    "prettier/prettier": [
+      "error",
+      {
+        endOfLine: "auto",
+      },
+    ],
   },
 };

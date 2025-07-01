@@ -42,12 +42,12 @@ export default function CompanyItem({ isLoading, data }: CompanyItemProps) {
                   {data?.ticketTotal || 0} Tickets
                 </p>
               </div>
-              <div>
+              {/* <div>
                 <p className="text-xs md:text-sm font-medium">
                   Subscription Type
                 </p>
                 <p className="text-xs text-slate-600">{data?.type}</p>
-              </div>
+              </div> */}
               <div>
                 <p className="text-xs md:text-sm font-medium">Domain</p>
                 <a
