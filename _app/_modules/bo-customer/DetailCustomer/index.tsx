@@ -8,8 +8,8 @@ import { Button } from "@/root/_app/components/ui/button";
 import {
   CustomerListParams,
   useCustomerCompanyList,
-  useCustomerDetail,
 } from "@/root/_app/services/remote/repository/customer/index.service";
+import { useCompanyDetail } from "@/services_remote/repository/company/index.service";
 import {
   Table,
   TableHeader,
@@ -31,18 +31,18 @@ interface Props {
 }
 export default function DetailCustomer({ params }: Props) {
   const router = useRouter();
-  const agentId = useMemo(() => params?.id, [params]);
+  const id = useMemo(() => params?.id, [params]);
   const [currentPage, setCurrentPage] = useState(1);
   const [currentLimit, setCurrentLimit] = useState(10);
-  const { data } = useCustomerDetail(agentId || "", {
-    query: { queryKey: ["agent-detail", agentId] },
+  const { data } = useCompanyDetail(id || "", {
+    query: { queryKey: ["agent-detail", id] },
   });
   const [paramsCustomer, setParamsCustomer] = useState<CustomerListParams>({
     page: 1,
     limit: 10,
     sort: "createdAt",
     dir: "desc",
-    companyProductID: agentId,
+    companyID: id,
   });
 
   const { data: dataCustomer, isPending } = useCustomerCompanyList({
@@ -59,12 +59,12 @@ export default function DetailCustomer({ params }: Props) {
         limit: currentLimit,
         sort: "createdAt",
         dir: "desc",
-        companyProductID: agentId,
+        companyID: id,
       });
     }, 3e2);
 
     return () => clearTimeout(timeout);
-  }, [currentPage, currentLimit, agentId]);
+  }, [currentPage, currentLimit, id]);
 
   return (
     <div className="p-6">
@@ -77,15 +77,15 @@ export default function DetailCustomer({ params }: Props) {
 
       <Card className="w-fit">
         <div className="flex justify-between items-center p-4">
-          <span className="text-xs font-medium">Customer B2B Detail</span>
+          <span className="text-xs font-medium">Customer Detail</span>
         </div>
         <CardContent>
           <div className="grid grid-cols-2 gap-4">
             <div className="flex items-center">
-              {!isPending && data?.data.logo.url && (
+              {!isPending && data?.data?.logo.url && (
                 <Image
                   className="flex-none w-10 h-10 rounded-full object-cover"
-                  src={data?.data.logo.url || ""}
+                  src={data?.data?.logo.url || ""}
                   width={40}
                   height={40}
                   alt="avatar"
@@ -93,10 +93,10 @@ export default function DetailCustomer({ params }: Props) {
               )}
               <div className="ml-4">
                 <p className="text-sm font-medium leading-none">
-                  {data?.data.name}
+                  {data?.data?.name}
                 </p>
                 <p className="text-xs text-slate-400">
-                  {data?.data.company.name}
+                  {data?.data?.settings.domain?.fullUrl}
                 </p>
               </div>
             </div>

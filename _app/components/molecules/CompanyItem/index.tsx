@@ -29,9 +29,9 @@ export default function CompanyItem({ isLoading, data }: CompanyItemProps) {
             </div>
             <div className="flex flex-col gap-2">
               <div>
-                <p className="text-xs md:text-sm font-medium">Total Brand</p>
+                <p className="text-xs md:text-sm font-medium">Total Customer</p>
                 <p className="text-xs text-slate-600">
-                  {data?.productTotal || 0} Brands
+                  {data?.customerTotal || 0} Customer
                 </p>
               </div>
               <div>

@@ -12,6 +12,7 @@ export interface CustomerListParams extends DefaultListParams {
   sort?: string;
   dir?: string;
   companyProductID?: string;
+  companyID?: string;
   type?: string;
 }
 
