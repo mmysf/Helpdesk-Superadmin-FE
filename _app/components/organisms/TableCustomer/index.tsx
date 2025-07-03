@@ -7,22 +7,16 @@ import {
   TableCell,
   TableHead,
 } from "@/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import Image from "next/image";
 import {
-  CustomerListParams,
-  useCustomerDelete,
-  useCustomerList,
-} from "@/services_remote/repository/customer/index.service";
+  CompanyListParams,
+  useCompanyDelete,
+  useCompanyList,
+} from "@/services_remote/repository/company/index.service";
 import { Card, CardContent } from "@/ui/card";
 import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
-import { EllipsisVertical, Loader, Plus, Search } from "lucide-react";
+import { Loader, Plus, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import PaginationWithoutLinks from "../PaginationWithoutLinks";
@@ -31,19 +25,19 @@ import ConfirmDeleteModal from "../Modals/ModalDelete";
 export default function CustomerTable() {
   const router = useRouter();
 
-  const [selectedId, setSelectedId] = useState("");
+  const [selectedId] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [currentLimit, setCurrentLimit] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
-  const [params, setParams] = useState<CustomerListParams>();
+  const [params, setParams] = useState<CompanyListParams>();
 
-  const { data, isPending, refetch } = useCustomerList({
-    axios: { params },
-    query: { queryKey: ["agent-list", params] },
+  const { data, isPending, refetch } = useCompanyList({
+    axios: { params: { ...params, sort: "createdAt", dir: "desc" } },
+    query: { queryKey: ["company-list", params] },
   });
 
-  const { mutate } = useCustomerDelete(selectedId);
+  const { mutate } = useCompanyDelete(selectedId);
 
   const tableData = useMemo(() => data?.data.list, [data]);
 
@@ -65,13 +59,12 @@ export default function CustomerTable() {
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      setParams({
+      setParams((val) => ({
+        ...val,
+        search: searchTerm,
         page: currentPage,
         limit: currentLimit,
-        q: searchTerm,
-        sort: "createdAt",
-        dir: "desc",
-      });
+      }));
     }, 3e2);
 
     return () => clearTimeout(timeout);
@@ -116,7 +109,7 @@ export default function CustomerTable() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
-                    <TableHead>Company</TableHead>
+                    <TableHead>Total Customer</TableHead>
                     <TableHead>Action</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -166,49 +159,18 @@ export default function CustomerTable() {
                           </div>
                         </div>
                       </TableCell>
+                      <TableCell>{item.customerTotal} Customer</TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-3">
-                          <span className="flex-none flex justify-center items-center bg-blue-100 text-blue-600 w-10 h-10 rounded-full text-xl font-bold">
-                            {item.company.name[0]}
-                          </span>
-                          <p className="font-medium">{item.company.name}</p>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-6 w-6 p-0">
-                              <EllipsisVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" sideOffset={4}>
-                            <DropdownMenuItem
-                              onClick={() => {
-                                router.push(`/bo/customer/${item.id}`);
-                              }}
-                            >
-                              Detail
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => {
-                                router.push(
-                                  `/bo/customer/update-customer/${item.id}`,
-                                );
-                              }}
-                            >
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              className="text-red-500 hover:text-red-500 hover:bg-red-100"
-                              onClick={() => {
-                                setSelectedId(item.id);
-                                setIsOpen(true);
-                              }}
-                            >
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        <Button
+                          type="button"
+                          onClick={() => {
+                            router.push(`/bo/customer/${item.id}`);
+                          }}
+                          variant="ghost"
+                          className="text-primary"
+                        >
+                          View Customer
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}

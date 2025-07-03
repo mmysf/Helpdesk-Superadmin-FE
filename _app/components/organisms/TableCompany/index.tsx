@@ -114,7 +114,7 @@ const CompanyTable = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
-                    <TableHead>Total Brand</TableHead>
+                    <TableHead>Total Customer</TableHead>
                     <TableHead>Ticket Submitted</TableHead>
                     <TableHead>Action</TableHead>
                   </TableRow>
@@ -158,7 +158,7 @@ const CompanyTable = () => {
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell>{company.productTotal} Brand</TableCell>
+                        <TableCell>{company.customerTotal} Customer</TableCell>
                         <TableCell>{company.ticketTotal} Tickets</TableCell>
                         <TableCell>
                           <DropdownMenu>

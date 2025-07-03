@@ -39,7 +39,7 @@ export interface Company {
   name: string;
   bio: string;
   type: string;
-  productTotal: number;
+  customerTotal: number;
   ticketTotal: number;
   logo: DataAttachment;
   settings: CompanySetting;
