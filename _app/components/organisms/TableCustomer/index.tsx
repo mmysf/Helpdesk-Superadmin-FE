@@ -16,7 +16,7 @@ import {
 import { Card, CardContent } from "@/ui/card";
 import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
-import { Loader, Plus, Search } from "lucide-react";
+import { Loader, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import PaginationWithoutLinks from "../PaginationWithoutLinks";
@@ -94,14 +94,14 @@ export default function CustomerTable() {
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
-                <Button
+                {/* <Button
                   onClick={() => {
                     router.push("/bo/customer/add-customer");
                   }}
                   className="bg-primary text-white flex items-center gap-2 px-4 py-2 rounded-md"
                 >
                   Add New Customer <Plus className="w-4 h-4" />
-                </Button>
+                </Button> */}
               </div>
             </div>
             <div className="overflow-x-auto rounded-md border">

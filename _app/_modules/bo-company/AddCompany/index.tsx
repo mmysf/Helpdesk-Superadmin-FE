@@ -16,7 +16,6 @@ import {
 } from "@/root/_app/services/remote/repository/company/index.service";
 import { useRouter } from "next/navigation";
 import { Routes } from "@/root/_app/config/routes";
-import { Switch } from "@/components/ui/switch";
 import Image from "next/image";
 import * as zod from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -42,7 +41,16 @@ export default function AddCompanyForm({ params }: Props) {
       .email({ message: "Invalid email address" })
       .min(1, { message: "Email is required" }),
     logoAttachId: z.string().min(1, { message: "Logo is required" }),
-    colorMode: z.object({}),
+    colorMode: z.object({
+      light: z.object({
+        primary: z.string(),
+        secondary: z.string(),
+      }),
+      dark: z.object({
+        primary: z.string(),
+        secondary: z.string(),
+      }),
+    }),
     domain: z
       .object({
         isCustom: z.boolean(),
@@ -238,13 +246,13 @@ export default function AddCompanyForm({ params }: Props) {
             <Label className="mb-2">
               Setting Subdomain <span className="text-red-500">*</span>
             </Label>
-            <div className="flex items-center gap-2 mb-2">
+            {/* <div className="flex items-center gap-2 mb-2">
               <Switch
                 checked={watch("domain.isCustom")}
                 onCheckedChange={(e) => setValue("domain.isCustom", e)}
               />
               <div className="text-xs">Gunakan custom domain</div>
-            </div>
+            </div> */}
 
             {watch("domain.isCustom") ? (
               <>
@@ -274,7 +282,7 @@ export default function AddCompanyForm({ params }: Props) {
                   <Input
                     {...register("domain.subdomain")}
                     value={watch("domain.subdomain")}
-                    endContent={<span className="px-2">.solutionlab.id</span>}
+                    endContent={<span className="px-2">.helpdeskku.site</span>}
                     placeholder="company.example.com"
                     className="flex-1"
                   />

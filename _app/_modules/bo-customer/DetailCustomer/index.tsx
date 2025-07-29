@@ -77,7 +77,7 @@ export default function DetailCustomer({ params }: Props) {
 
       <Card className="w-fit">
         <div className="flex justify-between items-center p-4">
-          <span className="text-xs font-medium">Customer Detail</span>
+          <span className="text-xs font-medium">Company</span>
         </div>
         <CardContent>
           <div className="grid grid-cols-2 gap-4">
